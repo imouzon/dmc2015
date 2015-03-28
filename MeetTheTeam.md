@@ -23,8 +23,8 @@ Two Facts and a Falsehood
 
 The parts you need to edit are LIKE_THIS
 -->
-<a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="./team_pics/ian.jpg" width="100"/></a><br/><br/>
 <div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
+<a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="./team_pics/ian.jpg" width="100"/></a><br/><br/>
 <b>Ian Mouzon (STAT)</b><br/>
 Two Facts and a Falsehood
 <ul>
