@@ -46,6 +46,6 @@ Then you will be asked for your password.
 I recommend using the windows app https://windows.github.com/
 
 #A first exercise
-
+Notice that there is a folder 
 
 1. Add a picture to the 
