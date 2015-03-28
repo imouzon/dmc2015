@@ -12,4 +12,3 @@ Add a picture to the team_pics folder, and edit the following template:
 -->
 
 <img src="./team_pics/ian.jpg" alt="HTML5 Icon" width="128" height="128">
-<img src="./team_pics/alex.jpg" alt="HTML5 Icon" width="128" height="128">
