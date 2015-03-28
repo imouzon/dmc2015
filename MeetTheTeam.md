@@ -10,19 +10,27 @@ So - the idea is this:
 
 Add a picture to the team_pics folder, and edit the following template:
 
-<a href="./<YOUR PICTURE>" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="<YOUR PICTURE>" width="100"/></a><br/><br/>
+<a href="./team_pics/YOUR_PICTURE_FILE" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="<./team_pics/YOUR_PICTURE_FILE>" width="100"/></a><br/><br/>
 <div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
-<b>YOUR NAME (YOUR DEPT)</b><br/>
+<b>YOUR_NAME (YOUR_DEPT)</b><br/>
 Two Facts and a Falsehood
 <ul>
-   <li>Fact 1</li>
-   <li>Fact 2</li>
-   <li>Fact 3</li>
+   <li>FACT_1</li>
+   <li>FACT_2</li>
+   <li>FACT_3</li>
 </ul>
 </div>
 
-The parts you need to edit are <LIKE THIS> (take out the < and > parts too)
+The parts you need to edit are LIKE_THIS
 -->
-
-<img src="./team_pics/ian.jpg" alt="HTML5 Icon" width="128" height="128">
+<a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="./team_pics/ian.jpg" width="100"/></a><br/><br/>
+<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
+<b>Ian Mouzon (STAT)</b><br/>
+Two Facts and a Falsehood
+<ul>
+   <li>I have been shot in the face</li>
+   <li>I have been stabbed in the knee</li>
+   <li>I have been beaten unconscious</li>
+</ul>
+</div>
 <img src="./team_pics/alex.jpg" alt="HTML5 Icon" width="128" height="128">
