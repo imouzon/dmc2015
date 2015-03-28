@@ -61,7 +61,7 @@ I recommend using the windows app https://windows.github.com/ provided by Github
 Like the mac app, there are some things you can do from the command line that you can't do in the app,
 but you will most likely never need them.
 
-#A first exercise
+##A first exercise
 Notice that there is a folder team_pics. If you look inside it you will see a picture labeled ian.jpg
 
 1. Add a picture to the 
