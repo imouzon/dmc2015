@@ -43,7 +43,9 @@ Finally, the changes can be sent to the main repository using `git push`.
 Then you will be asked for your password.
 
 ###Windows
-I recommend using the windows app https://windows.github.com/
+I recommend using the windows app https://windows.github.com/ provided by Github.
+Like the mac app, there are some things you can do from the command line that you can't do in the app,
+but you will most likely never need them.
 
 #A first exercise
 Notice that there is a folder team_pics. If you look inside it you will see a picture labeled ian.jpg
@@ -53,4 +55,3 @@ Notice that there is a folder team_pics. If you look inside it you will see a pi
 Since you can see this page it means that you have been invited to this private github repository.
 
 As a first short assignment: Add a picture of yourself to bio.md and a few facts about yourself.
->>>>>>> 3ceceba738a09c8bf878376dde3f12e42a993a34
