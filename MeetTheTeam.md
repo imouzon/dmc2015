@@ -30,12 +30,18 @@ This is some text
 
 The parts you need to edit are LIKE_THIS
 -->
-<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
+
+#The 2014 Iowa State Data Mining Cup Teams
+<!-- html -->
+<div style="margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
 <a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0"  src="./team_pics/ian.jpg" width="100"/></a>
 <b>This is a colored box</b><br/>
 This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go.
 </div>
+
+
 <div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
+
 <!--
 <a href="./team_pics/alex.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; overflow: hidden"><img border="0"  src="./team_pics/alex.jpg" width="100"/></a><br/><br/>
 <b>Alex Shum (STAT)</b><br/>
