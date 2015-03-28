@@ -31,8 +31,8 @@ This is some text
 The parts you need to edit are LIKE_THIS
 -->
 <div style="margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
-<a style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;">
-   <img border="0"  src="~/dmc2015/team_pics/ian.jpg" width="100"/>
+<a href = "./team_pic/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;">
+   <img border="0"  src="./team_pics/ian.jpg" width="100"/>
 </a>
 <b>This is a colored box</b>
 <br/>
