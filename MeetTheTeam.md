@@ -22,27 +22,17 @@ Two Facts and a Falsehood
    <li>FACT_3</li>
 </ol>
 
-<p style="width: 500px;">
-<img src="./team_pics/ian.jpg" style="float: right; overflow: hidden"/>
-This is some text
-</p> 
-</div>
-
 The parts you need to edit are LIKE_THIS
 -->
-<div style="margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
-<a href = "./team_pic/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;">
-   <img border="0"  src="./team_pics/ian.jpg" width="100"/>
-</a>
-<b>This is a colored box</b>
-<br/>
+<a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0" alt="Ian Mouzon" src="./team_pics/ian.jpg" width="100"/></a><br/><br/>
+<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
+<b>This is a colored box</b><br/>
 This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go.
 </div>
 
 
-<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
-
 <!--
+<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
 <a href="./team_pics/alex.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; overflow: hidden"><img border="0"  src="./team_pics/alex.jpg" width="100"/></a><br/><br/>
 <b>Alex Shum (STAT)</b><br/>
 Two Facts and a Falsehood
