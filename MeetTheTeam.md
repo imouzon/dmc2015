@@ -25,19 +25,9 @@ Two Facts and a Falsehood
 The parts you need to edit are LIKE_THIS
 -->
 
-Ian Mouzon (STAT)          |  
+**Ian Mouzon** (STAT)  | Two Facts and a Falsehood
 :-------------------------:|:-------------------------:
-<a href="./team_pics/YOUR_PICTURE_FILE" 
-   style="clear: left; 
-          float: left; 
-          margin-bottom: 1em; 
-          margin-right: 1em; 
-          overflow: hidden">
-<img border="0"  
-     src="./team_pics/ian.jpg" 
-     width="100"/>
-</a>
-   |  1.  I have been shot in the face
+<a href="./team_pics/YOUR_PICTURE_FILE" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; overflow: hidden"> <img border="0"  src="./team_pics/ian.jpg" width="100"/> </a> |  1.  I have been shot in the face
    |  2.  I have been stabbed in the knee
    |  3.  I have been knocked unconscious
 
