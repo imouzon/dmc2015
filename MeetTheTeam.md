@@ -29,6 +29,28 @@ The parts you need to edit are LIKE_THIS
 :-------------------------:|:-------------------------:
 <a href="./team_pics/ian.jpg" style="overflow: hidden"> <img src="./team_pics/ian.jpg" width="100"/> </a> | <ul> <li>This fact is true.</li> <li>This fact is false.</li> <li>This is a fact</li> </ul>
 
+<table>
+   <tbody>
+      <tr>
+         <th>Ian Mouzon (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/ian.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/ian.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>item1</li>
+               <li>item2</li>
+               <li>item3</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
 
 <!--
 <div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
