@@ -44,8 +44,8 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/ian.jpg" style="overflow: hidden"> 
-               <img src="./team_pics/ian.jpg" width="100"/> 
+            <a href="./team_pics/ian.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/ian.jpeg" width="100"/> 
             </a>
          </td>
          <td>
