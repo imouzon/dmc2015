@@ -24,11 +24,12 @@ Two Facts and a Falsehood
 
 The parts you need to edit are LIKE_THIS
 -->
-<a href="./team_pics/ian.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img border="0" alt="Ian Mouzon" src="./team_pics/ian.jpg" width="100"/></a><br/><br/>
-<div style="background-color: #FFF8C6; margin-left: 20px; margin-right: 20px; padding-bottom: 8px; padding-left: 8px; padding-right: 8px; padding-top: 8px;">
-<b>This is a colored box</b><br/>
-This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go. This is where your text will go.
-</div>
+
+Ian Mouzon (STAT)          |  
+:-------------------------:|:-------------------------:
+![](./team_pics/ian.jpg)   |  1.  I have been shot in the face
+                           |  2.  I have been stabbed in the knee
+                           |  3.  I have been knocked unconscious
 
 
 <!--
