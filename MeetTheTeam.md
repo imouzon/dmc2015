@@ -73,9 +73,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>This fact is true</li>
-               <li>This fact is false</li>
-               <li>This is a fact</li>
+               <li>I have been beaten unconscious</li>
+               <li>I have been shot in the face</li>
+               <li>I have been stabbed in the knee</li>
             </ol>
          </td>
       </tr>
