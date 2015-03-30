@@ -50,9 +50,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>item1</li>
-               <li>item2</li>
-               <li>item3</li>
+               <li>I have been beaten unconscious</li>
+               <li>I have been shot in the face</li>
+               <li>I have been stabbed in the knee</li>
             </ol>
          </td>
       </tr>
@@ -73,9 +73,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>I have been beaten unconscious</li>
-               <li>I have been shot in the face</li>
-               <li>I have been stabbed in the knee</li>
+               <li>This fact is true</li>
+               <li>This fact is a lie</li>
+               <li>This is a fact</li>
             </ol>
          </td>
       </tr>
