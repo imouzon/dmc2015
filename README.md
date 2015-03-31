@@ -61,11 +61,20 @@ I recommend using the windows app https://windows.github.com/ provided by Github
 Like the mac app, there are some things you can do from the command line that you can't do in the app,
 but you will most likely never need them.
 
-##A first exercise
-Notice that there is a folder team_pics. If you look inside it you will see a picture labeled ian.jpg
+Exercise: Getting to Know the Team
+==================================
+Once you have pulled the repository, you will notice that there is a folder `team_pics`. 
+If you look inside it you will see a picture labeled `ian.jpg`.
+You may also notice a file on the repository page called `MeetTheTeam.md`.
+If you click on it, you will see Ian's picture and a list with three items, 
+two of which are true and one of which is false.
 
-1. Add a picture to the 
-=======
-Since you can see this page it means that you have been invited to this private github repository.
+To orient ourselves with github and help us get to know one another, you will make one too.
 
-As a first short assignment: Add a picture of yourself to bio.md and a few facts about yourself.
+##1. Add a picture to the `team_pics` folder.
+
+##2. Edit the file `MeetTheTeam.md`. 
+There is a template at the top of the file.
+Copy it and replace the filler values with the link to your picture and your "two facts and a falsehood".
+
+##3. Push the changes to the github folder
