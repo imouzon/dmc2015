@@ -167,9 +167,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>I hate doing dishes</li>
-               <li>Intro to Statistics was my lowest math/stat grade</li>
-               <li>I love eating brown rice</li>
+               <li>I hate doing dishes.</li>
+               <li>Intro to Statistics was my lowest math/stat grade.</li>
+               <li>I love eating brown rice.</li>
             </ol>
          </td>
       </tr>
