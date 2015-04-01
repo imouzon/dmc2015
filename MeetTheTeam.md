@@ -106,7 +106,7 @@ The parts you need to edit are LIKE_THIS
 </table>
 
 
-table>
+<table>
    <tbody>
       <tr>
          <th>Yet Nguyen (STAT)</th>
