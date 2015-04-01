@@ -104,3 +104,27 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+
+table>
+   <tbody>
+      <tr>
+         <th>Yet Nguyen (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Yet.JPG" style="overflow: hidden"> 
+               <img src="./team_pics/Yet.JPG" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I cut my hair twice a month</li>
+               <li>I can run nonstop for 1 hour</li>
+               <li>I can swim nonstop for 2 hours</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
