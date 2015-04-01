@@ -210,7 +210,7 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/Ran.JPG" style="overflow: hidden">
+            <a href="./team_pics/Ran.jpg" style="overflow: hidden">
                <img src="./team_pics/Ran.JPG" width="100"/>
             </a>
          </td>
