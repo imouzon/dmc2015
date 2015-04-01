@@ -73,9 +73,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>This fact is true</li>
-               <li>This fact is a lie</li>
-               <li>This is a fact</li>
+               <li>This fact is true.</li>
+               <li>This fact is false.</li>
+               <li>Squirtle is the best starter pokemon.</li>
             </ol>
          </td>
       </tr>
