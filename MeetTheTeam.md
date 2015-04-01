@@ -81,3 +81,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Connor Jennings (IMSE)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/connorj.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/connorj.jpeg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I can break into a car with only a shoelace.</li>
+               <li>I love tomatoes</li>
+               <li>I wanted to be a gym teacher when I was in high school.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
