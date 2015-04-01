@@ -202,3 +202,25 @@ The parts you need to edit are LIKE_THIS
 </table>
 
 
+<table>
+   <tbody>
+      <tr>
+         <th>Ran Bi (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Ran.JPG" style="overflow: hidden">
+               <img src="./team_pics/Ran.JPG" width="100"/>
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I did not have my lunch today.</li>
+               <li>I play piano every month.</li>
+               <li>I love ice cream.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
