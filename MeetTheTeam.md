@@ -85,7 +85,7 @@ The parts you need to edit are LIKE_THIS
 <table>
    <tbody>
       <tr>
-         <th>Connor Jennings (IMSE)</th>
+         <th>Connor Jennings (IE)</th>
          <th align="center">Two Facts and a Falsehood</th>
       </tr>
       <tr>
