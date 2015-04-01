@@ -59,4 +59,8 @@ Please respond to the poll at:
 This is to schedule a **permanent meeting time** - I am going to try to schedule twice a week, 
 preferably late afternoon Tuesday and Friday.
 
-
+##Sharing code is hard
+With this many people working on the same problem, 
+it is entirely possible that we will come up with some useful chunks of R code.
+So I think it is a good idea to get a common R package going.
+I have a private repository that I will finish setting up soon and we can all start adding to it.
