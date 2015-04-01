@@ -216,9 +216,9 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>I did not have my lunch today.</li>
-               <li>I play piano every month.</li>
-               <li>I love ice cream.</li>
+               <li>I did not have my lunch today</li>
+               <li>I play piano every month</li>
+               <li>I love ice cream</li>
             </ol>
          </td>
       </tr>
