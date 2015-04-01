@@ -9,7 +9,7 @@ the github apps:
 
 <center>
 <h3>OSX: https://mac.github.com</h3>
-<h3>Windows: https://mac.github.com</h3>
+<h3>Windows: https://windows.github.com</h3>
 </center>
 
 ###OSX/Linux
