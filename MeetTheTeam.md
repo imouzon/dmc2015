@@ -138,8 +138,8 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/chen.JPG" style="overflow: hidden"> 
-               <img src="./team_pics/chen.JPG" width="100"/> 
+            <a href="./team_pics/chen.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/chen.jpeg" width="100"/> 
             </a>
          </td>
          <td>
