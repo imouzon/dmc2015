@@ -25,6 +25,7 @@ We'll fix the first 3 next meeting, and I will fix the last 2 now.
 I can see that people are adding things to MeetTheTeam.md as I write this, 
 so I suppose that is fixing itself.
 
+##A tour around our github page
 ###The landing page
 This is page you see on [https://github.com/imouzon/dmc2015/](https://github.com/imouzon/dmc2015/).
 If you are just starting to use git, then these are the things you want to know:
@@ -49,3 +50,10 @@ the contents of the file. By default, the folder will show README.md
 - ...
 
 and so on.
+
+##Schedule future meetings
+Please respond to the poll at: [http://whenisgood.net/bz2rdwg/](http://whenisgood.net/bz2rdwg/).
+This is to schedule a permanent meeting time - I am going to try to schedule twice a week, 
+preferably late afternoon Tuesday and Friday.
+
+
