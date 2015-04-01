@@ -152,3 +152,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Evan "Pete" Walsh (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/pete.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/pete.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I hate doing dishes.</li>
+               <li>Intro to Statistics was my lowest math/stat grade.</li>
+               <li>I love eating brown rice.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
