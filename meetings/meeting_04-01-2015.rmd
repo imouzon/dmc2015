@@ -31,4 +31,7 @@ If you are just starting to use git, then these are the things you want to know:
 You can see the repository file structure and view files just by visiting the github page:
 ![](./figs/landing_page.png)
 
+If you click on a file, the window underneath the folder structure will attempt to show 
+the contents of the file. By default, the folder will show README.md
+![](./figs/README_showing.png)
 
