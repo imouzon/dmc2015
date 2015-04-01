@@ -175,3 +175,30 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+
+
+<table>
+   <tbody>
+      <tr>
+         <th>Neo_Zhou (Math)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Neo_Zhou.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/Neo_Zhou.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I like NBA</li>
+               <li>I like Kobe</li>
+               <li>I like Math</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
+
+
