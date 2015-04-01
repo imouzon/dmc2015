@@ -52,8 +52,11 @@ the contents of the file. By default, the folder will show README.md
 and so on.
 
 ##Schedule future meetings
-Please respond to the poll at: [http://whenisgood.net/bz2rdwg/](http://whenisgood.net/bz2rdwg/).
-This is to schedule a permanent meeting time - I am going to try to schedule twice a week, 
+Please respond to the poll at: 
+
+[http://whenisgood.net/bz2rdwg/](http://whenisgood.net/bz2rdwg/).
+
+This is to schedule a **permanent meeting time** - I am going to try to schedule twice a week, 
 preferably late afternoon Tuesday and Friday.
 
 
