@@ -1,10 +1,34 @@
 April 1st 2015
 ==============
 
-Our first meeting went really well. 
-The slides I presented are in the folder [presentation/introduction](under
+Our first meeting went really well, but also really quickly.
+The slides I presented are in the folder [presentation/introduction](https://github.com/imouzon/dmc2015/blob/master/presentation/introduction/DMC2015_intro.pdf)
 
+##I Forgot SO Many Things
+Our DMC meetings are usually "working meetings," 
+by which I mean everyone works on things and we talk about 
+plans/issues regarding the data and our approach to it.
+There will never be that much talking by me again.
+These are the things I forgot to do:
 
+- Introduce myself in a proper way
+- Let everyone else introduce themselves
+- Pass around the "how comfortable are you with R/python/matlab/etc" sheet
+- Give everyone time to edit MeetTheTeam.md
+- Schedule future meetings
+- Take everyone on a tour of the github page
 
+Yikes! 
+That's a lot of stuff to forget. 
+We'll fix the first 3 next meeting, and I will fix the last 2 now. 
+I can see that people are adding things to MeetTheTeam.md as I write this, 
+so I suppose that is fixing itself.
+
+###The repository landing page
+This is the first page you see on [https://github.com/imouzon/dmc2015/](https://github.com/imouzon/dmc2015/).
+If you are just starting to use git, then these are the things you want to know:
+
+You can see the repository file structure and view files just by visiting the github page:
+![](./figs/landing_page.png)
 
 
