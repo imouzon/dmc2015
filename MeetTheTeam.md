@@ -128,3 +128,27 @@ table>
       </tr>
    </tbody>
 </table>
+
+
+<table>
+   <tbody>
+      <tr>
+         <th>Chen Hua (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/chen.JPG" style="overflow: hidden"> 
+               <img src="./team_pics/chen.JPG" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I like biking.</li>
+               <li>I went to Italy last summer.</li>
+               <li>I learning python.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
