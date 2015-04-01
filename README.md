@@ -30,7 +30,7 @@ This is how you get the files from the repo to your computer.
 It is as simple as using the command line to navigate to the directory where you want to put the DMC folder and 
 typing the following: 
 
-`git clone https://github.imouzon.com/dmc2015/`.
+`git clone https://github.com/imouzon/dmc2015`.
 
 #### Updating the repo
 Since when you start working it is likely that other people changed files, 
