@@ -280,8 +280,8 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/Sam_Benidt.jpeg" style="overflow: hidden"> 
-               <img src="./team_pics/Sam_Benidt.jpeg" width="100"/> 
+            <a href="./team_pics/Sam_Benidt.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/Sam_Benidt.jpg" width="100"/> 
             </a>
          </td>
          <td>
