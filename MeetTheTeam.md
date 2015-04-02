@@ -271,3 +271,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Sam Benidt (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Sam_Benidt.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/Sam_Benidt.jpeg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I have not been beaten unconscious</li>
+               <li>I'm terrified of bees</li>
+               <li>I have what plants crave</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
