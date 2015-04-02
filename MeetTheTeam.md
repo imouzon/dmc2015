@@ -240,7 +240,7 @@ The parts you need to edit are LIKE_THIS
          </td>
          <td>
             <ol>
-               <li>I'm a cool girl</li>
+               <li>I play Guitar</li>
                <li>I play soccer</li>
                <li>My favourite soccer team is Bayern Munich</li>
             </ol>
