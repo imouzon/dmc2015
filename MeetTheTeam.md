@@ -248,3 +248,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Guillermo Basulto-Elias (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/ian.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/guillermo.png" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I think it's annoying to have two last names</li>
+               <li>I like to live in Ames</li>
+               <li>Stat 500 has been the most difficult course for me at ISU</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
