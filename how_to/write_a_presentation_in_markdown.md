@@ -332,8 +332,8 @@ This leaves
 ```
 a few JavaScript elements to be run at the end. If we take it on faith that we need all of these, then we keep this stuff,
 and only edit the CSS stuff to make our slides look like we want them too.
-We can keep the style sheets in their own file, `dmc_style1.css`, save the built in JavaScript elements (`varslideshow.js`, `gaqpush.js`) and we can reduce the template to:
-```
+We can keep the style sheets in their own file, `dmc_style1.css`, 
+save the built in JavaScript elements (`varslideshow.js`, `gaqpush.js`) and we can reduce the template to:
 ```HTML
 <!DOCTYPE html>
 <html>
