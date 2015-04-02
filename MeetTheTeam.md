@@ -304,7 +304,7 @@ The parts you need to edit are LIKE_THIS
       <tr>
          <td>
             <a href="./team_pics/Meiling.jpeg" style="overflow: hidden"> 
-               <img src="./team_pics/Meiling.jpeg" width="100"/> 
+               <img src="./team_pics/Meiling" width="100"/> 
             </a>
          </td>
          <td>
