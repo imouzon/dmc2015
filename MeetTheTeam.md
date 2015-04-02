@@ -271,3 +271,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Meiling Liu (BCB)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Meiling.jpeg" style="overflow: hidden"> 
+               <img src="./team_pics/Meiling.jpeg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I like rock climbing.</li>
+               <li>I hate the smell of cheese, so I never eat it.</li>
+               <li>Cheery is my favorite fruit.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
