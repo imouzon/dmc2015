@@ -16,4 +16,4 @@ ssh USERNAME@104.236.207.198
 
 Windows
 =======
-In order to connect to the server you will need an SSH client for windows.  If you use Chrome you can download a [Chrome extension](https://chrome.google.com/webstore/detail/secure-shell/pnhechapfaindjhompbnflcldabbghjo?hl=en) that will allow you to SSH into the server.
+In order to connect to the server you will need an SSH client for windows.  If you use Chrome you can download a [Chrome extension](https://chrome.google.com/webstore/detail/secure-shell/pnhechapfaindjhompbnflcldabbghjo?hl=en) that will allow you to SSH into the server using the same command as in the Linux/Mac OS section.  If you do not use chrome you can download standalone SSH clients: [Putty](http://www.putty.org) or [WinSCP](http://www.winscp.net).  The instructions for how to use putty or winSCP should be on their respective websites.  Using the server IP address: `104.236.207.198` you should be able to connect.
