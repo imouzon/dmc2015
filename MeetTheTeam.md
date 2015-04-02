@@ -224,3 +224,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+
+<table>
+   <tbody>
+      <tr>
+         <th>Yaxuan Sun (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Yaxun Sun.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/Yaxun Sun.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I'm a cool girl</li>
+               <li>I play soccer</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
