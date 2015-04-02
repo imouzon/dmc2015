@@ -303,8 +303,8 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/Meiling.jpeg" style="overflow: hidden"> 
-               <img src="./team_pics/Meiling" width="100"/> 
+            <a href="./team_pics/Meiling.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/Meiling.jpg" width="100"/> 
             </a>
          </td>
          <td>
