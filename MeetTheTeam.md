@@ -340,3 +340,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Jason Saporta (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/jsaporta.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/jsaporta.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I have had the name "Jason" my entire life.</li>
+               <li>I have had the name "Andrew" my entire life.</li>
+               <li>I have had the name "Saporta" my entire life.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
