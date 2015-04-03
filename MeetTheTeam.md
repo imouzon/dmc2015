@@ -363,3 +363,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Liuhua Peng (STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/penglh.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/penglh.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I am Liuhua Peng.</li>
+               <li>Liuhua Peng is my name.</li>
+               <li>I like eating.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>
