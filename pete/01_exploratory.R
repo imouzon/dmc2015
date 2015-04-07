@@ -34,3 +34,31 @@ train <- read.csv("/Users/epwalsh/GitHub/dmc2015/data/raw_data/DMC_2015_orders_t
 # $ coupon1Used    : int  0 1 0 1 0 1 0 1 0 1 ...
 # $ coupon2Used    : int  1 0 0 1 0 0 0 1 0 0 ...
 # $ coupon3Used    : int  0 1 0 0 0 1 0 1 0 1 ...
+
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+
+ymd_hms(train$orderTime[1]) - ymd_hms(train$orderTime[2])
+summary(train$basketValue)
+# what about customers that didn't buy anything?
+
+time_diff = ymd_hms(train$orderTime) - ymd_hms(train$couponsReceived)
+
+
+min_diff = as.numeric(time_diff) / 60
+
+# indicates different expiration times
+qplot(min_diff, geom="histogram", colour=I("white"))
+
+train$minute_diff <- min_diff
+
+train %>% subset(basketValue < 1000) %>%
+  ggplot(aes(x = minute_diff, y = basketValue)) + geom_point()
+
+# coupon 1 used the most, then coupon 2, then coupon 3
+sum(train$coupon1Used)
+sum(train$coupon2Used)
+sum(train$coupon3Used)
+
+
