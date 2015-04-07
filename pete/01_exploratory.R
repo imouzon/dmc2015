@@ -67,12 +67,3 @@ sum(train$coupon3Used)
 
 
 
-
-
-
-
-# 5:56 or 6:11
-
-
-
-
