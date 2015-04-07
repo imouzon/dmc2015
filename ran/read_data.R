@@ -58,14 +58,32 @@ ggplot() +
 #################
 
 library(lubridate)
-dif_lub <- difftime(ymd_hms(orderTime), ymd_hms(couponsReceived))
-hist(as.numeric(dif_lub), breaks = 100)
+dif_lub <- as.numeric(difftime(ymd_hms(orderTime), ymd_hms(couponsReceived)))  # difference in seconds
+hist(dif_lub, breaks = 100, xlab = "received_use_dif")
 ggplot() + 
   geom_point(aes(x = ymd_hms(couponsReceived), y = ymd_hms(orderTime))) +
   xlab("coupon_received_time") + ylab("order_time")
 
 
+###########################
+### coupon used or not? ###
+###########################
 
+couponUsed <- train[, 29:31]
+couponUsed$coupon_num <- apply(couponUsed, 1, sum)
+
+# coupon 1
+dif_coupon11 <- dif_lub[couponUsed[, 1] == 1]
+dif_coupon10 <- dif_lub[couponUsed[, 1] == 0]
+boxplot(dif_coupon11, dif_coupon10)
+# coupon 2
+dif_coupon21 <- dif_lub[couponUsed[, 2] == 1]
+dif_coupon20 <- dif_lub[couponUsed[, 2] == 0]
+boxplot(dif_coupon21, dif_coupon20)
+# coupon 3
+dif_coupon31 <- dif_lub[couponUsed[, 3] == 1]
+dif_coupon30 <- dif_lub[couponUsed[, 3] == 0]
+boxplot(dif_coupon31, dif_coupon30)
 
 
 
