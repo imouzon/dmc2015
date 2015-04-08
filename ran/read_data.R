@@ -47,8 +47,7 @@ coupon_second0 <- coupon_second - start_time
 dif_second0 <- dif_second
 
 library(ggplot2)
-hist(dif_second0/3600, breaks = 100)
-plot(coupon_second0, order_second0)
+qplot(dif_second0, geom = "histogram", binwidth = 10000) + xlab("received_use_dif")
 ggplot() + 
   geom_point(aes(x = coupon_second0, y = order_second0)) +
   xlab("coupon_received_time") + ylab("order_time")
@@ -59,7 +58,7 @@ ggplot() +
 
 library(lubridate)
 dif_lub <- as.numeric(difftime(ymd_hms(orderTime), ymd_hms(couponsReceived)))  # difference in seconds
-hist(dif_lub, breaks = 100, xlab = "received_use_dif")
+qplot(dif_lub, geom = "histogram", binwidth = 10000) + xlab("received_use_dif")
 ggplot() + 
   geom_point(aes(x = ymd_hms(couponsReceived), y = ymd_hms(orderTime))) +
   xlab("coupon_received_time") + ylab("order_time")
@@ -84,6 +83,12 @@ boxplot(dif_coupon21, dif_coupon20)
 dif_coupon31 <- dif_lub[couponUsed[, 3] == 1]
 dif_coupon30 <- dif_lub[couponUsed[, 3] == 0]
 boxplot(dif_coupon31, dif_coupon30)
+
+# time difference between order time and coupon received time
+# vs. number of coupon used
+boxplot(dif_lub ~ couponUsed[, 4])
+
+ggplot()
 
 
 
