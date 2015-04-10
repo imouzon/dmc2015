@@ -107,6 +107,31 @@ train_melt <- rbind(coupon1, coupon2, coupon3)
 train_melt <- train_melt[order(train_melt$orderID),]
 
 
+###########################
+### reward distribution ###
+###########################
+
+nlevels(as.factor(train_melt$reward))
+levels(as.factor(train_melt$reward))
+
+# reward histogram vs. coupon number
+ggplot(train_melt, aes(x = train_melt$reward, fill = as.factor(train_melt$coupon_num))) +
+  geom_histogram(binwidth = .2, position = "dodge") 
+# reward histogram vs. whether the coupon is used
+ggplot(train_melt, aes(x = train_melt$reward, fill = as.factor(train_melt$couponUsed))) +
+  geom_histogram(binwidth = .2, position = "fill") 
+
+
+##################################################
+### couponID = brand, producGroup, categoryID? ###
+##################################################
+
+max_coupon <- max(table(train_melt$couponID))
+max_couponID <- names(table(train_melt$couponID)[table(train_melt$couponID) == max_coupon])
+table(train_melt$couponUsed[train_melt$couponID == max_couponID])
+
+
+
 
 nlevels(train$couponID1)
 
