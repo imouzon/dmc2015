@@ -26,7 +26,7 @@ ggplot(dat.train)+geom_point(aes(factor(date),as.numeric(tdiff)))+theme(axis.tex
 
 ### correlation between time difference and how many coupons are used
 dat.train$couponused <- rowSums(dat.train[,29:31])
-boxplot(as.numeric(tdiff)~couponused,dat.train)
+boxplot(as.numeric(tdiff)~couponused,dat.train,xlab="#coupon used",ylab="time difference")
 
 
 ### some users do several orders
