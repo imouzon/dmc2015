@@ -30,7 +30,7 @@ reward = with(dat,
      })
 barplot(reward, beside=TRUE, legend.text = c("reward1", "reward2", "reward3"))
 
-## --- Q3
+## ---- Q3
 ## Q: Price distributions?
 summary(dat$price1)
 summary(dat$price2)
@@ -39,18 +39,18 @@ price = melt(dat[c("price1", "price2", "price3")])
 ggplot(price, aes(value, fill = variable)) + geom_histogram(position = "dodge")
 ggplot(price, aes(value, fill = variable)) + geom_histogram(binwidth = 1, position = "dodge") + xlim(0, 20)
 
-## --- Q4
+## ---- Q4
 ## Q: Price distributions?
 basePrice = melt(dat[c("basePrice1", "basePrice2", "basePrice3")])
 ggplot(basePrice, aes(value, fill = variable)) + geom_histogram(position = "dodge")
 ggplot(basePrice, aes(value, fill = variable)) + geom_histogram(binwidth = 1, position = "dodge") + xlim(0, 25)
 
-## --- Q5
+## ---- Q5
 ## Q: basketValue distribution?
 summary(dat$basketValue)
 hist(dat$basketValue[dat$basketValue<1000])
 
-## --- Q6
+## ---- Q6
 ## Q: coupon usage: 1 > 2 > 3
 sum(dat$coupon1Used)
 sum(dat$coupon2Used)
@@ -159,3 +159,24 @@ plot(crT, oT)
 
 head(oT)
 head(crT)
+
+
+par(mfrow=c(2,2))
+plot(dat$price1, dat$basePrice1)
+plot(dat$price2, dat$basePrice2)
+plot(dat$price3, dat$basePrice3)
+
+c1 = as.integer(dat$couponID1)
+
+table(c1)
+which(c1==1226)
+dat$brand1[which(c1==1226)]
+dat$productGroup1[which(c1==1226)]
+
+
+dat$brand1[which(c1==1065)]
+dat$productGroup1[which(c1==1065)]
+
+
+
+

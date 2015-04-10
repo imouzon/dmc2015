@@ -1,7 +1,41 @@
 # My Findings
 
-```{r external-code, cashe=FALSE}
+```{r external-code, cashe=FALSE, echo=FALSE}
 knitr::read_chunk('dmc2015.R')
 ```
 ## Data understanding
+
+## Q1: Does one particular coupon belong to only one couponID?
+
+```{r Q1}
+```
+
+## Q2: Reward distributions?
+
+```{r Q2}
+```
+
+## Q3: Price distributions?
+
+```{r Q3}
+```
+
+## Q4: Price distributions?
+
+```{r Q4}
+```
+
+## Q5: BasketValue distribution?
+
+```{r Q5}
+```
+## Q6: coupon usage: 1 > 2 > 3
+
+```{r Q6}
+```
+
+## Q7:  BasketValue vs coupon usage rate
+
+```{r Q7}
+```
 
