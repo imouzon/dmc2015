@@ -45,7 +45,8 @@ sum(train$coupon1Used)
 sum(train$coupon2Used)
 sum(train$coupon3Used)
 
-
+train$coupons_used = train$coupon1Used + train$coupon2Used + train$coupon3Used
+train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + geom_bar()
 
 
 # ==================================================================
