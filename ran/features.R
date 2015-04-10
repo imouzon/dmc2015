@@ -133,10 +133,10 @@ table(train_melt$couponUsed[train_melt$couponID == max_couponID])
 nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == "89d62b666d585f03f262b1f6a6abdd2c"]))
 
 # number of categories == number of columns coupon appear?
-a = 0
+a <- rep(0, length(train_melt$userID))
 for(i in 1:length(train_melt$userID)){
-  a = a + (length(strsplit(as.character(train_melt$categoryIDs), split = ",")[[i]]) == 
-         nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == train_melt$couponID[i]])))
+  a[i] <- (length(strsplit(as.character(train_melt$categoryIDs), split = ",")[[i]]) == 
+             nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == train_melt$couponID[i]])))
 }
 
 
