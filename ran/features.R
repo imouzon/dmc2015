@@ -90,6 +90,22 @@ boxplot(dif_lub ~ couponUsed[, 4], xlab = "number of coupons used",
         ylab = "order_received time diff")
 
 
+#######################
+### melt by coupons ###
+#######################
+
+coupon1 <- train[, c(1:12, 29)]
+coupon2 <- train[, c(1:4, 13:20, 30)]
+coupon3 <- train[, c(1:4, 21:28, 31)]
+coupon1$coupon_num <- 1
+coupon2$coupon_num <- 2
+coupon3$coupon_num <- 3
+names(coupon1) <- names(coupon2) <- names(coupon3) <-
+  c("orderID", "orderTime", "userID", "couponsReceived", "couponID", "price", "basePrice", "reward",
+    "premiumProduct", "brand", "productGroup", "categoryIDs", "couponUsed", "coupon_num")  
+train_melt <- rbind(coupon1, coupon2, coupon3)
+train_melt <- train_melt[order(train_melt$orderID),]
+
 
 
 nlevels(train$couponID1)
