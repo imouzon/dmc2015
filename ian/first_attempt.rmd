@@ -1,0 +1,56 @@
+#Initial Exploration
+
+<!-- setup: R code (No Results in Document) -->
+```{r setup,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+```
+
+I use the following packages:
+```{r, echo=TRUE, cache=TRUE, include = TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+```
+
+Reading in the data:
+<!-- readData: R code (No Results in Document) -->
+```{r readData,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   tr = read.delim("../data/raw_data/DMC_2015_orders_train.txt", header = TRUE, sep = "|", quote = "")
+   ts = read.delim("../data/raw_data/DMC_2015_orders_class.txt", header = TRUE, sep = "|", quote = "")
+```
+
+##10,000 foot view:
+<!-- headData: R code (No Results in Document) -->
+```{r headData,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   names(tr)
+```
+
+###Session Info
+<!-- sessinf: R code (No Results in Document) -->
+```{r sessinf,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   print(xtable(head(tr[,c(1:4,29:32)])),type="html")
+```
+
+###Coupon 1 Info
+
+
+
+
+
+
+
+
+
+
+
+

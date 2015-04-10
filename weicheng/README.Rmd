@@ -1,0 +1,7 @@
+# My Findings
+
+```{r external-code, cashe=FALSE}
+knitr::read_chunk('dmc2015.R')
+```
+## Data understanding
+
