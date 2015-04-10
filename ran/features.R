@@ -1,4 +1,4 @@
-setwd("//Users/Ran/Documents/ISU/dmc2015/")
+setwd("//Users/Ran/Dropbox/ISU/dmc2015/")
 train <- read.table("data/raw_data/DMC_2015_orders_train.txt", head = T, sep = "|")
 class <- read.table("data/raw_data/DMC_2015_orders_class.txt", head = T, sep = "|")
 
@@ -57,8 +57,8 @@ ggplot() +
 #################
 
 library(lubridate)
-dif_lub <- as.numeric(difftime(ymd_hms(orderTime), ymd_hms(couponsReceived)))  # difference in seconds
-qplot(dif_lub, geom = "histogram", binwidth = 10000) + xlab("received_use_dif")
+dif_lub <- as.numeric(difftime(ymd_hms(orderTime), ymd_hms(couponsReceived), units = "mins"))  # difference in seconds
+qplot(dif_lub, geom = "histogram", binwidth = 200) + xlab("received_use_dif")
 ggplot() + 
   geom_point(aes(x = ymd_hms(couponsReceived), y = ymd_hms(orderTime))) +
   xlab("coupon_received_time") + ylab("order_time")
@@ -86,9 +86,9 @@ boxplot(dif_coupon31, dif_coupon30)
 
 # time difference between order time and coupon received time
 # vs. number of coupon used
-boxplot(dif_lub ~ couponUsed[, 4])
+boxplot(dif_lub ~ couponUsed[, 4], xlab = "number of coupons used", 
+        ylab = "order_received time diff")
 
-ggplot()
 
 
 
