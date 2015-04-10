@@ -122,15 +122,22 @@ ggplot(train_melt, aes(x = train_melt$reward, fill = as.factor(train_melt$coupon
   geom_histogram(binwidth = .2, position = "fill") 
 
 
-##################################################
-### couponID = brand, producGroup, categoryID? ###
-##################################################
+###################################################
+### couponID == brand, producGroup, categoryID? ###
+###################################################
 
 max_coupon <- max(table(train_melt$couponID))
 max_couponID <- names(table(train_melt$couponID)[table(train_melt$couponID) == max_coupon])
 table(train_melt$couponUsed[train_melt$couponID == max_couponID])
 
+nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == "89d62b666d585f03f262b1f6a6abdd2c"]))
 
+# number of categories == number of columns coupon appear?
+a = 0
+for(i in 1:length(train_melt$userID)){
+  a = a + (length(strsplit(as.character(train_melt$categoryIDs), split = ",")[[i]]) == 
+         nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == train_melt$couponID[i]])))
+}
 
 
 nlevels(train$couponID1)
