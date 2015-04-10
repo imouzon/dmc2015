@@ -4,6 +4,7 @@ train <- read.csv("/Users/epwalsh/GitHub/dmc2015/data/raw_data/DMC_2015_orders_t
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+library(reshape2)
 
 # ==================================================================
 # how does order time compare to the time the coupon was recieved?
@@ -48,6 +49,23 @@ sum(train$coupon3Used)
 train$coupons_used = train$coupon1Used + train$coupon2Used + train$coupon3Used
 train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + geom_bar()
 
+usage = train %>% group_by(wday_couponsReceived) %>%
+  summarize(none = round(sum(coupons_used == 0) / length(coupons_used), 2),
+            one = round(sum(coupons_used == 1) / length(coupons_used), 2),
+            two = round(sum(coupons_used == 2) / length(coupons_used), 2),
+            three = round(sum(coupons_used == 3) / length(coupons_used), 2)) %>%
+  melt(id = "wday_couponsReceived", 
+       variable.name = "used",
+       value.name = "perc")
+usage <- usage[order(usage$wday_couponsReceived),]
+
+qplot(used, perc, data = usage, facets = ~wday_couponsReceived, 
+      geom="bar", stat = "identity")
+
+# ==================================================================
+# users
+# ==================================================================
+levels(train$userID) <- as.character(1:length(levels(train$userID)))
 
 # ==================================================================
 # what the hell is the difference between basePrice, price, and reward?
