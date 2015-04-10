@@ -1,5 +1,6 @@
 ## Pete's folder
 
-### Questions
+### Findings
 
-- What is the difference between basePrice, price, and reward?
+- It seems that all coupons expire before Tuesday.
+- I have verified this with the ```test``` set as well.
