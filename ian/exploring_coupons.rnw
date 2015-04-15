@@ -1,0 +1,448 @@
+% For LaTeX-Box: root = exploring_coupons.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: exploring_coupons.rnw
+%  Purpose:
+%
+%  Creation Date: 12-04-2015
+%  Last Modified: Tue Apr 14 17:34:15 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+%-- title page and quote
+\HWinfo{April 14 2015}{}{}
+\titleheader
+
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(plyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+@
+and my working directory is set to \verb!dmc2015/ian!.
+
+\section{Reading the Data}
+Read the data into R:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #training set ("historical data")
+   trn = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+
+   #test set ("future data")
+   tst = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+@
+add the time features:
+<<manageTime, echo=TRUE, cache=FALSE, include = TRUE>>=
+   source("~/dmc2015/ian/R/TimeFeatures.R")
+
+   #Whatever you do to the training set
+   trn = TimeFeatures(trn,"orderTime")
+   trn = TimeFeatures(trn,"couponsReceived")
+
+   #try if you can to do the same to the test set
+   tst = TimeFeatures(tst,"orderTime")
+   tst = TimeFeatures(tst,"couponsReceived")
+@
+and identify orders as belonging to batches starting at every Tuesday at midnight and lasting for one week.
+%-- assign_batch: R code (Code in Document)
+<<assign_batch, echo=TRUE, cache=FALSE, include = TRUE>>=
+   #add batch information
+   source("~/dmc2015/ian/R/GetBatchInfo.R")
+   batchres = GetBatchInfo("2015-01-06 00:00:00")
+   trn = batchres$train
+   tst = batchres$test
+
+   trn$TimeBtwnSentRec = difftime(trn$couponsReceived,trn$couponsSent,units='hours')
+   trn$TimeBtwnRecExpire = difftime(trn$couponsExpire,trn$couponsReceived,units='hours')
+   trn$TimeBtwnRecOrder = difftime(trn$orderTime,trn$couponsReceived,units='hours')
+   trn$TimeBtwnOrderExpire = difftime(trn$couponsExpire,trn$orderTime,units='hours')
+
+   tst$TimeBtwnSentRec = difftime(tst$couponsReceived,tst$couponsSent,units='hours')
+   tst$TimeBtwnRecExpire = difftime(tst$couponsExpire,tst$couponsReceived,units='hours')
+   tst$TimeBtwnRecOrder = difftime(tst$orderTime,tst$couponsReceived,units='hours')
+   tst$TimeBtwnOrderExpire = difftime(tst$couponsExpire,tst$orderTime,units='hours')
+@
+
+\section{Exploring Coupons}
+The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
+We can alter this fairly simply:
+%-- dds: R code (Code in Document)
+<<dds, echo=TRUE, cache=TRUE, include = TRUE>>=
+   stackCoupons = function(train,test,idcols = NULL){
+      #coupon rows have 1, 2, or 3 in column name
+      cpn.i = lapply(1:3, function(i) which(grepl(i,names(train))))
+
+      #if we don't specify, all non-coupon columns are id columns
+      if(is.null(idcols)) idcols = (1:ncol(train))[-unlist(cpn.i)]
+
+      #print messages so that it is obvious if there is a column problem
+      m1 = "using columns:\n\tidcols\nas id columns"
+      m2 = "using columns:\n\tcpncols\nas measure columns"
+      message(gsub("idcols",paste(names(train)[idcols],collapse=',\n\t'),m1))
+      message(gsub("cpncols",paste(names(train)[unlist(cpn.i)],collapse=',\n\t'),m2))
+
+      #identify observations as coming from training or test set
+      train$dsn = "train"
+      test$dsn = "test"
+
+      #add that dataset identifier to the id columns
+      idcols = c(idcols,which(names(train) == "dsn"))
+
+      cpnisolate = function(i){
+         ret = rbind(train,test)[,c(idcols,cpn.i[[i]])]
+         ret$couponCol = i
+         names(ret) = gsub(i,'',names(ret))
+         return(ret)
+      }
+
+      d.stack = do.call("rbind", lapply(1:3, cpnisolate))
+
+      d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
+               "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
+               "combined" = d.stack)
+
+      return(d)
+   }
+
+   #combine the two sets
+   d.stack = stackCoupons(trn,tst)
+@
+
+\subsection{Basic Questions About Coupons}
+We can now address some basic questions. 
+Most of these questions can be turned into a dataframe.
+
+How many unique coupons are there total:
+%-- : R code (Code in Document)
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #in both sets
+   couponInfo = data.frame(unique(d.stack$combined$couponID))
+   length(unique(couponInfo$couponID))
+   length(unique(d.stack$train$couponID))
+
+   couponInfo %>% 
+      select(couponID) %>%
+      group_by(couponID) %>% 
+      tally %>%
+      group_by(couponID) %>%
+      mutate(pct = (100*n)/sum(n))
+      
+      
+   nrow(couponInfo)
+   names(
+   ddply(couponID, couponID, summarise,)
+   d.stack$combined %>% 
+      group_by(couponID) %>%
+      select(couponID) %>%
+      summarise(
+            freq = nrow(couponInfo)
+      )
+   , couponID) %>% summarise(couponID)
+@
+How many unique coupons are there in the training set:
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #which IDs in the training set
+   trainIDs = unique(d.stack$train$couponID)
+
+   couponInfo$inTrain = as.numeric(couponInfo$couponID %in% trainIDs)
+
+   sum(couponInfo$inTrain)
+@
+How many unique coupons are there in the test set:
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #unique coupon IDs in test set:
+   testIDs = unique(d.stack$test$couponID)
+
+   couponInfo$inTest = as.numeric(couponInfo$couponID %in% testIDs)
+
+   sum(couponInfo$inTest)
+@
+Are there coupons in the test set that are not in the training set:
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #101 coupons in the test set but not in train set
+   sum(couponInfo$inTrain < couponInfo$inTest)
+@
+How often are these coupons in the test set:
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #in the test set
+   cpnFreq = data.frame(table(d.stack$combined[,c("couponID")]))
+   names(cpnFreq) = c("couponID","nCouponReceived")
+   couponInfo = merge(couponInfo,cpnFreq,by="couponID",all.x=TRUE)
+@
+How often is the coupon used?
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   #in the test set
+   cpnFreq = data.frame(table(couponInfo[,c("couponID","couponUsed")]))
+   names(cpnFreq) = c("couponID","nCouponReceived")
+   couponInfo = merge(couponInfo,cpnFreq,by="couponID",all.x=TRUE)
+@
+
+
+How many unique coupons are there in the training set:
+
+%-- dds: R code (Code in Document)
+<<dds, echo=TRUE, cache=TRUE, include = TRUE>>=
+      #get the melted sets
+      melt.cpni = function(i){
+         ret = melt(d$d, idcols, cpn.i[[i]]); 
+         ret$variable = gsub(i,'',names(ret));
+         return(ret)
+      }
+      melt.d = lapply(1:3, function(i) melt(d$d,idcols,cpn.i[[i]]))
+      head(melt.d[[1]])
+      message(gsub("idvars",paste(names(d)[cpn.i[[1]]],collapse=',\n\t'),m1))
+
+
+      d1 = d[,c(1:14,15:22,39,42)]
+   names(d1)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m1=melt(d1,id=c(1:22,24),measure=c(23))
+   m1$couponCol=1
+
+   d2 = d[,c(1:14,23:30,40,42)]
+   names(d2)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m2=melt(d2,id=c(1:22,24),measure=c(23))
+   m2$couponCol=2
+
+   d3 = d[,c(1:14,31:38,41,42)]
+   names(d3)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m3=melt(d3,id=c(1:22,24),measure=c(23))
+   m3$couponCol=3
+
+   d.m = rbind(m1,m2,m3)
+   trn$timetoreact = trn$couponsExpire - trn$couponsReceived
+   qplot(as.numeric(timetoreact),data=trn)
+
+   qplot(
+         ,data=trn,color=orderTimeDoW,facets=.~orderTimeDoW,geom='density',alpha=I(.5),fill= as.factor(coupon1Used))
+
+   trn$couponsReceived- trn$couponsSent
+
+
+
+   qplot(reward2, price2-basePrice2,data=d)
+
+
+   names(d.m)
+
+d.cpn = d.m[,c("orderID","couponID")]
+d.cpn2 = d.cpn
+names(d.cpn2)[2] = paste0(names(d.cpn)[2],'2')
+
+d.cpns = merge(d.cpn[,c("orderID","couponID")], d.cpn2[,c("orderID","couponID2")], by="orderID")
+d.tbl = data.frame(with(d.cpns,table(couponID,couponID2)))
+d.tbl = d.tbl[which(d.tbl$couponID != d.tbl$couponID2),]
+head(d.tbl)
+names(d.tbl)
+
+qplot(couponID,couponID2,data=d.tbl,size=Freq)
+
+d.m2 = d.m
+names(d.m2
+byorder = ddppy(d.m,.(orderID),summarize,
+                
+bycpn = ddply(d.m,.(couponID),summarize, 
+                  nBasket = length(unique(basketValue)),
+                  nbrands = length(unique(brand)),
+                  nGroup = length(unique(productGroup)),
+                  nCat = length(unique(productGroup)),
+                  nRewards = length(unique(reward)),
+                  times = length(price),
+                  times1 = sum(couponCol==1),
+                  times2 = sum(couponCol==2),
+                  times3 = sum(couponCol==3),
+                  nProd = length(unique(productGroup)),
+                  nPrice = length(unique(price)),
+                  nBase = length(unique(basePrice)),
+                  FirstRec = min(couponsReceived))
+cpnm = melt(bycpn,id="couponID",measure.vars = c('times','times1','times2','times3'))
+
+freqtab = melt(bycpn,id=c("couponID","times"),measure.vars = c('times1','times2','times3'))
+
+qplot(times,value,color=variable,data=freqtab)
+head(freqtab)
+                
+freqtab = with(bycpn,table(times,times1,times2,times3))
+relfreqtab = with(bycpn,table(times,times1/times,times2/times,times3/times))
+
+names(cpnm)
+qplot(variable,value,data=cpnm,geom='line',group=couponID)
+
+qplot(couponID,nBasket,data=bycpn)
+byprod$ncoupons = as.factor(byprod$ncoupons)
+
+byprod = ddply(d.m, .(productGroup,premiumProduct,categoryIDs,brand), summarize,
+                  ncoupons = length(unique(couponID)),
+                  nRewards = length(unique(reward)),
+                  times1 = sum(couponCol==1),
+                  times2 = sum(couponCol==2),
+                  times3 = sum(couponCol==3),
+                  nProd = length(unique(productGroup)),
+                  nPrice = length(unique(price)),
+                  nBase = length(unique(basePrice)),
+                  FirstRec = min(couponsReceived))
+
+summary(byprod$ncoupons)
+byprod$ncoupons = as.factor(byprod$ncoupons)
+
+
+qplot(ncoupons,data=byprod,biwidth=1)
+
+
+d.m$couponID = factor(d.m$couponID,levels=bycpn$couponID[order(bycpn$FirstRec)])
+qplot(couponsReceived,couponID,data=d.m,color=couponsReceivedDoW)
+names(d.m)
+levels(bycpn
+qplot(FirstSent,couponID,data=cpnFirstSent)
+names(cpnReward)
+qplot(couponID,nRewards,data=cpnReward)
+
+qplot(couponsReceived,couponID,data=d.m)
+
+
+m2=melt(d,id=c(1:14,23:30),measure=c(40))
+m3=melt(d,id=c(1:14,31:38),measure=c(40))
+names(d)
+m2
+
+       names(d)
+@
+
+
+
+
+   trn = batchres$train 
+   names(trn)
+   trn$timetoreact = trn$couponsExpire - trn$couponsReceived
+   qplot(as.numeric(timetoreact),data=trn)
+
+   qplot(
+         ,data=trn,color=orderTimeDoW,facets=.~orderTimeDoW,geom='density',alpha=I(.5),fill= as.factor(coupon1Used))
+
+   trn$couponsReceived- trn$couponsSent
+
+
+
+   qplot(reward2, price2-basePrice2,data=d)
+
+   d1 = d[,c(1:14,15:22,39,42)]
+   names(d1)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m1=melt(d1,id=c(1:22,24),measure=c(23))
+   m1$couponCol=1
+
+   d2 = d[,c(1:14,23:30,40,42)]
+   names(d2)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m2=melt(d2,id=c(1:22,24),measure=c(23))
+   m2$couponCol=2
+
+   d3 = d[,c(1:14,31:38,41,42)]
+   names(d3)[15:23] = gsub('1','',names(d)[c(15:22,39)])
+   m3=melt(d3,id=c(1:22,24),measure=c(23))
+   m3$couponCol=3
+
+   d.m = rbind(m1,m2,m3)
+
+   names(d.m)
+
+d.cpn = d.m[,c("orderID","couponID")]
+d.cpn2 = d.cpn
+names(d.cpn2)[2] = paste0(names(d.cpn)[2],'2')
+
+d.cpns = merge(d.cpn[,c("orderID","couponID")], d.cpn2[,c("orderID","couponID2")], by="orderID")
+d.tbl = data.frame(with(d.cpns,table(couponID,couponID2)))
+d.tbl = d.tbl[which(d.tbl$couponID != d.tbl$couponID2),]
+head(d.tbl)
+names(d.tbl)
+
+qplot(couponID,couponID2,data=d.tbl,size=Freq)
+
+d.m2 = d.m
+names(d.m2
+byorder = ddppy(d.m,.(orderID),summarize,
+                
+bycpn = ddply(d.m,.(couponID),summarize, 
+                  nBasket = length(unique(basketValue)),
+                  nbrands = length(unique(brand)),
+                  nGroup = length(unique(productGroup)),
+                  nCat = length(unique(productGroup)),
+                  nRewards = length(unique(reward)),
+                  times = length(price),
+                  times1 = sum(couponCol==1),
+                  times2 = sum(couponCol==2),
+                  times3 = sum(couponCol==3),
+                  nProd = length(unique(productGroup)),
+                  nPrice = length(unique(price)),
+                  nBase = length(unique(basePrice)),
+                  FirstRec = min(couponsReceived))
+cpnm = melt(bycpn,id="couponID",measure.vars = c('times','times1','times2','times3'))
+
+freqtab = melt(bycpn,id=c("couponID","times"),measure.vars = c('times1','times2','times3'))
+
+qplot(times,value,color=variable,data=freqtab)
+head(freqtab)
+                
+freqtab = with(bycpn,table(times,times1,times2,times3))
+relfreqtab = with(bycpn,table(times,times1/times,times2/times,times3/times))
+
+names(cpnm)
+qplot(variable,value,data=cpnm,geom='line',group=couponID)
+
+qplot(couponID,nBasket,data=bycpn)
+byprod$ncoupons = as.factor(byprod$ncoupons)
+
+byprod = ddply(d.m, .(productGroup,premiumProduct,categoryIDs,brand), summarize,
+                  ncoupons = length(unique(couponID)),
+                  nRewards = length(unique(reward)),
+                  times1 = sum(couponCol==1),
+                  times2 = sum(couponCol==2),
+                  times3 = sum(couponCol==3),
+                  nProd = length(unique(productGroup)),
+                  nPrice = length(unique(price)),
+                  nBase = length(unique(basePrice)),
+                  FirstRec = min(couponsReceived))
+
+summary(byprod$ncoupons)
+byprod$ncoupons = as.factor(byprod$ncoupons)
+
+
+qplot(ncoupons,data=byprod,biwidth=1)
+
+
+d.m$couponID = factor(d.m$couponID,levels=bycpn$couponID[order(bycpn$FirstRec)])
+qplot(couponsReceived,couponID,data=d.m,color=couponsReceivedDoW)
+names(d.m)
+levels(bycpn
+qplot(FirstSent,couponID,data=cpnFirstSent)
+names(cpnReward)
+qplot(couponID,nRewards,data=cpnReward)
+
+qplot(couponsReceived,couponID,data=d.m)
+
+
+m2=melt(d,id=c(1:14,23:30),measure=c(40))
+m3=melt(d,id=c(1:14,31:38),measure=c(40))
+names(d)
+m2
+
+       names(d)
+@
+
