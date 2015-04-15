@@ -1,0 +1,44 @@
+Ian: 
+ - Code included to create time features for dataset.
+ - Time cutoff between coupon batches should be set at midnight (monday-tuesday).
+ - Finding features based on coupon batches:
+ 	+ coupon send time versus coupon received time.
+ 	+ coupon receive time and order time
+ 	+ coupon receive time versus expiration
+ 	+ order time versus coupon expiration time
+ - 101 couponIDs in test set not in training set
+ - Baskets don't just comprise items with coupons:
+ 	+ Some orders with no coupons used still have positive basket value
+ - Coupons appear to be able to be used multiple times.
+
+
+Questions about coupons:
+- What is the value (discount) of this coupon?
+- Does it even correspond to a specified amount?
+- What is this for (what product, type of product)?
+- Does this coupon get better with multiple uses/change if you use/don't use/wait?
+- How does a coupon affect basket value?
+- Can we connect coupons through categoryIDs?
+- Can some coupons not be combined with other coupons?
+- How often coupon seen/how often coupon used?
+- When was the coupon first sent/seen in the dataset?
+
+Questions about users:
+- Do they use Coupons? # visits / # coupons used / # times coupon used
+- How much they spend?
+- Coupons connected with luxury items: "luxury coupons".
+- How many times does he use a specific coupon?
+- Does this user use coupons in category X?
+
+Questions about Categories:
+- Connect categories together using how often they appear together.
+- How do the categories relate to basket value?
+- Percent of coupons in this category?
+- Percent in this category that is luxury?
+- Do they words mean anything?
+
+Questions about batches:
+- Are batches the same? Similar?
+
+Questions about the loss function:
+- 
