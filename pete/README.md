@@ -24,7 +24,7 @@ train$wday_couponsReceived <- wday(train$couponsReceived, label=T)
 train %>% ggplot(aes(x = wday_couponsReceived, fill = wday_orderTime)) + 
 	geom_bar()
 ```
-![img](plot01.jpg)
+![img](figures/plot01.jpg)
 
 #### Coupon 1 is used the most, followed by coupon 2, and then coupon 3
 
@@ -37,11 +37,26 @@ sum(train$coupon3Used)
 # [1] 1008
 ```
 
-### Coupon usage rate is greater for people receiving coupons later in the week
+#### Coupon usage rate is greater for people receiving coupons later in the week
 
 ```r
 train$coupons_used = train$coupon1Used + train$coupon2Used + train$coupon3Used
 train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + 
 	geom_bar()
 ```
-![img](plot02.jpg)
+![img](figures/plot02.jpg)
+
+```r
+usage = train %>% group_by(wday_couponsReceived) %>%
+  summarize(none = round(sum(coupons_used == 0) / length(coupons_used), 2),
+            one = round(sum(coupons_used == 1) / length(coupons_used), 2),
+            two = round(sum(coupons_used == 2) / length(coupons_used), 2),
+            three = round(sum(coupons_used == 3) / length(coupons_used), 2)) %>%
+  melt(id = "wday_couponsReceived", 
+       variable.name = "used",
+       value.name = "perc")
+usage <- usage[order(usage$wday_couponsReceived),]
+qplot(used, perc, data = usage, facets = ~wday_couponsReceived, 
+      geom="bar", stat = "identity")
+```
+![img](figures/plot03.jpg)

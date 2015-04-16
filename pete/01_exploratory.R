@@ -33,10 +33,9 @@ jpeg("plot01.jpg")
 plot01
 dev.off()
 
-# every single person who spent their coupon on Tuesday had recieved their 
-# coupon on Tuesday, the same day
 wday_sum <- train %>% group_by(wday_couponsReceived, wday_orderTime) %>% 
   summarize(count = length(orderID))
+wday_sum
 
 # most coupons are sent out on Tuesday
 # all coupons expire before Tuesday
@@ -55,8 +54,11 @@ sum(train$coupon2Used)
 sum(train$coupon3Used)
 
 train$coupons_used = train$coupon1Used + train$coupon2Used + train$coupon3Used
-train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + 
+plot02 <- train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + 
 	geom_bar()
+jpeg("plot02.jpg")
+plot02
+dev.off()
 
 usage = train %>% group_by(wday_couponsReceived) %>%
   summarize(none = round(sum(coupons_used == 0) / length(coupons_used), 2),
@@ -68,8 +70,11 @@ usage = train %>% group_by(wday_couponsReceived) %>%
        value.name = "perc")
 usage <- usage[order(usage$wday_couponsReceived),]
 
-qplot(used, perc, data = usage, facets = ~wday_couponsReceived, 
+plot03 <- qplot(used, perc, data = usage, facets = ~wday_couponsReceived, 
       geom="bar", stat = "identity")
+jpeg("plot03.jpg")
+plot03
+dev.off()
 
 # ==================================================================
 # users
