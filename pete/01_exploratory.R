@@ -45,13 +45,8 @@ train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(day_diff))) +
 
 
 # ==================================================================
-# coupon usage
+# how does coupons usage vary by day received? 
 # ==================================================================
-
-# coupon 1 used the most, then coupon 2, then coupon 3
-sum(train$coupon1Used)
-sum(train$coupon2Used)
-sum(train$coupon3Used)
 
 train$coupons_used = train$coupon1Used + train$coupon2Used + train$coupon3Used
 plot02 <- train %>% ggplot(aes(x = wday_couponsReceived, fill = factor(coupons_used))) + 
@@ -76,14 +71,17 @@ jpeg("plot03.jpg")
 plot03
 dev.off()
 
-# ==================================================================
-# users
-# ==================================================================
-levels(train$userID) <- as.character(1:length(levels(train$userID)))
 
 # ==================================================================
-# coupons
+# how does placement (first, second, or third) affect coupon usage? 
 # ==================================================================
+
+# coupon 1 used the most, then coupon 2, then coupon 3
+sum(train$coupon1Used)
+sum(train$coupon2Used)
+sum(train$coupon3Used)
+
+
 coupon1 = train[,c("coupon1Used", "couponID1")]
 coupon2 = train[,c("coupon2Used", "couponID2")]
 coupon3 = train[,c("coupon3Used", "couponID3")]
@@ -93,12 +91,18 @@ names(coupon2) <- c("used", "coupon")
 names(coupon3) <- c("used", "coupon")
 
 coupon1$coupon <- as.character(coupon1$coupon)
-coupon1$batch <- 1
+coupon1$place <- 1
 coupon2$coupon <- as.character(coupon2$coupon)
-coupon2$batch <- 2
+coupon2$place <- 2
 coupon3$coupon <- as.character(coupon3$coupon)
-coupon3$batch <- 3
+coupon3$place <- 3
 
 couponData = rbind(coupon1, coupon2, coupon3)
 couponData$coupon = as.factor(couponData$coupon)
 levels(couponData$coupon) = 1:length(levels(couponData$coupon))
+
+# get unique coupon IDs
+uniqueCoupons = levels(couponData$coupon)
+
+couponSummary = couponData %>% group_by(coupon, place) %>%
+	summarize(usage = mean(used))
