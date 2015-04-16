@@ -24,4 +24,4 @@ train$wday_couponsReceived <- wday(train$couponsReceived, label=T)
 train %>% ggplot(aes(x = wday_couponsReceived, fill = wday_orderTime)) + 
 	geom_bar()
 ```
-![img](plot01.png)
+![img](plot01.pdf)
