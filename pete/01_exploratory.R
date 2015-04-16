@@ -27,8 +27,11 @@ qplot(train$minute_diff, geom="histogram", colour=I("white"))
 
 train %>% ggplot(aes(x = wday_orderTime, fill = wday_couponsReceived)) + 
 	geom_bar()
-train %>% ggplot(aes(x = wday_couponsReceived, fill = wday_orderTime)) + 
+plot01 <- train %>% ggplot(aes(x = wday_couponsReceived, fill = wday_orderTime)) + 
 	geom_bar()
+jpeg("plot01.jpg")
+plot01
+dev.off()
 
 # every single person who spent their coupon on Tuesday had recieved their 
 # coupon on Tuesday, the same day
