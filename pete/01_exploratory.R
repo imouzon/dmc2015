@@ -82,11 +82,23 @@ dev.off()
 levels(train$userID) <- as.character(1:length(levels(train$userID)))
 
 # ==================================================================
-# what the hell is the difference between basePrice, price, and reward?
+# coupons
 # ==================================================================
-summary(train$basePrice1+train$reward1-train$price1)
+coupon1 = train[,c("coupon1Used", "couponID1")]
+coupon2 = train[,c("coupon2Used", "couponID2")]
+coupon3 = train[,c("coupon3Used", "couponID3")]
 
+names(coupon1) <- c("used", "coupon")
+names(coupon2) <- c("used", "coupon")
+names(coupon3) <- c("used", "coupon")
 
+coupon1$coupon <- as.character(coupon1$coupon)
+coupon1$batch <- 1
+coupon2$coupon <- as.character(coupon2$coupon)
+coupon2$batch <- 2
+coupon3$coupon <- as.character(coupon3$coupon)
+coupon3$batch <- 3
 
-
-
+couponData = rbind(coupon1, coupon2, coupon3)
+couponData$coupon = as.factor(couponData$coupon)
+levels(couponData$coupon) = 1:length(levels(couponData$coupon))
