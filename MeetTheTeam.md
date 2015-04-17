@@ -386,3 +386,26 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
+
+<table>
+   <tbody>
+      <tr>
+         <th>Yihua Li (IMSE/STAT)</th>
+         <th align="center">Two Facts and a Falsehood</th>
+      </tr>
+      <tr>
+         <td>
+            <a href="./team_pics/Yihua.jpg" style="overflow: hidden"> 
+               <img src="./team_pics/Yihua.jpg" width="100"/> 
+            </a>
+         </td>
+         <td>
+            <ol>
+               <li>I love ice cream.</li>
+               <li>I love cilantro.</li>
+               <li>I love sleeping.</li>
+            </ol>
+         </td>
+      </tr>
+   </tbody>
+</table>

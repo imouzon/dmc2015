@@ -142,3 +142,55 @@ for(i in 1:length(train_melt$userID)){
 
 nlevels(train$couponID1)
 
+
+###################
+### Text Mining ###
+###################
+
+attach(train_melt)
+orderTime0 <- "2015-01-05 23:59:59"
+train_melt$batch <- factor(ceiling(as.numeric(difftime(ymd_hms(orderTime), ymd_hms(orderTime0), unit = "weeks"))))
+ggplot() + 
+  geom_point(aes(x = ymd_hms(couponsReceived), y = ymd_hms(orderTime)), col = batch) +
+  xlab("coupon_received_time") + ylab("order_time")
+
+batch_num <- c(0, as.numeric(table(train_melt$batch)))
+# couponID & batch count matrix
+couponID_unique <- unique(couponID)
+coupon_batch <- matrix(0, length(couponID_unique), length(batch_num)-1)
+for (i in 1:length(couponID_unique)){
+  for (j in 2:length(batch_num)){
+    coupon_batch[i, j-1] <- sum(couponID[(batch_num[j-1] + 1):batch_num[j]] == couponID_unique[i])
+  }
+  if (i%%100 == 0) {print(i)}
+}
+colnames(coupon_batch) <- 1:9
+rownames(coupon_batch) <- couponID_unique
+
+# userID & batch count matrix
+userID_unique <- unique(userID)
+user_batch <- matrix(0, length(userID_unique), length(batch_num)-1)
+for (i in 1:length(userID_unique)){
+  for (j in 2:length(batch_num)){
+    user_batch[i, j-1] <- sum(userID[(batch_num[j-1] + 1):batch_num[j]] == userID_unique[i])
+  }
+  if (i%%100 == 0) {print(i)}
+}
+colnames(user_batch) <- 1:9
+rownames(user_batch) <- userID_unique
+
+library(igraph)
+termMatrix <- coupon_batch %*% t(coupon_batch)
+# build a graph from the above matrix
+g <- graph.adjacency(termMatrix, weighted = T, mode = "undirected")
+# remove loops
+g <- simplify(g)
+# set labels and degrees of vertices
+V(g)$label <- NULL
+V(g)$degree <- degree(g)
+
+set.seed(2015)
+layout1 <- layout.fruchterman.reingold(g)
+plot(g, layout = layout1)
+
+eigen(termMatrix)$va[1:10]
