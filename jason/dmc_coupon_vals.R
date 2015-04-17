@@ -50,5 +50,8 @@ trn2 <- trn2 %>%
 ## Make a plot
 plot.me <- trn2 %>%
   filter(upper.bound < 1000)
+
+jpeg('upper_bounds.jpg')
 ggplot(data = plot.me, aes(x = upper.bound)) +
   geom_histogram(binwidth = 17)
+dev.off()
