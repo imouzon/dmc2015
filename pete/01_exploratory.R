@@ -139,8 +139,8 @@ couponSum4 = rbind(couponSum3$used, couponSum3$count - couponSum3$used)
 rownames(couponSum4) = c("used", "not used")
 colnames(couponSum4) = c("1", "2", "3")
 prop.table(couponSum4, 2)
-jpeg("plot04.jpg")
+jpeg("figures/plot04.jpg")
 barplot(prop.table(couponSum4, 2), col=c("slateblue", "mediumseagreen"),
 				legend=rownames(couponSum4), xlab = "position", 
-				main = "Usage of coupons that appears in all 3 positions")
+				main = "Usage of coupons that appear in all 3 positions")
 dev.off()

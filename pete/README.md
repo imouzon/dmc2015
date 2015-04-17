@@ -26,17 +26,6 @@ train %>% ggplot(aes(x = wday_couponsReceived, fill = wday_orderTime)) +
 ```
 ![img](figures/plot01.jpg)
 
-#### Coupon 1 is used the most, followed by coupon 2, and then coupon 3
-
-```r
-sum(train$coupon1Used)
-# [1] 1438
-sum(train$coupon2Used)
-# [1] 1129
-sum(train$coupon3Used)
-# [1] 1008
-```
-
 #### Coupon usage rate is greater for people receiving coupons later in the week
 
 ```r
@@ -61,9 +50,21 @@ qplot(used, perc, data = usage, facets = ~wday_couponsReceived,
 ```
 ![img](figures/plot03.jpg)
 
-#### Coupons appearing in position 1 have higher usage rates
+#### Coupon 1 is used the most, followed by coupon 2, and then coupon 3
 
 ```r
+sum(train$coupon1Used)
+# [1] 1438
+sum(train$coupon2Used)
+# [1] 1129
+sum(train$coupon3Used)
+# [1] 1008
+```
+
+#### This is true even just among coupons that appear in all 3 positions
+
+```r
+# summary of usage for coupons that appeared in all 3 position at least once
 couponSum3 = couponSum2 %>% group_by(place) %>%
 	summarize(count = sum(count),
                   used = sum(used),
