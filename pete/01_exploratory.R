@@ -1,3 +1,8 @@
+# read and manip data
+source("read_data.R")
+
+
+
 class <- read.csv("/Users/epwalsh/GitHub/dmc2015/data/raw_data/DMC_2015_orders_class.txt", sep="|")
 train <- read.csv("/Users/epwalsh/GitHub/dmc2015/data/raw_data/DMC_2015_orders_train.txt", sep="|")
 
@@ -105,4 +110,37 @@ levels(couponData$coupon) = 1:length(levels(couponData$coupon))
 uniqueCoupons = levels(couponData$coupon)
 
 couponSummary = couponData %>% group_by(coupon, place) %>%
-	summarize(usage = mean(used))
+	summarize(count = length(used),
+						used = sum(used))
+
+# get all coupons that appeared in every order
+tab = table(couponSummary$coupon)
+ids = as.numeric(which(tab == 3))
+
+index = rep(NA, 3*length(ids))
+j = 1
+for (i in ids) {
+	index[j:(j+2)] = which(couponSummary$coupon == i)
+	j = j + 3
+}
+
+couponSum2 = couponSummary[index,]
+couponSum2$rate = couponSum2$used / couponSum2$count
+
+# coupons that were sent out in each order, used more often when 1st coupon
+couponSum3 = couponSum2 %>% group_by(place) %>%
+	summarize(count = sum(count),
+						used = sum(used),
+						rate = sum(used) / sum(count))
+
+# plot this
+# couponSum4 = t(cbind(couponSum3[,c(1,4)], 1 - couponSum3$rate))[2:3,]
+couponSum4 = rbind(couponSum3$used, couponSum3$count - couponSum3$used)
+rownames(couponSum4) = c("used", "not used")
+colnames(couponSum4) = c("1", "2", "3")
+prop.table(couponSum4, 2)
+jpeg("plot04.jpg")
+barplot(prop.table(couponSum4, 2), col=c("slateblue", "mediumseagreen"),
+				legend=rownames(couponSum4), xlab = "position", 
+				main = "Usage of coupons that appears in all 3 positions")
+dev.off()

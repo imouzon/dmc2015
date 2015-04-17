@@ -60,3 +60,17 @@ qplot(used, perc, data = usage, facets = ~wday_couponsReceived,
       geom="bar", stat = "identity")
 ```
 ![img](figures/plot03.jpg)
+
+#### Coupons appearing in position 1 have higher usage rates
+
+```r
+couponSum3 = couponSum2 %>% group_by(place) %>%
+	summarize(count = sum(count),
+                  used = sum(used),
+		  rate = sum(used) / sum(count))
+#   place count used rate
+# 1     1  1204  355 0.295
+# 2     2   992  226 0.228
+# 3     3  1498  285 0.190
+```
+![img](figures/plot04.jpg)
