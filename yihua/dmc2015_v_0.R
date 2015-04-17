@@ -1,9 +1,9 @@
-#--------------------------------------**--------------------------------------# 
+#------------------------------**------------------------------# 
 #  
 # DMC_2015: data preparation
 # dmc2015_v_0.R
 # 
-#--------------------------------------**--------------------------------------# 
+#------------------------------**------------------------------# 
 
 library(ggplot2)
 library(plyr)
@@ -69,6 +69,7 @@ coupon.tr <- rbind(coupon1.tr, coupon2.tr, coupon3.tr)
 coupon.tr <- coupon.tr[order(coupon.tr$orderID),]
 head(coupon.tr)
 
+# Do people respond to the same coupon similarly?
 coupon.used <- ddply(coupon.tr, .(couponID), summarise, 
                      used=mean(couponUsed), dispatch=length(couponUsed),
                      appear1=sum(coupon==1), appear2=sum(coupon==2),
@@ -90,6 +91,45 @@ hist(worst$dispatch)
 hist(worst$reward)
 qplot(price, basePrice, data=worst, xlim=c(0,25), ylim=c(0,25), color=dispatch)
 qplot(used, log(as.numeric(diff)), data=coupon.used)
+
+# do people treat all coupons similarly?
+customer <- ddply(tr, .(userID), summarise, 
+                  used=mean(coupon1Used+coupon2Used+coupon3Used), 
+                  used0=sum(coupon1Used+coupon2Used+coupon3Used==0),
+                  used1=sum(coupon1Used+coupon2Used+coupon3Used==1),
+                  used2=sum(coupon1Used+coupon2Used+coupon3Used==2),
+                  used3=sum(coupon1Used+coupon2Used+coupon3Used==3),
+                  appear=length(orderID),
+                  use=sum(coupon1Used+coupon2Used+coupon3Used>0),
+                  diff.m=mean(diff),
+                  basketValue= mean(basketValue))
+customer <- customer[order(customer$appear, decreasing=T),]
+table(customer$appear, customer$use)
+table(customer$appear, customer$used0)
+table(customer$appear, customer$used1)
+table(customer$appear, customer$used2)
+table(customer$appear, customer$used3)
+
+qplot(used, data=customer, geom='histogram')
+qplot(used0, data=customer, geom='histogram')
+qplot(used1, data=customer, geom='histogram')
+qplot(used2, data=customer, geom='histogram')
+qplot(used3, data=customer, geom='histogram')
+
+# For those who received the same coupon multiple times, 
+# are those responsed consistent?
+cst.order <- ddply(coupon.tr, .(userID, couponID), summarise, 
+                   count=length(orderID),
+                   used=mean(couponUsed), 
+                   use=sum(couponUsed>0),
+                   diff.m=mean(diff),
+                   basketValue= mean(basketValue))
+cst.order <- cst.order[order(cst.order$count, decreasing=T),]
+
+qplot(count, use, data=cst.order)
+qplot(count, used, data=cst.order)
+qplot(used, geom='histogram', data=cst.order)
+table(cst.order$count, cst.order$use)
 
 ###########################
 ### coupon used or not? ###
@@ -115,47 +155,16 @@ boxplot(dif_coupon31, dif_coupon30)
 # vs. number of coupon used
 boxplot(dif_lub ~ couponUsed[, 4])
 
-
-# split into one row for each coupon
-Coupon1 <- train[,c(1:4,5:12,29,32)]
-Coupon1$coupon <- 1
-Coupon2 <- train[,c(1:4,13:20,30,32)]
-Coupon2$coupon <- 2
-Coupon3 <- train[,c(1:4,21:28,31,32)]
-Coupon3$coupon <- 3
-names(Coupon1) <- names(Coupon2) <- names(Coupon3) <- c("orderID", "orderTime", "userID", "couponsReceived", 
-                    "couponID", "price", "basePrice", "reward",
-                    "premiumProduct", "brand", "productGroup", "categoryIDs", 
-                    "couponUsed", "basketValue", "coupon")
-Coupon <- rbind(Coupon1, Coupon2, Coupon3)
-Coupon <- Coupon[order(Coupon$orderID),]
-
-Coupon1[1:100,c('price','basePrice','reward','premiumProduct')]
-mean(price1-reward1>basePrice1)
-mean(price1-reward1<basePrice1)
-mean(price1-reward1==basePrice1)
-hist(log(price1/basePrice1))
-hist(log((price1-reward1)/basePrice1))
-
-plot(coupon1Used, log(price1/basePrice1))
-abline(h=0)
-plot(coupon1Used, log(price2/basePrice2))
-abline(h=0)
-plot(coupon1Used, log(price3/basePrice3))
-abline(h=0)
-
-x <- table(Coupon$couponID, Coupon$reward)
-length(unique(Coupon$couponID))
+# detect coupon information
+# Finding: same couponID have same coupon info
+x <- table(coupon.tr$couponID, coupon.tr$reward)
+length(unique(coupon.tr$couponID))
 sum(x>0)
 
-x <- table(Coupon$couponID, Coupon$categoryIDs)
-length(unique(Coupon$couponID))
-sum(x>0)
+plot(log(coupon.tr$price/Coupon$basePrice), coupon.tr$couponUsed)
 
-mean(basketValue>coupon1Used*price1+coupon2Used*price2+coupon3Used*price3)
-mean(basketValue>coupon1Used*basePrice1+coupon2Used*basePrice2+coupon3Used*basePrice3)
-
-plot(log(Coupon$price/Coupon$basePrice), Coupon$couponUsed)
-
-
-
+# How much worth of products does people buy?
+qplot(log(coupon1Used*price1+coupon2Used*price2+coupon3Used*price3), 
+      log(basketValue), xlim=c(0,5), ylim=c(0,10), data=tr)
+qplot(log(basketValue)-log(coupon1Used*price1+coupon2Used*price2+coupon3Used*price3),
+      data=tr, geom='histogram')

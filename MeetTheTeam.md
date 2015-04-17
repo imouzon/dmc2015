@@ -395,8 +395,8 @@ The parts you need to edit are LIKE_THIS
       </tr>
       <tr>
          <td>
-            <a href="./team_pics/Yihua.jpg" style="overflow: hidden"> 
-               <img src="./team_pics/Yihua.jpg" width="100"/> 
+            <a href="./team_pics/Yihua.JPG" style="overflow: hidden"> 
+               <img src="./team_pics/Yihua.JPG" width="100"/> 
             </a>
          </td>
          <td>
