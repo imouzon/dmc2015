@@ -1,6 +1,6 @@
 ## Loading necessary libraries.
 library(dplyr)
-library(ggplot2)
+library(ggvis)
 library(lubridate)
 library(magrittr)
 library(stringr)
@@ -40,8 +40,12 @@ for (i in 1:length(trn2$used)) {
     trn2[i, 32] <- trn2$coupon3Used[i]
 }
 
-## Get the results!
+## Updating trn2 just in case it's useful later.
 trn2 <- trn2 %>%
+  select(orderID:couponsReceived, basketValue:used)
+
+## Get the results!
+coupon.tdf <- trn2 %>%
   filter(used == 1) %>%
   group_by(couponID) %>%
   summarize(upper.bound = min(basketValue),
@@ -50,8 +54,11 @@ trn2 <- trn2 %>%
   arrange(desc(unique.basket.vals))
 
 ## Make a plot
-plot.me <- trn2 %>%
-  filter(upper.bound < 1000)
+coupon.tdf %>%
+  filter(upper.bound < 1000) %>%
+  ggvis(x = ~upper.bound) %>%
+  layer_histograms(width = 17)
+  
 
 jpeg('upper_bounds.jpg')
 ggplot(data = plot.me, aes(x = upper.bound)) +
