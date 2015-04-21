@@ -62,7 +62,7 @@ coupon.tdf <- trn2 %>%
   filter(used == 1) %>%
   group_by(couponID) %>%
   summarize(upper.bound = min(basketValue),
-            count = n(),
+            num.orders = n(),
             unique.basket.vals = n_distinct(basketValue)) %>%
   arrange(desc(unique.basket.vals))
 
@@ -73,6 +73,25 @@ coupon.tdf %>%
   layer_histograms(width = 17)
 
 ## Which coupons are associated with multiple orders that have
-## the same basket value?
+## the same basket value? Find those coupons and then find all the
+## records in trn2 corresponding to those coupons.
 same.val.tdf <- coupon.tdf %>%
-  filter(unique.basket.vals != count)
+  filter(unique.basket.vals != num.orders)
+
+same.val.orders <- trn2 %>%
+  filter(couponID %in% same.val.tdf$couponID) %>%
+  filter(used == 1) %>%
+  arrange(couponID) %>%
+  select(couponID, basketValue, orderID)
+
+
+## For every coupon with an upper bound less than $100, let's say
+## that that is the true value of (coupon + product) and reiterate the
+## process for the other coupons to create new upper bounds on those
+## (coupon + product) values.
+cutoff <- 100
+
+true.vals <- coupon.tdf %>%
+  arrange(upper.bound) %>%
+  filter(upper.bound < cutoff) %>%
+  select(couponID, upper.bound)
