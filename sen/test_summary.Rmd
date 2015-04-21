@@ -1,0 +1,146 @@
+Test set summary
+========================================================
+
+Try to gather some information.
+
+
+```{r}
+
+# read data
+
+train = read.delim("/Users/senzhou/Desktop/dmc15/DMC 2015/DMC_2015_orders_train.txt",header = T, sep = "|")
+test = read.delim("/Users/senzhou/Desktop/dmc15/DMC 2015/DMC_2015_orders_class.txt",header = T, sep = "|")
+
+# clean the data:
+# 1. change factor to character
+
+i = sapply(train, is.factor)
+train[,i] = sapply(train[,i], as.character)
+
+j = sapply(test, is.factor)
+test[,j] = sapply(test[,j], as.character)
+
+# 2. truncate the character to easily work with
+
+## take some columns out first
+
+tr = train[,c(2:5,13,21,29:32)]
+te = test[,c(2:5,13,21,29:32)]
+
+
+trunc = function(d){
+  for (i in c(2,4,5,6)){
+    d[,i] = strtrim(d[,i], 6)       # verified at least trim 6
+  }
+  return(d)
+} 
+
+tr1 = trunc(tr)
+te1 = trunc(te)
+
+
+```
+
+
+```{r}
+
+# work with time
+
+library(lubridate)
+
+diff = function(d){
+  diff = as.numeric(ymd_hms(d$orderTime) - ymd_hms(d$couponsReceived))
+  return(diff)
+}
+
+tr1$gap = diff(tr1)
+te1$gap = diff(te1)
+
+tr1$orderDay = wday(tr1$orderTime, label = T)
+tr1$recDay = wday(tr1$couponsReceived, label = T)
+te1$orderDay = wday(te1$orderTime, label = T)
+te1$recDay = wday(te1$couponsReceived, label = T)
+
+
+# reorder the columns to better work with
+
+tr2 = tr1[c(3,1,13,12,11,2,4:10)]
+te2 = te1[c(3,1,13,12,11,2,4:10)]
+
+```
+
+
+```{r}
+
+
+# For the userID in test, have it appeared in the train? where?
+# For the couponID1-3 in test, have they appeared in the train? where?
+
+info = list()
+
+
+for (i in 1:669){
+  temp1 = grep(te2[i,6], tr2[,6])                             # test userID appeared in train 
+  temp2 = lapply(tr2[7:9],  function(x) grep(te2[i,7], x))    # test couponID1 appeared in train coupon1-3
+  temp3 = lapply(tr2[7:9],  function(x) grep(te2[i,8], x))    # test couponID2 appeared in train coupon1-3
+  temp4 = lapply(tr2[7:9],  function(x) grep(te2[i,9], x))    # test couponID3 appeared in train coupon1-3
+  info[[i]] = list(temp1, temp2[[1]], temp2[[2]], temp2[[3]],  
+                          temp3[[1]], temp3[[2]], temp3[[3]],     # bind them into a list
+                          temp4[[1]], temp4[[2]], temp4[[3]]
+                   )
+}
+
+
+
+# l = rep(0,10)
+# m = rep(0,9)
+
+# for (i in 1:669){
+#   for (j in 1:10){
+#     l[j] = info[[i]][[j]]
+#   }
+#   
+#   for (k in 2:10){
+#     m[k-1] = intersect(l[1],l[k])
+#   }
+# 
+#   
+# }
+
+# since each index is also a bunch of numbers, so it is not easy to write loops.
+
+library(reshape)
+
+ test_summary = data.frame(user = character(), 
+                           coupon1 = character(), 
+                           coupon2 = character(), 
+                           coupon3 = character(), 
+                           stringsAsFactors = F)
+
+
+for (i in (1:669)){
+  user_id = info[[i]][[1]]           # location where test user appeared in train
+  coupon1_1id = info[[i]][[2]]       
+  coupon1_2id = info[[i]][[3]]       # location where test coupon1 appeared in train coupon2
+  coupon1_3id = info[[i]][[4]]
+  coupon2_1id = info[[i]][[5]]
+  coupon2_2id = info[[i]][[6]]
+  coupon2_3id = info[[i]][[7]]
+  coupon3_1id = info[[i]][[8]]
+  coupon3_2id = info[[i]][[9]]
+  coupon3_3id = info[[i]][[10]]
+  
+  
+test_summary[i,1] = toString(user_id)
+test_summary[i,2] = paste(toString(coupon1_1id),toString(coupon1_2id),toString(coupon1_3id), sep = "   |   ")
+test_summary[i,3] = paste(toString(coupon2_1id),toString(coupon2_2id),toString(coupon2_3id), sep = "   |   ")
+test_summary[i,4] = paste(toString(coupon3_1id),toString(coupon3_2id),toString(coupon3_3id), sep = "   |   ")
+
+}  
+
+library(xlsx)
+write.xlsx(test_summary, "/Users/senzhou/Desktop/dmc15/test_summary.xlsx")
+
+
+```
+
