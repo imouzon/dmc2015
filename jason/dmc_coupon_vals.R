@@ -28,16 +28,29 @@ trn2 <- trn %>%
   gather(key = position, value = couponID, couponID1, couponID2, couponID3) %>%
   mutate(position = as.numeric(str_extract(position, "\\d"))) %>%
   filter(coupon1Used | coupon2Used | coupon3Used) %>%
-  mutate(used = rep(NA, length(position)))
+  mutate(price = rep(NA, length(position)),
+         basePrice = rep(NA, length(position)),
+         reward = rep(NA, length(position)),
+         premiumProduct = rep(NA, length(position)),
+         brand = rep(NA, length(position)),
+         productGroup = rep(NA, length(position)),
+         categoryIDs = rep(NA, length(position)),
+         used = rep(NA, length(position)))
 
-## Now I fill in the used column with the relevant information.
+## Now I fill in the new columns with the relevant information.
 for (i in 1:length(trn2$used)) {
-  if (trn2$position[i] == 1)
-    trn2[i, 32] <- trn2$coupon1Used[i]
-  else if (trn2$position[i] == 2)
-    trn2[i, 32] <- trn2$coupon2Used[i]
-  else
-    trn2[i, 32] <- trn2$coupon3Used[i]
+  if (trn2$position[i] == 1) {
+    trn2[i, 32:38] <- trn2[i, 5:11]
+    trn2$used[i] <- trn2$coupon1Used[i]
+  }
+  else if (trn2$position[i] == 2) {
+    trn2[i, 32:38] <- trn2[i, 12:18]
+    trn2$used[i] <- trn2$coupon2Used[i]
+  }
+  else {
+    trn2[i, 32:38] <- trn2[i, 19:25]
+    trn2$used[i] <- trn2$coupon3Used[i]
+  }
 }
 
 ## Updating trn2 just in case it's useful later.
@@ -53,19 +66,13 @@ coupon.tdf <- trn2 %>%
             unique.basket.vals = n_distinct(basketValue)) %>%
   arrange(desc(unique.basket.vals))
 
-## Make a plot
+## Make a plot. This is saved in upper_bounds.svg in my github folder.
 coupon.tdf %>%
   filter(upper.bound < 1000) %>%
   ggvis(x = ~upper.bound) %>%
   layer_histograms(width = 17)
-  
-
-jpeg('upper_bounds.jpg')
-ggplot(data = plot.me, aes(x = upper.bound)) +
-  geom_histogram(binwidth = 17)
-dev.off()
 
 ## Which coupons are associated with multiple orders that have
 ## the same basket value?
-same.val <- with(trn2, which(unique.basket.vals != count))
-trn2[same.val, ]
+same.val.tdf <- coupon.tdf %>%
+  filter(unique.basket.vals != count)
