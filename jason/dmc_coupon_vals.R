@@ -6,6 +6,22 @@ library(magrittr)
 library(stringr)
 library(tidyr)
 
+## If you're unfamiliar with dplyr, here are some commands
+## that will help you understand how this code works:
+
+## filter: select rows matching some criterion
+## select: select columns matching some criterion
+## arrange: arrange rows according to some variable
+## mutate: add new variables, possibly as functions of old ones
+## summarize: reduce variables to values, like the summarize part of ddply
+## group_by: splits data frames up according to a certain (set of) variable(s)
+
+## Most of these commands can also be done in base R, but the advantage
+## to using dplyr is that they (1) may be faster than the base R versions
+## and (2) have been designed to work well with pipelines (the %>% operator).
+## The updated versions of reshape2 and ggplot2, called tidyr and ggvis,
+## respectively, are also designed to work with pipelines.
+
 ## Reading in the data, trn for "training", tst for "test".
 ## Make the dates nicer with lubridate functions, and
 ## turn the data frames into tbl_dfs to make things sane.
@@ -67,10 +83,12 @@ coupon.tdf <- trn2 %>%
   arrange(desc(unique.basket.vals))
 
 ## Make a plot. This is saved in upper_bounds.svg in my github folder.
-coupon.tdf %>%
-  filter(upper.bound < 1000) %>%
-  ggvis(x = ~upper.bound) %>%
-  layer_histograms(width = 17)
+# cutoff <- 1000
+
+# coupon.tdf %>%
+#   filter(upper.bound < cutoff) %>%
+#   ggvis(x = ~upper.bound) %>%
+#   layer_histograms(width = 17)
 
 ## Which coupons are associated with multiple orders that have
 ## the same basket value? Find those coupons and then find all the
@@ -84,14 +102,52 @@ same.val.orders <- trn2 %>%
   arrange(couponID) %>%
   select(couponID, basketValue, orderID)
 
+## Are any of the bound-defining basket values repeated more than once?
+same.val.orders %>%
+  print.data.frame()
 
-## For every coupon with an upper bound less than $100, let's say
-## that that is the true value of (coupon + product) and reiterate the
-## process for the other coupons to create new upper bounds on those
-## (coupon + product) values.
-cutoff <- 100
+####################################################################################
 
+## "De-coupon" the dataset where we say that any values below some cutoff
+## are the "true values" of (product + coupon).
+cutoff2 <- 200
 true.vals <- coupon.tdf %>%
-  arrange(upper.bound) %>%
-  filter(upper.bound < cutoff) %>%
-  select(couponID, upper.bound)
+  filter(upper.bound < cutoff2)
+trn3 <- trn # Just so I don't screw up the original dataset.
+
+trn3.nrows <- dim(trn3)[1]
+for (i in 1:trn3.nrows) {
+  if (trn3$coupon1Used[i] == 1)
+    if (trn3$couponID1[i] %in% true.vals$couponID) {
+      index = which(true.vals$couponID == trn3$couponID1[i])
+      trn3$basketValue[i] <- trn3$basketValue[i] - true.vals$upper.bound[index]
+    }
+  else if (trn3$coupon2Used[i] == 1)
+    if (trn3$couponID2[i] %in% true.vals$couponID) {
+      index = which(true.vals$couponID == trn3$couponID2[i])
+      trn3$basketValue[i] <- trn3$basketValue[i] - true.vals$upper.bound[index]
+    }
+  else if (trn3$coupon3Used[i] == 1)
+    if (trn3$couponID3[i] %in% true.vals$couponID) {
+      index = which(true.vals$couponID == trn3$couponID3[i])
+      trn3$basketValue[i] <- trn3$basketValue[i] - true.vals$upper.bound[index]
+    }
+}
+
+## Did we accidentally reduce any of the basket values to below $0?
+sum(trn3$basketValue < 0)
+## Nope!
+
+## Let's pretend like the coupons with upper bounds > 200 don't exist for now.
+## With this assumption, we are justified in killing off all the coupon columns
+## in trn3 and trying to model basket value with the remaining variables.
+## This is analogous to modeling a stationary time series after removing trend
+## and seasonal components.
+trn3 <- trn3 %>%
+  select(orderID:couponsReceived, basketValue)
+
+## The span of time between when the coupons were received and when the order
+## was placed.
+trn3$timespan <- trn3$orderTime - trn3$couponsReceived
+trn3 <- trn3 %>%
+  select(-orderTime, -couponsReceived)
