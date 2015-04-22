@@ -10,3 +10,20 @@
 
 | Column Name | NAs? | Type |  Ys? | Briefly | Detailed |
 |:------------|:----:|:----:|:----:|:--------|:---------|
+couponsReceivedDate | N | N | N | year-month-day the coupons were received | |
+couponsReceivedTime | N | N | N | hour-minute-second the coupons were received | |
+couponsReceivedDoW  | N | N | N | Day of week the coupons were received | |
+couponsReceivedWeekend | N | N | N | 1 if coupons were received on Saturday/Sunday, 0 otherwise | |
+couponsReceivedFriSat| N | N | N | 1 if the coupons were received on Friday/Saturday, 0 otherwise | |
+orderTimeDate| N | N | N | year-month-day the order was made | |
+orderTimeTime| N | N | N | hour-minute-second the order was made | |
+orderTimeDoW| N | N | N | Day of week the order was made | |
+orderTimeWeekend| N | N | N | 1 if the order was made on a weekend, 0 otherwise | |
+orderTimeFriSat| N | N | N | 1 if the order was made on a Friday/Saturday, 0 otherwise | |
+batchID| N | N | N | An integer indicating which batch the order belonged to, (1 to 11) | |
+couponsExpire| N | N | N | year-month-day-hour-minute-second the coupons expire | |
+couponsSent| N | N | N | year-month-day-hour-minute-second the couponse were sent | |
+TimeBtwnSentRec| N | N | N | Time between couponse being sent and coupons being received (in hours) | |
+TimeBtwnRecExpire| N | N | N | Time between coupons being received and coupons expiring (in hours) | |
+TimeBtwnRecOrder| N | N | N | Time between coupons being received and order being placed (in hours) | |
+TimeBtwnOrderExpire| N | N | N | Time between order being placed and coupons expiring (in hours) ||
