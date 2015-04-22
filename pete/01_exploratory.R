@@ -144,3 +144,5 @@ barplot(prop.table(couponSum4, 2), col=c("slateblue", "mediumseagreen"),
 				legend=rownames(couponSum4), xlab = "position", 
 				main = "Usage of coupons that appear in all 3 positions")
 dev.off()
+
+
