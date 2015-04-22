@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 15-04-2015
-#  Last Modified: Wed Apr 15 13:51:32 2015
+#  Last Modified: Wed Apr 22 12:26:08 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -20,8 +20,8 @@ stackCoupons = function(train,test,idcols = NULL){
    if(is.null(idcols)) idcols = (1:ncol(train))[-unlist(cpn.i)]
 
    #print messages so that it is obvious if there is a column problem
-   m1 = "using columns:\n\tidcols\nas id columns"
-   m2 = "using columns:\n\tcpncols\nas measure columns"
+   m1 = "using the following as id:\n\tidcols\n"
+   m2 = "using the following as measure columns:\n\tcpncols\n"
    message(gsub("idcols",paste(names(train)[idcols],collapse=',\n\t'),m1))
    message(gsub("cpncols",paste(names(train)[unlist(cpn.i)],collapse=',\n\t'),m2))
 
@@ -40,6 +40,8 @@ stackCoupons = function(train,test,idcols = NULL){
    }
 
    d.stack = do.call("rbind", lapply(1:3, cpnisolate))
+   d.stack$dsn = factor(d.stack$dsn,levels=c("train","test"))
+   d.stack = d.stack[with(d.stack,order(orderID,dsn)),]
 
    d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
             "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
@@ -47,4 +49,3 @@ stackCoupons = function(train,test,idcols = NULL){
 
    return(d)
 }
-

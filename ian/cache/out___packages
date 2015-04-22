@@ -1,0 +1,17 @@
+base
+knitr
+usefulR
+ggplot2
+lubridate
+xtable
+foreach
+rCharts
+plyr
+dplyr
+reshape2
+gtools
+proto
+gsubfn
+DBI
+RSQLite
+sqldf

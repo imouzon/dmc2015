@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 15-04-2015
-#  Last Modified: Wed Apr 15 13:40:45 2015
+#  Last Modified: Wed Apr 15 13:54:39 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -44,4 +44,3 @@ tst$TimeBtwnSentRec = difftime(tst$couponsReceived,tst$couponsSent,units='hours'
 tst$TimeBtwnRecExpire = difftime(tst$couponsExpire,tst$couponsReceived,units='hours')
 tst$TimeBtwnRecOrder = difftime(tst$orderTime,tst$couponsReceived,units='hours')
 tst$TimeBtwnOrderExpire = difftime(tst$couponsExpire,tst$orderTime,units='hours')
-

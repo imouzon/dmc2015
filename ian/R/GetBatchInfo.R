@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 12-04-2015
-#  Last Modified: Wed Apr 15 13:43:24 2015
+#  Last Modified: Tue Apr 21 10:40:52 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -34,16 +34,17 @@ GetBatchInfo = function(initial_batch.ymd_hms, nbatch=10, weeks2expire = 1, trai
    weeksbtwnbatches = weeks2expire
 
    #coupons start on 
-   batch.start = ymd_hms(initial_batch.ymd_hms,tz ='CET')
+   batch.start = ymd_hms(initial_batch.ymd_hms)
 
    # make data frame
    couponBatches = data.frame(
-      'sendDate' = batch.start + (0:(nbatch-1))*couponLengthValid,
-      'expireDate' = batch.start + 1:nbatch*couponLengthValid,
+      'couponsSent' = batch.start + (0:(nbatch-1))*couponLengthValid,
+      'couponsExpire' = batch.start + 1:nbatch*couponLengthValid,
       'batch' = factor(1:nbatch))
 
+   couponBatches
    #create time interval
-   couponBatches$validInterval = with(couponBatches,interval(sendDate, expireDate))
+   couponBatches$validInterval = with(couponBatches,interval(couponsSent, couponsExpire))
 
    #give the training set batchID
    train$batchID = 0 
@@ -82,15 +83,25 @@ GetBatchInfo = function(initial_batch.ymd_hms, nbatch=10, weeks2expire = 1, trai
    #plots help us make sure that the batches make sense
    p1 = ggplot() + geom_point(data=cbind(rbind(train,test),batch.invalid),aes(x=couponsReceived,y=orderTime,shape=dataset,size=batch.violation))
 
-   p2 = ggplot() +geom_rect(data=couponBatches, aes(xmin=sendDate, xmax=sendDate+weeks(1), ymin=sendDate, ymax=expireDate, fill = batch),alpha=I(.4)) + geom_point(data=cbind(rbind(train,test),batch.invalid),aes(x=couponsReceived,y=orderTime,shape=dataset),size=I(.9)) 
+   p2 = ggplot() +geom_rect(data=couponBatches, aes(xmin=couponsSent, xmax=couponsSent+weeks(1), ymin=couponsSent, ymax=couponsExpire, fill = batch),alpha=I(.4)) + geom_point(data=cbind(rbind(train,test),batch.invalid),aes(x=couponsReceived,y=orderTime,shape=dataset),size=I(.9)) 
 
    p3 = ggplot() + geom_point(data=cbind(rbind(train,test),batch.invalid),aes(x=couponsReceived,y=orderTime,color=batchID),size=I(.9))
 
    train = train[,-which(names(train) == "dataset")]
    test = test[,-which(names(test) == "dataset")]
 
+   #add custom variables
+   train$TimeBtwnSentRec = difftime(train$couponsReceived,train$couponsSent,units='hours')
+   train$TimeBtwnRecExpire = difftime(train$couponsExpire,train$couponsReceived,units='hours')
+   train$TimeBtwnRecOrder = difftime(train$orderTime,train$couponsReceived,units='hours')
+   train$TimeBtwnOrderExpire = difftime(train$couponsExpire,train$orderTime,units='hours')
+
+   test$TimeBtwnSentRec = difftime(test$couponsReceived,test$couponsSent,units='hours')
+   test$TimeBtwnRecExpire = difftime(test$couponsExpire,test$couponsReceived,units='hours')
+   test$TimeBtwnRecOrder = difftime(test$orderTime,test$couponsReceived,units='hours')
+   test$TimeBtwnOrderExpire = difftime(test$couponsExpire,test$orderTime,units='hours')
+
    results = list('train' = train, 'test' = test, 'plots' = list(p1,p2,p3))
 
    return(results)
 }
-

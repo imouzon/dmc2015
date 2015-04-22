@@ -4,16 +4,16 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Tue Apr 14 17:34:15 2015
+%  Last Modified: Wed Apr 22 12:21:48 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%-- Set parent file
+%-- Set parent fil
 <<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
    #set up knitr
    #devtools::install_github('imouzon/usefulR')
    library(usefulR)
 
-   working.dir = "/Users/user/dmc2015/ian"
+   working.dir = "/Users/user/dmc2015/ian/"
    setwd(working.dir)
    knitrSetup(rootDir=FALSE,use.tikz=FALSE)
 
@@ -38,6 +38,7 @@ I am using the following packages:
    library(dplyr)
    library(reshape2)
    library(gtools)
+   library(sqldf)
 @
 and my working directory is set to \verb!dmc2015/ian!.
 
@@ -47,9 +48,11 @@ Read the data into R:
 <<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
    #training set ("historical data")
    trn = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   trn.raw = trn
 
    #test set ("future data")
    tst = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   tst.raw = tst
 @
 add the time features:
 <<manageTime, echo=TRUE, cache=FALSE, include = TRUE>>=
@@ -71,23 +74,19 @@ and identify orders as belonging to batches starting at every Tuesday at midnigh
    batchres = GetBatchInfo("2015-01-06 00:00:00")
    trn = batchres$train
    tst = batchres$test
+@
 
-   trn$TimeBtwnSentRec = difftime(trn$couponsReceived,trn$couponsSent,units='hours')
-   trn$TimeBtwnRecExpire = difftime(trn$couponsExpire,trn$couponsReceived,units='hours')
-   trn$TimeBtwnRecOrder = difftime(trn$orderTime,trn$couponsReceived,units='hours')
-   trn$TimeBtwnOrderExpire = difftime(trn$couponsExpire,trn$orderTime,units='hours')
-
-   tst$TimeBtwnSentRec = difftime(tst$couponsReceived,tst$couponsSent,units='hours')
-   tst$TimeBtwnRecExpire = difftime(tst$couponsExpire,tst$couponsReceived,units='hours')
-   tst$TimeBtwnRecOrder = difftime(tst$orderTime,tst$couponsReceived,units='hours')
-   tst$TimeBtwnOrderExpire = difftime(tst$couponsExpire,tst$orderTime,units='hours')
+%-- trainSave1: R code (Code in Document)
+<<trainSave1, echo=FALSE, cache=TRUE, include = TRUE>>=
+   training.set = trn
+   testing.set = tst
 @
 
 \section{Exploring Coupons}
 The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
 We can alter this fairly simply:
 %-- dds: R code (Code in Document)
-<<dds, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<stackfunc, echo=TRUE, cache=TRUE, include = TRUE>>=
    stackCoupons = function(train,test,idcols = NULL){
       #coupon rows have 1, 2, or 3 in column name
       cpn.i = lapply(1:3, function(i) which(grepl(i,names(train))))
@@ -116,6 +115,8 @@ We can alter this fairly simply:
       }
 
       d.stack = do.call("rbind", lapply(1:3, cpnisolate))
+      d.stack$dsn = factor(d.stack$dsn,levels=c("train","test"))
+      d.stack = d.stack[with(d.stack,order(orderID,dsn)),]
 
       d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
                "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
@@ -123,23 +124,242 @@ We can alter this fairly simply:
 
       return(d)
    }
+@
 
-   #combine the two sets
+%-- trainSave1: R code (Code in Document)
+<<trainSave2, echo=FALSE, cache=TRUE, include = TRUE>>=
+   trn = training.set
+   tst = testing.set
+@
+
+%-- Name: R code (Code in Document)
+<<stack, echo=TRUE, cache=TRUE, include = TRUE>>=
+   #combine the two sets and stack coupons
    d.stack = stackCoupons(trn,tst)
 @
 
 \subsection{Basic Questions About Coupons}
 We can now address some basic questions. 
 Most of these questions can be turned into a dataframe.
+First, though, lets handle these coupons names:
+
+%-- smartLabel: R code (Code in Document)
+<<smartLabel, echo=TRUE, cache=TRUE, include = TRUE>>=
+dsn=d.stack$combined
+varn="couponID"
+abrv="cpn"
+orderby=c("orderID","couponCol","dsn")
+listout=FALSE
+replace=TRUE
+   smartLabel = function(dsn,varn,abrv="smart.",orderby=NULL,replace=FALSE,listout=TRUE){
+      #dsn is the dataset with a "anonymous" ID variable
+      #varn is the label to improve
+      #orderby is a variable to sort the new ids by
+      #replace = TRUE removes old label
+      #        = FALSE keeps old label and names new label "smart.varn"
+      #list.out = TRUE returns a list with the data and the map varn to smart.varn
+      #         = FALSE returns the dataset only
+
+      if(!is.null(orderby)){
+         orderby_query = gsub("orderby",paste(orderby,collapse=", "),"select varn, orderby from dsn order by orderby")
+         orderby_query = gsub("varn",varn,orderby_query)
+         dsn_labels = data.frame(unique(sqldf(orderby_query)[,varn]))
+         names(dsn_labels) = varn
+         dsn_labels$smart_label = paste0(abrv,1:nrow(dsn_labels))
+         dsn = sqldf(gsub("varn",varn,"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn"))
+      }else{
+         dsn_labels = data.frame(unique(dsn[,varn]))
+         names(dsn_labels) = varn
+         dsn_labels$smart_label = paste0(abrv,1:nrow(dsn_labels))
+         dsn = sqldf(gsub("varn",varn,"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn"))
+      }
+
+      if(replace){
+         dsn[,varn] = dsn$smart_label
+         dsn = dsn[,-which(names(dsn) == "smart_label")]
+      }else{
+         names(dsn)[which(names(dsn) == "smart_label")] = paste0("smart_",varn)
+      }
+
+      if(listout){
+         message("returning a list")
+         ret = list("data" = dsn,"mapping"=dsn.labels)
+      }else{
+         ret = dsn
+      }
+
+      return(ret)
+   }
+
+   splitTrain=function(combined.dsn,splitvar='dsn'){
+      train = combined.dsn[which(combined.dsn[,splitvar] == "train"),] 
+      test = combined.dsn[which(combined.dsn[,splitvar] == "test"),] 
+      return(list("train" = train,"test"=test))
+   }
+@
+%-- changeLabels: R code (Code in Document)
+<<changeLabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+   d.stack$combined = smartLabel(d.stack$combined,"couponID",abrv="cpn",orderby=c("orderID","couponCol","dsn"),listout=FALSE,replace=TRUE)
+@
+And while we're at it, let's fix the other "scrambled" IDs:
+%-- changemorelabels: R code (Code in Document)
+<<changemorelabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+   brandIDmap = smartLabel(d.stack$combined,"brand",abrv="brand",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = brandIDmap$data 
+
+   groupIDmap = smartLabel(d.stack$combined,"productGroup",abrv="prod",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = groupIDmap$data 
+@
+Getting the category IDs to be more simple is not insignificant:
+%-- Name: R code (Code in Document)
+<<simpCatsIDs, echo=TRUE, cache=TRUE, include = TRUE>>=
+   catID.d = d.stack$combined[,c("orderID","categoryIDs")] %>% 
+      mutate(parts = strsplit(categoryIDs,",")) %>%
+         group_by(categoryIDs) %>%
+         do( data.frame(
+           {
+              idx = 1:length(.$parts[[1]])
+              lst = lapply(idx, function(x) .$parts[[1]][x])
+              names(lst) = lapply(idx,function(x) paste0("categoryIDs",x))
+                                  (lst)
+           }, stringsAsFactors=FALSE)
+          ) %>%
+          inner_join(d.stack$combined,by="categoryIDs")
+
+   catID = melt(catID.d,id=c("orderID","dsn","couponCol"),measure=2:6)
+   catID$variable = as.numeric(as.character(gsub("categoryIDs","",catID$variable)))
+   names(catID)[4] = "categoryEntry"
+   names(catID)[5] = "categoryIDs"
+
+   catID = catID[which(!is.na(catID$categoryIDs)),]
+   catID = catID[with(catID,order(orderID,couponCol,categoryEntry,dsn)),]
+
+   catIDmap = smartLabel(catID,"categoryIDs",abrv="cat",orderby=c("orderID","couponCol","categoryEntry","dsn"),listout=TRUE,replace=TRUE)
+   catIDmap$data = catIDmap$data[with(catIDmap$data,order(orderID,couponCol,categoryEntry,dsn)),]
+
+   catIDmap$map
+   d.stack$combined[1,33]
+
+   catID.p = ddply(catIDmap$data,.(orderID,dsn,couponCol), summarize, paste(unique(categoryIDs),collapse=','))
+
+   d.stack$combined = merge(d.stack$combined[,-which(names(d.stack$combined) == "categoryIDs")],catID.p,by=c("orderID","dsn","couponCol"),all.x=TRUE)
+@
+
+I'm going to write this test set and training set:
+%-- writeRdata: R code (Code in Document)
+<<writeRdata, echo=TRUE, cache=TRUE, include = TRUE>>=
+   write.d = splitTrain(d.stack$combined) 
+
+   saveRDS(write.d$train,"train.rds")
+   saveRDS(write.d$test,"test.rds")
+
+   write.csv(write.d$train,file='train.csv',row.names=FALSE)
+   getwd()
+@
+
+
+
 
 How many unique coupons are there total:
 %-- : R code (Code in Document)
 <<echo=TRUE, cache=TRUE, include = TRUE>>=
-   #in both sets
-   couponInfo = data.frame(unique(d.stack$combined$couponID))
+   #build a frame to gather info about coupons
+   couponInfo = ddply(d.stack$combined,.(couponID),summarise,
+                   firstRec = min(couponsReceived),
+                   firstOrd = min(orderTime))
+   qplot(firstRec,couponID,data=couponInfo)
+
    length(unique(couponInfo$couponID))
    length(unique(d.stack$train$couponID))
 
+   head(d.stack$train$couponsReceived)
+   head(as.numeric(d.stack$train$couponsReceived))
+   trm = d.stack$train
+
+   trm$superEarlyRec = factor(c("Early","Late")[1*(-as.numeric(trm$couponsSent) + as.numeric(trm$couponsReceived) > 60*60*8) + 1])
+   trm$FirstDay= factor(c("First Day","not first")[1*(-as.numeric(trm$couponsSent) + as.numeric(trm$couponsReceived) > 60*60*28) + 1])
+   qplot(as.numeric(couponsReceived) - as.numeric(couponsSent), geom='density',data=d.stack$train, alpha=I(.1),fill=factor(couponUsed),facets=.~couponUsed) + geom_vline(aes(xintercept=60*60*8))
+
+
+   trm$ordtimeclass = factor(c("order fast", "order slow")[1*(as.numeric(trm$orderTime) -as.numeric(trm$couponsReceived)  > 60*60*1) + 1])
+   qplot(as.factor(couponUsed),facets=FirstDay~ordtimeclass, data=trm)
+
+   with(trm[(trm$superEarlyRec=="Early"),],table(ordtimeclass,couponUsed)/rowSums(table(ordtimeclass,couponUsed)))
+   with(trm[(trm$superEarlyRec=="Late"),],table(ordtimeclass,couponUsed)/rowSums(table(ordtimeclass,couponUsed)))
+
+   names(trm)
+   qplot(brand,data=trm,fill=factor(couponUsed))
+  
+   dftrn = data.frame(table(trn$userID))
+   names(dftrn)
+   
+   qplot(factor(Freq), data=dftrn,geom='bar')
+
+#logistic reg
+   catIDs = unique(unlist(strsplit(trm$categoryIDs,",")))
+   prodGrps = unique(trm$productGroup)
+   brands = unique(trm$brand)
+   logregMat = matrix(0,nrow=nrow(trm), ncol = length(c(catIDs,prodGrps,brands)) + 1)
+
+   for(i in 1:length(catIDs)){
+      logregMat[,i] = sapply(1:nrow(trm), function(k) 1*(catIDs[i] %in% unlist(strsplit(trm$categoryIDs[k],','))))
+   }
+
+   for(i in 1:length(prodGrps)){
+      logregMat[,(i + length(catIDs))] = 1*grepl(prodGrps[i],trm$productGroup)
+   }
+
+   for(i in 1:length(brands)){
+      logregMat[,(i + length(prodGrps) + length(catIDs))] = 1*grepl(brands[i],trm$brand)
+   }
+
+   logregMat[,(length(brands) + length(prodGrps) + length(catIDs)+1)] = trm$premiumProduct
+
+   logregDat = data.frame(couponUsed = trm$couponUsed)
+   logregDat = cbind(logregDat,logregMat)
+   names(logregDat) = c("couponUsed", paste0("catID",1:length(catIDs)), paste0("prodGrps",1:length(prodGrps)), paste0("brand",1:length(brands)), "premProd")
+
+   head(logregDat)
+
+   logRegmod = glm(formula = couponUsed ~ .,family='binomial',data=logregDat)
+
+   library(pls)
+   plsr(couponUsed ~.,ncomp=1,data=logregDat)
+
+
+   
+
+
+
+      for(j in 1:length
+
+             unique(unlist(strsplit(trm$categoryIDs,",")))
+
+
+   length(unique(trm$
+
+   names(trm)
+   head(trm$
+
+
+
+
+   tbl = ddply(trm, .(brand), summarize, nSent = length(couponUsed), nUsed = sum(couponUsed), nCoupons = length(unique(couponID)))
+   tbl$propUsed = tbl$nUsed/tbl$nSent
+   ggplot(data=tbl,aes(x=nSent,y=nCoupons,color=brand)) + geom_point()
+   qplot(nSent,nCoupons,color=brand,data=tbl)
+   qplot(nSent,propUsed,size=nCoupons, data=tbl)
+   qplot(nSent,propUsed,size=nCoupons, data=tbl[which(tbl$nSent < 500),])
+   data.frame(with(trm,table(brand,couponUsed)))
+   with(trm,table(brand,couponUsed)/rowSums(table(brand,couponUsed)))
+
+
+   ggplot(data=trm,aes(x=ordtimeclass, fill=couponUsed)) + geom_bar()
+   qplot(ordtimeclass,facets=.~couponUsed,data=trm)
+   qplot(-as.numeric(couponsReceived) + as.numeric(orderTime), geom='density',data=d.stack$train, alpha=I(.1),fill=factor(couponUsed),facets=.~couponUsed) + geom_vline(aes(xintercept=60*60*6))
+   qplot(as.numeric(couponsReceived), as.numeric(orderTime), data=d.stack$train, alpha=I(.1),color=factor(couponUsed),facets=.~couponUsed)
+
+   
    couponInfo %>% 
       select(couponID) %>%
       group_by(couponID) %>% 
@@ -323,6 +543,29 @@ m2=melt(d,id=c(1:14,23:30),measure=c(40))
 m3=melt(d,id=c(1:14,31:38),measure=c(40))
 names(d)
 m2
+
+nrow(trn)
+trn[5000,]
+
+newfeatureMat = data.frame(orderID = trn$orderID)
+head(newfeatureMat)
+trn[5000,]
+newfeatureMat$timesherebefore = c(0,sapply(2:nrow(trn), function(i) sum(grepl(trn$userID[i],trn$userID[1:(i-1)]))))
+newfeatureMat$timesherebefore = c(0,sapply(2:nrow(trn), function(i) sum(
+                                                                        trn$userID[i]==trn$userID[1:(i-1)]) 
+                                                                        & trn$batchID[i]==trn$batchID[1:(i-1)])
+                                                                        & trn$couponID1[i]==trn$couponID1[1:(i-1)])
+                                                                        & trn$coupon1Used[1:(i-1)]  == 1
+
+                                                                        )
+)
+)
+newfeatureMat$beenherebefore = 1*
+   (
+    newfeatureMat$timesherebefore
+    >0)
+write.csv(newfeatureMat, file="mynewfeat.csv", row.names=FALSE)
+sum(grepl("dogs",c("dogs", "cats","dogs")))
 
        names(d)
 @

@@ -1,0 +1,564 @@
+
+
+
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[]{graphicx}\usepackage[]{xcolor}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
+\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
+\newcommand{\Sexpr}[1]{}       % will only be parsed by R
+
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[DMC,none]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+
+
+
+
+\begin{document}
+% For LaTeX-Box: root = exploring_coupons.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: exploring_coupons.rnw
+%  Purpose:
+%
+%  Creation Date: 12-04-2015
+%  Last Modified: Wed Apr 22 14:29:16 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent fil
+
+
+%-- title page and quote
+\HWinfo{April 14 2015}{}{}
+\titleheader
+
+I am using the following packages:
+%-- paks: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(lubridate)}
+\hlkwd{library}\hlstd{(xtable)}
+\hlkwd{library}\hlstd{(foreach)}
+\hlkwd{library}\hlstd{(rCharts)}
+\hlkwd{library}\hlstd{(plyr)}
+\hlkwd{library}\hlstd{(dplyr)}
+\hlkwd{options}\hlstd{(}\hlkwc{dplyr.width} \hlstd{=} \hlnum{Inf}\hlstd{)}
+\hlkwd{library}\hlstd{(reshape2)}
+\hlkwd{library}\hlstd{(gtools)}
+\hlkwd{library}\hlstd{(sqldf)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+and my working directory is set to \verb!dmc2015/ian!.
+
+\section{Reading the Data}
+Read the data into R:
+%-- readDat: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# training set ('historical data')}
+\hlstd{trn} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"../data/raw_data/DMC_2015_orders_train.txt"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
+\hlstd{trn.raw} \hlkwb{<-} \hlstd{trn}
+
+\hlcom{# test set ('future data')}
+\hlstd{tst} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"../data/raw_data/DMC_2015_orders_class.txt"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
+\hlstd{tst.raw} \hlkwb{<-} \hlstd{tst}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\section{Stacking Coupons}
+The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
+We can alter this fairly simply:
+%-- dds: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{source}\hlstd{(}\hlstr{"~/dmc2015/ian/R/stackCoupons.R"}\hlstd{)}
+\hlstd{d.stack} \hlkwb{<-} \hlkwd{stackCoupons}\hlstd{(trn, tst)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# using the following as id:\\\#\# 	orderID,\\\#\# 	orderTime,\\\#\# 	userID,\\\#\# 	couponsReceived,\\\#\# 	basketValue\\\#\# \\\#\# using the following as measure columns:\\\#\# 	couponID1,\\\#\# 	price1,\\\#\# 	basePrice1,\\\#\# 	reward1,\\\#\# 	premiumProduct1,\\\#\# 	brand1,\\\#\# 	productGroup1,\\\#\# 	categoryIDs1,\\\#\# 	coupon1Used,\\\#\# 	couponID2,\\\#\# 	price2,\\\#\# 	basePrice2,\\\#\# 	reward2,\\\#\# 	premiumProduct2,\\\#\# 	brand2,\\\#\# 	productGroup2,\\\#\# 	categoryIDs2,\\\#\# 	coupon2Used,\\\#\# 	couponID3,\\\#\# 	price3,\\\#\# 	basePrice3,\\\#\# 	reward3,\\\#\# 	premiumProduct3,\\\#\# 	brand3,\\\#\# 	productGroup3,\\\#\# 	categoryIDs3,\\\#\# 	coupon3Used}}\end{kframe}
+\end{knitrout}
+
+\subsection{Relabeling coupons}
+The following function renames the ID variables in a data set.
+\begin{itemize}
+   \item It does so in a way that provides a 1-1 map between labels.
+   \item Preserves the order of the labels either as they appear in the dataset \textbf{or} with respect to another column in the dataset.
+   \item Can return both the mapping \textbf{and} the the relabeled dataset.
+   \item Allows you to choose whether to replace the old ID labels or not.
+\end{itemize}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{smartLabel} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{dsn}\hlstd{,} \hlkwc{varn}\hlstd{,} \hlkwc{abrv} \hlstd{=} \hlstr{"smart."}\hlstd{,}
+    \hlkwc{orderby} \hlstd{=} \hlkwa{NULL}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{) \{}
+    \hlcom{# dsn is the dataset with a 'anonymous' ID variable}
+    \hlcom{# varn is the label to improve orderby is a}
+    \hlcom{# variable to sort the new ids by replace = TRUE}
+    \hlcom{# removes old label = FALSE keeps old label and}
+    \hlcom{# names new label 'smart.varn' list.out = TRUE}
+    \hlcom{# returns a list with the data and the map varn to}
+    \hlcom{# smart.varn = FALSE returns the dataset only}
+
+    \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{is.null}\hlstd{(orderby)) \{}
+        \hlstd{orderby_query} \hlkwb{<-} \hlkwd{gsub}\hlstd{(}\hlstr{"varn"}\hlstd{, varn,} \hlkwd{gsub}\hlstd{(}\hlstr{"orderby"}\hlstd{,}
+            \hlkwd{paste}\hlstd{(orderby,} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{),} \hlstr{"select varn, orderby from dsn order by orderby"}\hlstd{))}
+        \hlstd{dsn_labels} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwd{unique}\hlstd{(}\hlkwd{sqldf}\hlstd{(orderby_query)[,}
+            \hlstd{varn]))}
+        \hlkwd{names}\hlstd{(dsn_labels)} \hlkwb{<-} \hlstd{varn}
+        \hlstd{dsn_labels}\hlopt{$}\hlstd{smart_label} \hlkwb{<-} \hlkwd{paste0}\hlstd{(abrv,} \hlnum{1}\hlopt{:}\hlkwd{nrow}\hlstd{(dsn_labels))}
+        \hlstd{dsn} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"varn"}\hlstd{, varn,} \hlkwd{gsub}\hlstd{(}\hlstr{"orderby"}\hlstd{,}
+            \hlkwd{paste}\hlstd{(orderby,} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{),} \hlstr{"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn order by orderby"}\hlstd{)))}
+    \hlstd{\}} \hlkwa{else} \hlstd{\{}
+        \hlstd{dsn_labels} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwd{unique}\hlstd{(dsn[, varn]))}
+        \hlkwd{names}\hlstd{(dsn_labels)} \hlkwb{<-} \hlstd{varn}
+        \hlstd{dsn_labels}\hlopt{$}\hlstd{smart_label} \hlkwb{<-} \hlkwd{paste0}\hlstd{(abrv,} \hlnum{1}\hlopt{:}\hlkwd{nrow}\hlstd{(dsn_labels))}
+        \hlstd{dsn} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"varn"}\hlstd{, varn,} \hlstr{"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn"}\hlstd{))}
+    \hlstd{\}}
+
+    \hlkwa{if} \hlstd{(replace) \{}
+        \hlstd{dsn[, varn]} \hlkwb{<-} \hlstd{dsn}\hlopt{$}\hlstd{smart_label}
+        \hlstd{dsn} \hlkwb{<-} \hlstd{dsn[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(dsn)} \hlopt{==} \hlstr{"smart_label"}\hlstd{)]}
+    \hlstd{\}} \hlkwa{else} \hlstd{\{}
+        \hlkwd{names}\hlstd{(dsn)[}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(dsn)} \hlopt{==} \hlstr{"smart_label"}\hlstd{)]} \hlkwb{<-} \hlkwd{paste0}\hlstd{(}\hlstr{"smart_"}\hlstd{,}
+            \hlstd{varn)}
+    \hlstd{\}}
+
+    \hlkwa{if} \hlstd{(listout) \{}
+        \hlkwd{message}\hlstd{(}\hlstr{"returning a list"}\hlstd{)}
+        \hlstd{ret} \hlkwb{<-} \hlkwd{list}\hlstd{(}\hlkwc{data} \hlstd{= dsn,} \hlkwc{mapping} \hlstd{= dsn_labels)}
+    \hlstd{\}} \hlkwa{else} \hlstd{\{}
+        \hlstd{ret} \hlkwb{<-} \hlstd{dsn}
+    \hlstd{\}}
+
+    \hlkwd{return}\hlstd{(ret)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+We need consistent labeling between the test set and the training set - this means that we need to
+run this function on the combined set. Fortunately, we have used the variable \verb!dsn! to specify
+which set a row in the combined output from \verb!stackCoupons! originated from.
+Once we have relabeled everything, we can split the sets apart again using:
+%-- splitTrain: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{splitByAndDrop} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{combined.dsn}\hlstd{,} \hlkwc{splitvar} \hlstd{=} \hlstr{"dsn"}\hlstd{) \{}
+    \hlstd{train} \hlkwb{<-} \hlstd{combined.dsn[}\hlkwd{which}\hlstd{(combined.dsn[, splitvar]} \hlopt{==}
+        \hlstr{"train"}\hlstd{), ]}
+    \hlstd{test} \hlkwb{<-} \hlstd{combined.dsn[}\hlkwd{which}\hlstd{(combined.dsn[, splitvar]} \hlopt{==}
+        \hlstr{"test"}\hlstd{), ]}
+    \hlkwd{return}\hlstd{(}\hlkwd{list}\hlstd{(}\hlkwc{train} \hlstd{= train,} \hlkwc{test} \hlstd{= test))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+First, lets handle these coupons names:
+%-- smartLabel: R code (Code in Document)
+%-- changeLabels: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{couponIDmap} \hlkwb{<-} \hlkwd{smartLabel}\hlstd{(d.stack}\hlopt{$}\hlstd{combined,} \hlstr{"couponID"}\hlstd{,}
+    \hlkwc{abrv} \hlstd{=} \hlstr{"cpn"}\hlstd{,} \hlkwc{orderby} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlstr{"couponCol"}\hlstd{,}
+        \hlstr{"dsn"}\hlstd{),} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: tcltk\\\#\# returning a list}}\begin{alltt}
+\hlstd{d.stack}\hlopt{$}\hlstd{combined} \hlkwb{<-} \hlstd{couponIDmap}\hlopt{$}\hlstd{data}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+And while we're at it, let's fix the other "scrambled" IDs:
+%-- changemorelabels: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{brandIDmap} \hlkwb{<-} \hlkwd{smartLabel}\hlstd{(d.stack}\hlopt{$}\hlstd{combined,} \hlstr{"brand"}\hlstd{,}
+    \hlkwc{abrv} \hlstd{=} \hlstr{"brand"}\hlstd{,} \hlkwc{orderby} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlstr{"couponCol"}\hlstd{,}
+        \hlstr{"dsn"}\hlstd{),} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# returning a list}}\begin{alltt}
+\hlstd{d.stack}\hlopt{$}\hlstd{combined} \hlkwb{<-} \hlstd{brandIDmap}\hlopt{$}\hlstd{data}
+
+\hlstd{groupIDmap} \hlkwb{<-} \hlkwd{smartLabel}\hlstd{(d.stack}\hlopt{$}\hlstd{combined,} \hlstr{"productGroup"}\hlstd{,}
+    \hlkwc{abrv} \hlstd{=} \hlstr{"prod"}\hlstd{,} \hlkwc{orderby} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlstr{"couponCol"}\hlstd{,}
+        \hlstr{"dsn"}\hlstd{),} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# returning a list}}\begin{alltt}
+\hlstd{d.stack}\hlopt{$}\hlstd{combined} \hlkwb{<-} \hlstd{groupIDmap}\hlopt{$}\hlstd{data}
+
+\hlstd{userIDmap} \hlkwb{<-} \hlkwd{smartLabel}\hlstd{(d.stack}\hlopt{$}\hlstd{combined,} \hlstr{"userID"}\hlstd{,}
+    \hlkwc{abrv} \hlstd{=} \hlstr{"user"}\hlstd{,} \hlkwc{orderby} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlstr{"couponCol"}\hlstd{,}
+        \hlstr{"dsn"}\hlstd{),} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# returning a list}}\begin{alltt}
+\hlstd{d.stack}\hlopt{$}\hlstd{combined} \hlkwb{<-} \hlstd{userIDmap}\hlopt{$}\hlstd{data}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Getting the category IDs to be more simple is not insignificant. 
+The following function takes a data set and splits a single column into multiple columns on a given \verb!splitby! value.
+If columns have different numbers of splits, the additional columns are filled with \verb!NA!s:
+%-- Name: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{splitColumn} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{dsn}\hlstd{,} \hlkwc{varn}\hlstd{,} \hlkwc{orderby}\hlstd{,} \hlkwc{splitby} \hlstd{=} \hlstr{","}\hlstd{) \{}
+    \hlstd{res_d} \hlkwb{<-} \hlstd{dsn[,} \hlkwd{c}\hlstd{(orderby, varn)]} \hlopt{%>%} \hlkwd{mutate}\hlstd{(}\hlkwc{parts} \hlstd{=} \hlkwd{strsplit}\hlstd{(dsn[,}
+        \hlstd{varn], splitby))} \hlopt{%>%} \hlkwd{group_by_}\hlstd{(varn)} \hlopt{%>%} \hlkwd{do}\hlstd{(}\hlkwd{data.frame}\hlstd{(\{}
+        \hlstd{idx} \hlkwb{<-} \hlnum{1}\hlopt{:}\hlkwd{length}\hlstd{(.}\hlopt{$}\hlstd{parts[[}\hlnum{1}\hlstd{]])}
+        \hlstd{lst} \hlkwb{<-} \hlkwd{lapply}\hlstd{(idx,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{) .}\hlopt{$}\hlstd{parts[[}\hlnum{1}\hlstd{]][x])}
+        \hlkwd{names}\hlstd{(lst)} \hlkwb{<-} \hlkwd{lapply}\hlstd{(idx,} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{paste0}\hlstd{(varn,}
+            \hlstd{x))}
+        \hlstd{(lst)}
+    \hlstd{\},} \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{))}
+    \hlstd{res_d} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"varn"}\hlstd{, varn,} \hlkwd{gsub}\hlstd{(}\hlstr{"orderby"}\hlstd{,}
+        \hlkwd{paste}\hlstd{(orderby,} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{),} \hlstr{"select a.*, b.* from dsn as a left join res_d as b on a.varn = b.varn order by orderby"}\hlstd{)))}
+    \hlstd{res_d} \hlkwb{<-} \hlstd{res_d[,} \hlopt{-}\hlstd{(}\hlkwd{ncol}\hlstd{(dsn)} \hlopt{+} \hlnum{1}\hlstd{)]}
+    \hlkwd{return}\hlstd{(res_d)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+%-- categoryIDs: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{catID.d} \hlkwb{<-} \hlkwd{splitColumn}\hlstd{(d.stack}\hlopt{$}\hlstd{combined,} \hlstr{"categoryIDs"}\hlstd{,}
+    \hlstr{"orderID"}\hlstd{)}
+\hlstd{catID.m} \hlkwb{<-} \hlkwd{melt}\hlstd{(catID.d,} \hlkwc{id} \hlstd{=} \hlnum{1}\hlopt{:}\hlkwd{ncol}\hlstd{(d.stack}\hlopt{$}\hlstd{combined),}
+    \hlkwc{measure} \hlstd{= (}\hlkwd{ncol}\hlstd{(d.stack}\hlopt{$}\hlstd{combined)} \hlopt{+} \hlnum{1}\hlstd{)}\hlopt{:}\hlkwd{ncol}\hlstd{(catID.d))}
+\hlstd{catID.m}\hlopt{$}\hlstd{variable} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{as.character}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"categoryIDs"}\hlstd{,}
+    \hlstr{""}\hlstd{, catID.m}\hlopt{$}\hlstd{variable)))}
+\hlkwd{names}\hlstd{(catID.m)[(}\hlkwd{ncol}\hlstd{(catID.m)} \hlopt{-} \hlnum{1}\hlstd{)]} \hlkwb{<-} \hlstr{"categoryEntry"}
+\hlkwd{names}\hlstd{(catID.m)[(}\hlkwd{ncol}\hlstd{(catID.m))]} \hlkwb{<-} \hlstr{"catIDs"}
+
+\hlstd{catID.m} \hlkwb{<-} \hlstd{catID.m[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlkwd{is.na}\hlstd{(catID.m}\hlopt{$}\hlstd{catIDs)), ]}
+\hlstd{catID.m} \hlkwb{<-} \hlstd{catID.m[}\hlkwd{with}\hlstd{(catID.m,} \hlkwd{order}\hlstd{(orderID, couponCol,}
+    \hlstd{categoryEntry, dsn)), ]}
+
+\hlstd{catIDmap} \hlkwb{<-} \hlkwd{smartLabel}\hlstd{(catID.m,} \hlstr{"catIDs"}\hlstd{,} \hlkwc{abrv} \hlstd{=} \hlstr{"cat"}\hlstd{,}
+    \hlkwc{orderby} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlstr{"couponCol"}\hlstd{,} \hlstr{"categoryEntry"}\hlstd{,}
+        \hlstr{"dsn"}\hlstd{),} \hlkwc{listout} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# returning a list}}\begin{alltt}
+\hlstd{rd} \hlkwb{<-} \hlstd{catIDmap}\hlopt{$}\hlstd{data} \hlopt{%>%} \hlkwd{group_by}\hlstd{(orderID, couponID)} \hlopt{%>%}
+    \hlkwd{summarise}\hlstd{(}\hlkwc{catIDs} \hlstd{=} \hlkwd{paste}\hlstd{(catIDs,} \hlkwc{collapse} \hlstd{=} \hlstr{":"}\hlstd{))}
+
+\hlstd{ld} \hlkwb{<-} \hlstd{d.stack}\hlopt{$}\hlstd{combined}
+\hlstd{res_d} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlstr{"select a.*, b.catIDs from ld as a left join rd as b on a.orderID = b.orderId and a.couponID = b.couponID order by orderID, couponID, dsn"}\hlstd{)}
+
+\hlstd{res_d}\hlopt{$}\hlstd{categoryIDs} \hlkwb{<-} \hlstd{res_d}\hlopt{$}\hlstd{catIDs}
+\hlstd{d.stack}\hlopt{$}\hlstd{combined} \hlkwb{<-} \hlstd{res_d} \hlopt{%>%} \hlkwd{select}\hlstd{(}\hlopt{-}\hlstd{catIDs)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Now we can split this into the original test and training sets:
+%-- trtst: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{train.test} \hlkwb{<-} \hlkwd{splitByAndDrop}\hlstd{(d.stack}\hlopt{$}\hlstd{combined)}
+
+\hlstd{train} \hlkwb{<-} \hlstd{train.test}\hlopt{$}\hlstd{train[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(train.test}\hlopt{$}\hlstd{train)} \hlopt{==}
+    \hlstr{"dsn"}\hlstd{)]}
+\hlstd{test} \hlkwb{<-} \hlstd{train.test}\hlopt{$}\hlstd{test[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(train.test}\hlopt{$}\hlstd{test)} \hlopt{==}
+    \hlstr{"dsn"}\hlstd{)]}
+
+\hlkwd{head}\hlstd{(train)}
+\end{alltt}
+\begin{verbatim}
+##   orderID           orderTime userID
+## 1       1 2015-01-06 09:38:35  user1
+## 2       1 2015-01-06 09:38:35  user1
+## 3       1 2015-01-06 09:38:35  user1
+## 4       2 2015-01-06 10:03:19  user2
+## 5       2 2015-01-06 10:03:19  user2
+## 6       2 2015-01-06 10:03:19  user2
+##       couponsReceived basketValue couponID price
+## 1 2015-01-06 09:34:53      187.60     cpn1  3.24
+## 2 2015-01-06 09:34:53      187.60     cpn2  5.19
+## 3 2015-01-06 09:34:53      187.60     cpn3 12.92
+## 4 2015-01-06 10:00:44      185.93     cpn4  2.32
+## 5 2015-01-06 10:00:44      185.93     cpn5  3.70
+## 6 2015-01-06 10:00:44      185.93     cpn6  3.89
+##   basePrice reward premiumProduct  brand
+## 1      5.40   1.57              0 brand1
+## 2      0.57   1.57              0 brand2
+## 3     12.92   2.20              0 brand3
+## 4      1.59   1.57              0 brand2
+## 5      1.85   0.94              0 brand3
+## 6      0.06   2.20              0 brand2
+##   productGroup    categoryIDs couponUsed
+## 1        prod1      cat1:cat2          0
+## 2        prod2      cat3:cat4          1
+## 3        prod3 cat5:cat4:cat2          0
+## 4        prod4           cat5          1
+## 5        prod5           cat6          0
+## 6        prod6           cat6          1
+##   couponCol
+## 1         1
+## 2         2
+## 3         3
+## 4         1
+## 5         2
+## 6         3
+\end{verbatim}
+\begin{alltt}
+\hlkwd{head}\hlstd{(test)}
+\end{alltt}
+\begin{verbatim}
+##       orderID           orderTime  userID
+## 18160    6054 2015-03-10 08:09:55   user8
+## 18161    6054 2015-03-10 08:09:55   user8
+## 18162    6054 2015-03-10 08:09:55   user8
+## 18163    6055 2015-03-10 10:03:15 user769
+## 18164    6055 2015-03-10 10:03:15 user769
+## 18165    6055 2015-03-10 10:03:15 user769
+##           couponsReceived basketValue couponID
+## 18160 2015-03-10 08:03:09          NA    cpn22
+## 18161 2015-03-10 08:03:09          NA    cpn23
+## 18162 2015-03-10 08:03:09          NA    cpn24
+## 18163 2015-03-10 09:07:00          NA   cpn158
+## 18164 2015-03-10 09:07:00          NA    cpn22
+## 18165 2015-03-10 09:07:00          NA   cpn585
+##       price basePrice reward premiumProduct
+## 18160  9.17      2.04   0.94              1
+## 18161  4.82      0.60   1.57              0
+## 18162  6.21      1.24   1.57              1
+## 18163  2.69      2.69   1.57              1
+## 18164  9.17      2.04   0.94              1
+## 18165  9.22      2.56   1.57              0
+##        brand productGroup    categoryIDs
+## 18160 brand4        prod7      cat1:cat7
+## 18161 brand3       prod11           cat3
+## 18162 brand4       prod19           cat5
+## 18163 brand4       prod75 cat5:cat7:cat4
+## 18164 brand4        prod7      cat1:cat7
+## 18165 brand3       prod28           cat3
+##       couponUsed couponCol
+## 18160         NA         1
+## 18161         NA         2
+## 18162         NA         3
+## 18163         NA         3
+## 18164         NA         1
+## 18165         NA         2
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+We can save these melted version of the training and test sets:
+%-- savemelt: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(train,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/melted_train_simple_name.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(test,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/melted_test_simple_name.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Now we can reformat this data so that it resembles the original data:
+%-- reformat: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{train_backbone} \hlkwb{<-} \hlkwd{unique}\hlstd{(train[,} \hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(train)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw))])}
+
+\hlstd{coupon1cols} \hlkwb{<-} \hlstd{train[}\hlkwd{which}\hlstd{(train}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{1}\hlstd{), ]}
+\hlstd{coupon1cols} \hlkwb{<-} \hlstd{coupon1cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon1cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon1cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon1cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"1"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{train_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"1"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from train_backbone as a left join coupon1cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+
+\hlstd{coupon2cols} \hlkwb{<-} \hlstd{train[}\hlkwd{which}\hlstd{(train}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{2}\hlstd{), ]}
+\hlstd{coupon2cols} \hlkwb{<-} \hlstd{coupon2cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon2cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon2cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon2cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"2"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{train_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"2"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from train_backbone as a left join coupon2cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+
+\hlstd{coupon3cols} \hlkwb{<-} \hlstd{train[}\hlkwd{which}\hlstd{(train}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{3}\hlstd{), ]}
+\hlstd{coupon3cols} \hlkwb{<-} \hlstd{coupon3cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon3cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon3cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon3cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"3"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{train_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"3"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from train_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+
+\hlstd{test_backbone} \hlkwb{<-} \hlkwd{unique}\hlstd{(test[,} \hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(test)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw))])}
+
+\hlstd{coupon1cols} \hlkwb{<-} \hlstd{test[}\hlkwd{which}\hlstd{(test}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{1}\hlstd{), ]}
+\hlstd{coupon1cols} \hlkwb{<-} \hlstd{coupon1cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon1cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon1cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon1cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"1"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{test_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"1"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from test_backbone as a left join coupon1cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+
+\hlstd{coupon2cols} \hlkwb{<-} \hlstd{test[}\hlkwd{which}\hlstd{(test}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{2}\hlstd{), ]}
+\hlstd{coupon2cols} \hlkwb{<-} \hlstd{coupon2cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon2cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon2cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon2cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"2"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{test_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"2"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from test_backbone as a left join coupon2cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+
+\hlstd{coupon3cols} \hlkwb{<-} \hlstd{test[}\hlkwd{which}\hlstd{(test}\hlopt{$}\hlstd{couponCol} \hlopt{==} \hlnum{3}\hlstd{), ]}
+\hlstd{coupon3cols} \hlkwb{<-} \hlstd{coupon3cols[,} \hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(coupon3cols)} \hlopt{==}
+    \hlstr{"couponCol"}\hlstd{)]}
+\hlkwd{names}\hlstd{(coupon3cols)[}\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(coupon3cols)} \hlopt{%in%}
+    \hlkwd{names}\hlstd{(trn.raw)))]} \hlkwb{<-} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"3"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))]}
+\hlstd{test_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"3"}\hlstd{,}
+    \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from test_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+and save them
+%-- savemelt: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(train_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/train_simple_name.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(test_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/test_simple_name.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+We can also save each map:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(couponIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/couponIDmap.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(brandIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/brandIDmap.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(groupIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/groupIDmap.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(userIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/userIDmap.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(catIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/catIDmap.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+\end{document}

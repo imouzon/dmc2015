@@ -1,0 +1,258 @@
+% For LaTeX-Box: root = exploring_coupons.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: exploring_coupons.rnw
+%  Purpose:
+%
+%  Creation Date: 12-04-2015
+%  Last Modified: Wed Apr 22 14:29:52 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent fil
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian/"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+%-- title page and quote
+\HWinfo{April 14 2015}{}{}
+\titleheader
+
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(plyr)
+   library(dplyr)
+   options(dplyr.width = Inf)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+@
+and my working directory is set to \verb!dmc2015/ian!.
+
+\section{Reading the Data}
+Read the data into R:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #training set ("historical data")
+   trn = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   trn.raw = trn
+
+   #test set ("future data")
+   tst = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   tst.raw = tst
+@
+
+\section{Stacking Coupons}
+The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
+We can alter this fairly simply:
+%-- dds: R code (Code in Document)
+<<stackfunc, echo=TRUE, cache=TRUE, include = TRUE>>=
+   source("~/dmc2015/ian/R/stackCoupons.R")
+   d.stack = stackCoupons(trn,tst)
+@
+
+\subsection{Relabeling coupons}
+The following function renames the ID variables in a data set.
+\begin{itemize}
+   \item It does so in a way that provides a 1-1 map between labels.
+   \item Preserves the order of the labels either as they appear in the dataset \textbf{or} with respect to another column in the dataset.
+   \item Can return both the mapping \textbf{and} the the relabeled dataset.
+   \item Allows you to choose whether to replace the old ID labels or not.
+\end{itemize}
+<<smartLabel, echo=TRUE, cache=TRUE, include = TRUE>>=
+   smartLabel = function(dsn,varn,abrv="smart.",orderby=NULL,replace=FALSE,listout=TRUE){
+      #dsn is the dataset with a "anonymous" ID variable
+      #varn is the label to improve
+      #orderby is a variable to sort the new ids by
+      #replace = TRUE removes old label
+      #        = FALSE keeps old label and names new label "smart.varn"
+      #list.out = TRUE returns a list with the data and the map varn to smart.varn
+      #         = FALSE returns the dataset only
+
+      if(!is.null(orderby)){
+         orderby_query = gsub("varn",varn,gsub("orderby",paste(orderby,collapse=", "),"select varn, orderby from dsn order by orderby"))
+         dsn_labels = data.frame(unique(sqldf(orderby_query)[,varn]))
+         names(dsn_labels) = varn
+         dsn_labels$smart_label = paste0(abrv,1:nrow(dsn_labels))
+         dsn = sqldf(gsub("varn",varn,gsub("orderby",paste(orderby,collapse=", "),"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn order by orderby")))
+      }else{
+         dsn_labels = data.frame(unique(dsn[,varn]))
+         names(dsn_labels) = varn
+         dsn_labels$smart_label = paste0(abrv,1:nrow(dsn_labels))
+         dsn = sqldf(gsub("varn",varn,"select a.*, b.smart_label from dsn as a left join dsn_labels as b on a.varn = b.varn"))
+      }
+
+      if(replace){
+         dsn[,varn] = dsn$smart_label
+         dsn = dsn[,-which(names(dsn) == "smart_label")]
+      }else{
+         names(dsn)[which(names(dsn) == "smart_label")] = paste0("smart_",varn)
+      }
+
+      if(listout){
+         message("returning a list")
+         ret = list("data" = dsn,"mapping"=dsn_labels)
+      }else{
+         ret = dsn
+      }
+
+      return(ret)
+   }
+@
+We need consistent labeling between the test set and the training set - this means that we need to
+run this function on the combined set. Fortunately, we have used the variable \verb!dsn! to specify
+which set a row in the combined output from \verb!stackCoupons! originated from.
+Once we have relabeled everything, we can split the sets apart again using:
+%-- splitTrain: R code (Code in Document)
+<<splitTrain, echo=TRUE, cache=TRUE, include = TRUE>>=
+   splitByAndDrop=function(combined.dsn,splitvar='dsn'){
+      train = combined.dsn[which(combined.dsn[,splitvar] == "train"),] 
+      test = combined.dsn[which(combined.dsn[,splitvar] == "test"),] 
+      return(list("train" = train,"test"=test))
+   }
+@
+First, lets handle these coupons names:
+%-- smartLabel: R code (Code in Document)
+%-- changeLabels: R code (Code in Document)
+<<changeLabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+   couponIDmap = smartLabel(d.stack$combined,"couponID",abrv="cpn",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = couponIDmap$data
+@
+And while we're at it, let's fix the other "scrambled" IDs:
+%-- changemorelabels: R code (Code in Document)
+<<changemorelabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+   brandIDmap = smartLabel(d.stack$combined,"brand",abrv="brand",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = brandIDmap$data 
+
+   groupIDmap = smartLabel(d.stack$combined,"productGroup",abrv="prod",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = groupIDmap$data 
+
+   userIDmap = smartLabel(d.stack$combined,"userID",abrv="user",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
+   d.stack$combined = userIDmap$data 
+@
+Getting the category IDs to be more simple is not insignificant. 
+The following function takes a data set and splits a single column into multiple columns on a given \verb!splitby! value.
+If columns have different numbers of splits, the additional columns are filled with \verb!NA!s:
+%-- Name: R code (Code in Document)
+<<simpCatsIDs, echo=TRUE, cache=TRUE, include = TRUE>>=
+   splitColumn = function(dsn,varn,orderby,splitby=",") {
+      res_d = dsn[,c(orderby,varn)] %>% 
+         mutate(parts = strsplit(dsn[,varn],splitby)) %>%
+         group_by_(varn) %>%
+         do(data.frame({
+            idx = 1:length(.$parts[[1]])
+            lst = lapply(idx, function(x) .$parts[[1]][x])
+            names(lst) = lapply(idx,function(x) paste0(varn,x))
+              (lst)
+            }, stringsAsFactors=FALSE)
+         )
+      res_d = sqldf(gsub("varn",varn,gsub("orderby",paste(orderby,collapse=", "),"select a.*, b.* from dsn as a left join res_d as b on a.varn = b.varn order by orderby")))
+      res_d = res_d[,-(ncol(dsn) + 1)]
+      return(res_d)
+   }
+@
+%-- categoryIDs: R code (Code in Document)
+<<categoryIDs, echo=TRUE, cache=TRUE, include = TRUE>>=
+   catID.d = splitColumn(d.stack$combined,"categoryIDs","orderID")
+   catID.m = melt(catID.d,id=1:ncol(d.stack$combined),measure=(ncol(d.stack$combined)+1):ncol(catID.d))
+   catID.m$variable = as.numeric(as.character(gsub("categoryIDs","",catID.m$variable)))
+   names(catID.m)[(ncol(catID.m) - 1)] = "categoryEntry"
+   names(catID.m)[(ncol(catID.m))] = "catIDs"
+
+   catID.m = catID.m[which(!is.na(catID.m$catIDs)),]
+   catID.m = catID.m[with(catID.m,order(orderID,couponCol,categoryEntry,dsn)),]
+
+   catIDmap = smartLabel(catID.m,"catIDs",abrv="cat",orderby=c("orderID","couponCol","categoryEntry","dsn"),listout=TRUE,replace=TRUE)
+
+   rd = catIDmap$data %>%
+      group_by(orderID,couponID) %>%
+      summarise(catIDs = paste(catIDs,collapse=":"))
+
+   ld = d.stack$combined
+   res_d = sqldf("select a.*, b.catIDs from ld as a left join rd as b on a.orderID = b.orderId and a.couponID = b.couponID order by orderID, couponID, dsn")
+
+   res_d$categoryIDs = res_d$catIDs
+   d.stack$combined = res_d %>% select(-catIDs)
+@
+Now we can split this into the original test and training sets:
+%-- trtst: R code (Code in Document)
+<<trtst, echo=TRUE, cache=TRUE, include = TRUE>>=
+   train.test = splitByAndDrop(d.stack$combined)      
+   
+   train = train.test$train[,-which(names(train.test$train) == "dsn")]
+   test = train.test$test[,-which(names(train.test$test) == "dsn")]
+
+   head(train)
+   head(test)
+@
+We can save these melted version of the training and test sets:
+%-- savemelt: R code (Code in Document)
+<<savemelt3, echo=TRUE, cache=TRUE, include = TRUE>>=
+   write.csv(train,file = "~/dmc2015/data/melted_train_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(test,file = "~/dmc2015/data/melted_test_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+@
+Now we can reformat this data so that it resembles the original data:
+%-- reformat: R code (Code in Document)
+<<reformat, echo=TRUE, cache=TRUE, include = TRUE>>=
+   train_backbone = unique(train[,which(names(train) %in% names(trn.raw))])
+
+   coupon1cols = train[which(train$couponCol == 1),]
+   coupon1cols = coupon1cols[,-which(names(coupon1cols) == "couponCol")]
+   names(coupon1cols)[which(!(names(coupon1cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("1",names(trn.raw))]
+   train_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("1",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from train_backbone as a left join coupon1cols as b on a.orderID = b.orderId order by orderID"))
+
+   coupon2cols = train[which(train$couponCol == 2),]
+   coupon2cols = coupon2cols[,-which(names(coupon2cols) == "couponCol")]
+   names(coupon2cols)[which(!(names(coupon2cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("2",names(trn.raw))]
+   train_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("2",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from train_backbone as a left join coupon2cols as b on a.orderID = b.orderId order by orderID"))
+
+   coupon3cols = train[which(train$couponCol == 3),]
+   coupon3cols = coupon3cols[,-which(names(coupon3cols) == "couponCol")]
+   names(coupon3cols)[which(!(names(coupon3cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("3",names(trn.raw))]
+   train_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("3",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from train_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"))
+
+   test_backbone = unique(test[,which(names(test) %in% names(trn.raw))])
+
+   coupon1cols = test[which(test$couponCol == 1),]
+   coupon1cols = coupon1cols[,-which(names(coupon1cols) == "couponCol")]
+   names(coupon1cols)[which(!(names(coupon1cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("1",names(trn.raw))]
+   test_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("1",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from test_backbone as a left join coupon1cols as b on a.orderID = b.orderId order by orderID"))
+
+   coupon2cols = test[which(test$couponCol == 2),]
+   coupon2cols = coupon2cols[,-which(names(coupon2cols) == "couponCol")]
+   names(coupon2cols)[which(!(names(coupon2cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("2",names(trn.raw))]
+   test_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("2",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from test_backbone as a left join coupon2cols as b on a.orderID = b.orderId order by orderID"))
+
+   coupon3cols = test[which(test$couponCol == 3),]
+   coupon3cols = coupon3cols[,-which(names(coupon3cols) == "couponCol")]
+   names(coupon3cols)[which(!(names(coupon3cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("3",names(trn.raw))]
+   test_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("3",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from test_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"))
+@
+and save them
+%-- savemelt: R code (Code in Document)
+<<savemelt2, echo=TRUE, cache=TRUE, include = TRUE>>=
+   write.csv(train_backbone,file = "~/dmc2015/data/train_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(test_backbone,file = "~/dmc2015/data/test_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+@
+We can also save each map:
+<<savemap, echo=TRUE, cache=TRUE, include = TRUE>>=
+   write.csv(couponIDmap$mapping,file = "~/dmc2015/ian/written_data/couponIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(brandIDmap$mapping,file = "~/dmc2015/ian/written_data/brandIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(groupIDmap$mapping,file = "~/dmc2015/ian/written_data/groupIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(userIDmap$mapping,file = "~/dmc2015/ian/written_data/userIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(catIDmap$mapping,file = "~/dmc2015/ian/written_data/catIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+@
