@@ -7,6 +7,6 @@
 - **inX**: is the feature in the current version of the feature matrix yet? (this is No if you are just now adding this feature)
 - **Briefly**: A simple description of your feature
 - **Detailed**: A more in depth description of your feature (only do this if it is very, very complicated)
-|             |      |      |      |  Description      ||
+
 | Column Name | NAs? | Type |  Ys? | Briefly | Detailed |
 |:------------|:----:|:----:|:----:|:--------|:---------|
