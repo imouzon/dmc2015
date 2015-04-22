@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 17:15:06 2015
+%  Last Modified: Wed Apr 22 17:29:22 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -77,8 +77,9 @@ and identify orders as belonging to batches starting at every Tuesday at midnigh
    tst = batchres$test
 
    #write the batchID and couponsSent as features:
-   write.csv(trn[,c("orderID",names(trn)[!(names(trn) %in% names(trn.raw))])],file="~/dmc2015/features/feature_files/batchInfo_train.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(tst[,c("orderID",names(tst)[!(names(tst) %in% names(tst.raw))])],file="~/dmc2015/features/feature_files/batchInfo_test.csv",row.names=FALSE,na="",quote=FALSE)
+   trn.w = trn[,c("orderID",names(trn)[!(names(trn) %in% names(trn.raw))])]
+   tst.w = tst[,c("orderID",names(tst)[!(names(tst) %in% names(tst.raw))])]
+   head(trn.w)
 @
 
 %-- trainSave1: R code (Code in Document)
