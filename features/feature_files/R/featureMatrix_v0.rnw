@@ -1,0 +1,73 @@
+% For LaTeX-Box: root = feature_files/R/featureMatrix_v0.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name:
+%  Purpose:
+%
+%  Creation Date: 22-04-2015
+%  Last Modified: Wed Apr 22 18:21:07 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/features/feature_files/R"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+\HWinfo{April 22 2015}{}{}
+\titleheader
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(dplyr)
+   library(reshape2)
+   library(sqldf)
+@
+and my working directory is set to \verb!dmc2015/ian!.
+\section{Reading the Data}
+Read the (clean) data into R:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #training set ("historical data")
+   trn.raw = read.delim("~/dmc2015/data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   trn = read.csv("~/dmc2015/data/clean_data/train_simple_name.csv", stringsAsFactors = FALSE,na.strings="")[,names(trn.raw)]
+
+   #test set ("future data")
+   cls.raw = read.delim("~/dmc2015/data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv", stringsAsFactors = FALSE,na.strings="")[,names(cls.raw)]
+@
+\section{Reading the Features}
+Read the batch features:
+%-- readBatch: R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   #batch features in ~/dmc2015/features/feature_files/batchInfo_test.csv, batchInfo_train.csv
+   batchInfo_train = readRDS("../batchInfo_train.rds")
+   batchInfo_test = readRDS("../batchInfo_test.rds")
+@
+Add the batch features:
+%-- addFeatures: R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   trn = trn %>% left_join(batchInfo_train,by="orderID")
+   cls = cls %>% left_join(batchInfo_test,by="orderID")
+@
+
+\section{Writing the Feature Matrix}
+Save the results as a list
+%-- : R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   write.csv(trn,file="~/dmc2015/data/featureMatrix/train_ver0.0.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(cls,file="~/dmc2015/data/featureMatrix/class_ver0.0.csv",row.names=FALSE,na="",quote=FALSE)
+
+   featMat = list("train" = trn, "class" = cls)
+   saveRDS(featMat, file="~/dmc2015/data/featureMatrix/featMat_v0.0.rds")
+@

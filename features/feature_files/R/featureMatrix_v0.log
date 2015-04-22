@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.1.24)  22 APR 2015 17:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.1.24)  22 APR 2015 18:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/Users/user/dmc2015/ian/assign_batch.tex
-(/Users/user/dmc2015/ian/assign_batch.tex
+**/Users/user/dmc2015/features/feature_files/R/featureMatrix_v0.tex
+(/Users/user/dmc2015/features/feature_files/R/featureMatrix_v0.tex
 LaTeX2e <2014/05/01>
 Babel <3.9k> and hyphenation patterns for 21 languages loaded.
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/base/report.cls
@@ -1484,8 +1484,8 @@ File: tikzlibraryplotmarks.code.tex 2008/01/09 v3.0.0 (rcs-revision 1.1)
 (/usr/local/texlive/2014basic/texmf-dist/tex/generic/pgf/libraries/pgflibrarypl
 otmarks.code.tex
 File: pgflibraryplotmarks.code.tex 2013/07/20 v3.0.0 (rcs-revision 1.13)
-))) (./assign_batch.aux)
-\openout1 = `assign_batch.aux'.
+))) (./featureMatrix_v0.aux)
+\openout1 = `featureMatrix_v0.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 106.
 LaTeX Font Info:    ... okay on input line 106.
@@ -1543,9 +1543,9 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 106.
 LaTeX Info: Redefining \pageref on input line 106.
 LaTeX Info: Redefining \nameref on input line 106.
- (./assign_batch.out) (./assign_batch.out)
+ (./featureMatrix_v0.out) (./featureMatrix_v0.out)
 \@outlinefile=\write4
-\openout4 = `assign_batch.out'.
+\openout4 = `featureMatrix_v0.out'.
 
 
 *geometry* driver: auto-detecting
@@ -1650,17 +1650,17 @@ LaTeX Font Info:    Try loading font information for OT1+lmtt on input line 106
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/lm/ot1lmtt.fd
 File: ot1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-Underfull \hbox (badness 10000) in alignment at lines 121--121
+Underfull \hbox (badness 10000) in alignment at lines 120--120
 [][] 
  []
 
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 127.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 125.
 
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 128.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 126.
  [1
 
 {/usr/local/texlive/2014basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
@@ -1668,22 +1668,22 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 AED: lastpage setting LastPage
 Package atenddvi Info: Last page = 2.
 [2]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 217.
-Package atveryend Info: Executing hook `AfterLastShipout' on input line 217.
- (./assign_batch.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 217.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 217.
-Package rerunfilecheck Info: File `assign_batch.out' has not changed.
-(rerunfilecheck)             Checksum: DD93A3287D97395841C79ABFC061C073;53.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 196.
+Package atveryend Info: Executing hook `AfterLastShipout' on input line 196.
+ (./featureMatrix_v0.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 196.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 196.
+Package rerunfilecheck Info: File `featureMatrix_v0.out' has not changed.
+(rerunfilecheck)             Checksum: DA1DC2CF345336777EFF24A3DDDFF6CE;173.
  ) 
 Here is how much of TeX's memory you used:
- 38262 strings out of 494522
- 874245 string characters out of 6167205
- 1064066 words of memory out of 5000000
- 40845 multiletter control sequences out of 15000+600000
+ 38266 strings out of 494522
+ 874408 string characters out of 6167205
+ 1062086 words of memory out of 5000000
+ 40847 multiletter control sequences out of 15000+600000
  36701 words of font info for 46 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 55i,11n,77p,10448b,765s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,11n,77p,10473b,761s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</usr/l
 ocal/texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/
 texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texliv
@@ -1691,10 +1691,10 @@ e/2014basic/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2014
 basic/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2014basic
 /texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2014basic/texm
 f-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on assign_batch.pdf (2 pages, 153589 bytes).
+Output written on featureMatrix_v0.pdf (2 pages, 151526 bytes).
 PDF statistics:
- 51 PDF objects out of 1000 (max. 8388607)
- 40 compressed objects within 1 object stream
- 4 named destinations out of 1000 (max. 500000)
- 21 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 59 PDF objects out of 1000 (max. 8388607)
+ 48 compressed objects within 1 object stream
+ 6 named destinations out of 1000 (max. 500000)
+ 37 words of extra memory for PDF output out of 10000 (max. 10000000)
 

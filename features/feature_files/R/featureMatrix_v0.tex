@@ -104,22 +104,20 @@
 
 
 \begin{document}
-% For LaTeX-Box: root = exploring_coupons.tex 
+% For LaTeX-Box: root = feature_files/R/featureMatrix_v0.tex 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  File Name: exploring_coupons.rnw
+%  File Name:
 %  Purpose:
 %
-%  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 17:53:38 2015
+%  Creation Date: 22-04-2015
+%  Last Modified: Wed Apr 22 18:20:44 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%-- Set parent fil
+%-- Set parent file
 
 
-%-- title page and quote
-\HWinfo{April 14 2015}{}{}
+\HWinfo{April 22 2015}{}{}
 \titleheader
-
 I am using the following packages:
 %-- paks: R code (Code in Document)
 \begin{knitrout}
@@ -127,90 +125,71 @@ I am using the following packages:
 \begin{alltt}
 \hlkwd{library}\hlstd{(ggplot2)}
 \hlkwd{library}\hlstd{(lubridate)}
-\hlkwd{library}\hlstd{(xtable)}
-\hlkwd{library}\hlstd{(foreach)}
-\hlkwd{library}\hlstd{(rCharts)}
-\hlkwd{library}\hlstd{(plyr)}
 \hlkwd{library}\hlstd{(dplyr)}
 \hlkwd{library}\hlstd{(reshape2)}
-\hlkwd{library}\hlstd{(gtools)}
 \hlkwd{library}\hlstd{(sqldf)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 and my working directory is set to \verb!dmc2015/ian!.
-
 \section{Reading the Data}
-Read the data into R:
+Read the (clean) data into R:
 %-- readDat: R code (Code in Document)
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# training set ('historical data')}
-\hlstd{trn.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"../data/raw_data/DMC_2015_orders_train.txt"}\hlstd{,}
+\hlstd{trn.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"~/dmc2015/data/raw_data/DMC_2015_orders_train.txt"}\hlstd{,}
     \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
-\hlstd{trn} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"../data/clean_data/train_simple_name.csv"}\hlstd{,}
-    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na.strings} \hlstd{=} \hlstr{""}\hlstd{)}
+\hlstd{trn} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"~/dmc2015/data/clean_data/train_simple_name.csv"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na.strings} \hlstd{=} \hlstr{""}\hlstd{)[,} \hlkwd{names}\hlstd{(trn.raw)]}
 
 \hlcom{# test set ('future data')}
-\hlstd{tst.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"../data/raw_data/DMC_2015_orders_class.txt"}\hlstd{,}
+\hlstd{cls.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"~/dmc2015/data/raw_data/DMC_2015_orders_class.txt"}\hlstd{,}
     \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
-\hlstd{tst} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"../data/clean_data/test_simple_name.csv"}\hlstd{,}
-    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na.strings} \hlstd{=} \hlstr{""}\hlstd{)}
+\hlstd{cls} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"~/dmc2015/data/clean_data/test_simple_name.csv"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na.strings} \hlstd{=} \hlstr{""}\hlstd{)[,} \hlkwd{names}\hlstd{(cls.raw)]}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-add the time features:
+\section{Reading the Features}
+Read the batch features:
+%-- readBatch: R code (Code in Document)
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{source}\hlstd{(}\hlstr{"~/dmc2015/ian/R/TimeFeatures.R"}\hlstd{)}
-
-\hlcom{# Whatever you do to the training set}
-\hlstd{trn} \hlkwb{<-} \hlkwd{TimeFeatures}\hlstd{(trn,} \hlstr{"orderTime"}\hlstd{)}
-\hlstd{trn} \hlkwb{<-} \hlkwd{TimeFeatures}\hlstd{(trn,} \hlstr{"couponsReceived"}\hlstd{)}
-
-\hlcom{# try if you can to do the same to the test set}
-\hlstd{tst} \hlkwb{<-} \hlkwd{TimeFeatures}\hlstd{(tst,} \hlstr{"orderTime"}\hlstd{)}
-\hlstd{tst} \hlkwb{<-} \hlkwd{TimeFeatures}\hlstd{(tst,} \hlstr{"couponsReceived"}\hlstd{)}
+\hlcom{# batch features in}
+\hlcom{# ~/dmc2015/features/feature_files/batchInfo_test.csv,}
+\hlcom{# batchInfo_train.csv}
+\hlstd{batchInfo_train} \hlkwb{<-} \hlkwd{readRDS}\hlstd{(}\hlstr{"../batchInfo_train.rds"}\hlstd{)}
+\hlstd{batchInfo_test} \hlkwb{<-} \hlkwd{readRDS}\hlstd{(}\hlstr{"../batchInfo_test.rds"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-and identify orders as belonging to batches starting at every Tuesday at midnight and lasting for one week.
-%-- assign_batch: R code (Code in Document)
+Add the batch features:
+%-- addFeatures: R code (Code in Document)
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# add batch information}
-\hlkwd{source}\hlstd{(}\hlstr{"~/dmc2015/ian/R/GetBatchInfo.R"}\hlstd{)}
-\hlstd{batchres} \hlkwb{<-} \hlkwd{GetBatchInfo}\hlstd{(}\hlstr{"2015-01-06 00:00:01"}\hlstd{,} \hlkwc{unts} \hlstd{=} \hlstr{"hours"}\hlstd{)}
+\hlstd{trn} \hlkwb{<-} \hlstd{trn} \hlopt{%>%} \hlkwd{left_join}\hlstd{(batchInfo_train,} \hlkwc{by} \hlstd{=} \hlstr{"orderID"}\hlstd{)}
+\hlstd{cls} \hlkwb{<-} \hlstd{cls} \hlopt{%>%} \hlkwd{left_join}\hlstd{(batchInfo_test,} \hlkwc{by} \hlstd{=} \hlstr{"orderID"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-\hlstd{trn} \hlkwb{<-} \hlstd{batchres}\hlopt{$}\hlstd{train}
-\hlstd{tst} \hlkwb{<-} \hlstd{batchres}\hlopt{$}\hlstd{test}
-
-\hlcom{# write the batchID and couponsSent as features:}
-\hlstd{trainFeatures} \hlkwb{<-} \hlstd{trn[,} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlkwd{names}\hlstd{(trn)[}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(trn)} \hlopt{%in%}
-    \hlkwd{names}\hlstd{(trn.raw))])]}
-
-\hlkwd{write.csv}\hlstd{(trainFeatures,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/features/feature_files/batchInfo_train.csv"}\hlstd{,}
+\section{Writing the Feature Matrix}
+Save the results as a list
+%-- : R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(trn,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/train_ver0.0.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(cls,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/class_ver0.0.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 
-\hlstd{testFeatures} \hlkwb{<-} \hlstd{tst[,} \hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,} \hlkwd{names}\hlstd{(tst)[}\hlopt{!}\hlstd{(}\hlkwd{names}\hlstd{(tst)} \hlopt{%in%}
-    \hlkwd{names}\hlstd{(tst.raw))])]}
-
-\hlkwd{write.csv}\hlstd{(testFeatures,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/features/feature_files/batchInfo_test.csv"}\hlstd{,}
-    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-Because some of these values are formatted, I also have created the following \verb!rds! files
-which can be read using \verb!readRDS!.
-%-- saveRDSversions: R code (Code in Document)
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{saveRDS}\hlstd{(trainFeatures,} \hlstr{"~/dmc2015/features/feature_files/batchInfo_train.rds"}\hlstd{)}
-\hlkwd{saveRDS}\hlstd{(testFeatures,} \hlstr{"~/dmc2015/features/feature_files/batchInfo_test.rds"}\hlstd{)}
+\hlstd{featMat} \hlkwb{<-} \hlkwd{list}\hlstd{(}\hlkwc{train} \hlstd{= trn,} \hlkwc{class} \hlstd{= cls)}
+\hlkwd{saveRDS}\hlstd{(featMat,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/featMat_v0.0.rds"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
