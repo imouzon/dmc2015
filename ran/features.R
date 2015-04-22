@@ -139,8 +139,24 @@ for(i in 1:length(train_melt$userID)){
              nlevels(as.factor(train_melt$coupon_num[train_melt$couponID == train_melt$couponID[i]])))
 }
 
-
 nlevels(train$couponID1)
+
+couponUsed_table <- table(train_melt$couponID, train_melt$couponUsed)
+couponUsed_table_melt <- melt(couponUsed_table)
+hist(couponUsed_table[, 2], breaks = 100)
+ggplot(couponUsed_table_melt, aes(x = value, fill = as.factor(Var2))) +
+  geom_histogram(binwidth = 1, position = "fill") 
+
+
+######################################
+### how many times user made order ###
+######################################
+
+userID_table <- table(train$userID)
+summary(as.numeric(userID_table))
+hist(userID_table)
+names(which(userID_table == 30))  # user ordered 30 times
+train[train$userID == "2bab1752b217fdd3704199dead8fa372", ]
 
 
 ###################
