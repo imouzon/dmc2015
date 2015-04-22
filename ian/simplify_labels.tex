@@ -110,7 +110,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 14:29:16 2015
+%  Last Modified: Wed Apr 22 16:27:06 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -529,6 +529,7 @@ Now we can reformat this data so that it resembles the original data:
     \hlkwd{names}\hlstd{(trn.raw))]}
 \hlstd{test_backbone} \hlkwb{<-} \hlkwd{sqldf}\hlstd{(}\hlkwd{gsub}\hlstd{(}\hlstr{"bcols"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"b."}\hlstd{,} \hlkwd{names}\hlstd{(trn.raw)[}\hlkwd{grepl}\hlstd{(}\hlstr{"3"}\hlstd{,}
     \hlkwd{names}\hlstd{(trn.raw))],} \hlkwc{collapse} \hlstd{=} \hlstr{", "}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{),} \hlstr{"select a.*, bcols from test_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"}\hlstd{))}
+\hlstd{test_backbone} \hlkwb{<-} \hlstd{test_backbone[,} \hlkwd{names}\hlstd{(tst.raw)]}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -537,9 +538,9 @@ and save them
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{write.csv}\hlstd{(train_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/train_simple_name.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(train_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/train_simple_name.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{write.csv}\hlstd{(test_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/test_simple_name.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(test_backbone,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/test_simple_name.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -548,15 +549,15 @@ We can also save each map:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{write.csv}\hlstd{(couponIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/couponIDmap.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(couponIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/IDmaps/couponIDmap.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{write.csv}\hlstd{(brandIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/brandIDmap.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(brandIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/IDmaps/brandIDmap.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{write.csv}\hlstd{(groupIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/groupIDmap.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(groupIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/IDmaps/groupIDmap.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{write.csv}\hlstd{(userIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/userIDmap.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(userIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/IDmaps/userIDmap.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{write.csv}\hlstd{(catIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/ian/written_data/catIDmap.csv"}\hlstd{,}
+\hlkwd{write.csv}\hlstd{(catIDmap}\hlopt{$}\hlstd{mapping,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/clean_data/IDmaps/catIDmap.csv"}\hlstd{,}
     \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \end{alltt}
 \end{kframe}

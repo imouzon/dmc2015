@@ -1,0 +1,80 @@
+% For LaTeX-Box: root = make_features.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: make_features.rnw
+%  Purpose:
+%
+%  Creation Date: 22-04-2015
+%  Last Modified: Wed Apr 22 15:15:25 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+%-- title page and quote
+\HWinfo{April 14 2015}{}{}
+\titleheader
+
+%-- title page and quote
+\section{Ian and Alex Make Some Features}
+We are using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(plyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+@
+and my working directory is set to \verb!dmc2015/ian!.
+
+\section{Reading the Data}
+Read the data into R:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #training set ("historical data")
+   trn = read.csv("../data/train_simple_name.csv",stringsAsFactors=FALSE)
+   tst = read.csv("../data/test_simple_name.csv",stringsAsFactors=FALSE)
+
+   source("./R/TimeFeatures.R")
+   source("./R/GetBatchInfo.R")
+   trn = TimeFeatures(trn,"orderTime")
+   tst = TimeFeatures(tst,"orderTime")
+
+   read.csv("./written_data/trainingset.batchID.csv")
+
+   read.csv("./first_attempt/
+   batchres = GetBatchInfo("2015-01-06 00:00:00")
+
+   trn.m = read.csv("../data/melted_train_simple_name.csv")
+@
+
+\subsection{By row of the training set}
+%-- byRowFeatuers: R code (Code in Document)
+<<byRowFeatuers, echo=TRUE, cache=TRUE, include = TRUE>>=
+   trn.feat = trn
+   qplot(orderTime,geom='density',data=trn,fill=as.factor(coupon1Used),alpha=.2)
+   names(trn.feat)
+   trn.feat$npremiumProduct = trn.feat$premiumProduct1 + trn.feat$premiumProduct2 + trn.feat$premiumProduct3
+
+   qplot(as.factor(couponUsed),basePrice/price,ylim=c(0,10),data=trn.m,geom='boxplot')
+   qplot(color=as.factor(couponUsed),x=basePrice,y=price,data=trn.m,xlim=c(0,100),ylim=c(0,50),facets=.~couponUsed,alpha=.25)
+@
+
+

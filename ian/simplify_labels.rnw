@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 14:29:52 2015
+%  Last Modified: Wed Apr 22 16:29:09 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -60,7 +60,7 @@ Read the data into R:
 The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
 We can alter this fairly simply:
 %-- dds: R code (Code in Document)
-<<stackfunc, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<stackfunc, echo=TRUE, cache=FALSE, include = TRUE>>=
    source("~/dmc2015/ian/R/stackCoupons.R")
    d.stack = stackCoupons(trn,tst)
 @
@@ -73,7 +73,7 @@ The following function renames the ID variables in a data set.
    \item Can return both the mapping \textbf{and} the the relabeled dataset.
    \item Allows you to choose whether to replace the old ID labels or not.
 \end{itemize}
-<<smartLabel, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<smartLabel, echo=TRUE, cache=FALSE, include = TRUE>>=
    smartLabel = function(dsn,varn,abrv="smart.",orderby=NULL,replace=FALSE,listout=TRUE){
       #dsn is the dataset with a "anonymous" ID variable
       #varn is the label to improve
@@ -118,7 +118,7 @@ run this function on the combined set. Fortunately, we have used the variable \v
 which set a row in the combined output from \verb!stackCoupons! originated from.
 Once we have relabeled everything, we can split the sets apart again using:
 %-- splitTrain: R code (Code in Document)
-<<splitTrain, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<splitTrain, echo=TRUE, cache=FALSE, include = TRUE>>=
    splitByAndDrop=function(combined.dsn,splitvar='dsn'){
       train = combined.dsn[which(combined.dsn[,splitvar] == "train"),] 
       test = combined.dsn[which(combined.dsn[,splitvar] == "test"),] 
@@ -128,13 +128,13 @@ Once we have relabeled everything, we can split the sets apart again using:
 First, lets handle these coupons names:
 %-- smartLabel: R code (Code in Document)
 %-- changeLabels: R code (Code in Document)
-<<changeLabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<changeLabels, echo=TRUE, cache=FALSE, include = TRUE>>=
    couponIDmap = smartLabel(d.stack$combined,"couponID",abrv="cpn",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
    d.stack$combined = couponIDmap$data
 @
 And while we're at it, let's fix the other "scrambled" IDs:
 %-- changemorelabels: R code (Code in Document)
-<<changemorelabels, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<changemorelabels, echo=TRUE, cache=FALSE, include = TRUE>>=
    brandIDmap = smartLabel(d.stack$combined,"brand",abrv="brand",orderby=c("orderID","couponCol","dsn"),listout=TRUE,replace=TRUE)
    d.stack$combined = brandIDmap$data 
 
@@ -148,7 +148,7 @@ Getting the category IDs to be more simple is not insignificant.
 The following function takes a data set and splits a single column into multiple columns on a given \verb!splitby! value.
 If columns have different numbers of splits, the additional columns are filled with \verb!NA!s:
 %-- Name: R code (Code in Document)
-<<simpCatsIDs, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<simpCatsIDs, echo=TRUE, cache=FALSE, include = TRUE>>=
    splitColumn = function(dsn,varn,orderby,splitby=",") {
       res_d = dsn[,c(orderby,varn)] %>% 
          mutate(parts = strsplit(dsn[,varn],splitby)) %>%
@@ -166,7 +166,7 @@ If columns have different numbers of splits, the additional columns are filled w
    }
 @
 %-- categoryIDs: R code (Code in Document)
-<<categoryIDs, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<categoryIDs, echo=TRUE, cache=FALSE, include = TRUE>>=
    catID.d = splitColumn(d.stack$combined,"categoryIDs","orderID")
    catID.m = melt(catID.d,id=1:ncol(d.stack$combined),measure=(ncol(d.stack$combined)+1):ncol(catID.d))
    catID.m$variable = as.numeric(as.character(gsub("categoryIDs","",catID.m$variable)))
@@ -190,7 +190,7 @@ If columns have different numbers of splits, the additional columns are filled w
 @
 Now we can split this into the original test and training sets:
 %-- trtst: R code (Code in Document)
-<<trtst, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<trtst, echo=TRUE, cache=FALSE, include = TRUE>>=
    train.test = splitByAndDrop(d.stack$combined)      
    
    train = train.test$train[,-which(names(train.test$train) == "dsn")]
@@ -201,13 +201,13 @@ Now we can split this into the original test and training sets:
 @
 We can save these melted version of the training and test sets:
 %-- savemelt: R code (Code in Document)
-<<savemelt3, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<savemelt3, echo=TRUE, cache=FALSE, include = TRUE>>=
    write.csv(train,file = "~/dmc2015/data/melted_train_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
    write.csv(test,file = "~/dmc2015/data/melted_test_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
 @
 Now we can reformat this data so that it resembles the original data:
 %-- reformat: R code (Code in Document)
-<<reformat, echo=TRUE, cache=TRUE, include = TRUE>>=
+<<reformat, echo=TRUE, cache=FALSE, include = TRUE>>=
    train_backbone = unique(train[,which(names(train) %in% names(trn.raw))])
 
    coupon1cols = train[which(train$couponCol == 1),]
@@ -241,18 +241,19 @@ Now we can reformat this data so that it resembles the original data:
    coupon3cols = coupon3cols[,-which(names(coupon3cols) == "couponCol")]
    names(coupon3cols)[which(!(names(coupon3cols) %in% names(trn.raw)))] = names(trn.raw)[grepl("3",names(trn.raw))]
    test_backbone = sqldf(gsub("bcols",paste("b.",names(trn.raw)[grepl("3",names(trn.raw))],collapse=", ",sep=""), "select a.*, bcols from test_backbone as a left join coupon3cols as b on a.orderID = b.orderId order by orderID"))
+   test_backbone = test_backbone[,names(tst.raw)]
 @
 and save them
 %-- savemelt: R code (Code in Document)
-<<savemelt2, echo=TRUE, cache=TRUE, include = TRUE>>=
-   write.csv(train_backbone,file = "~/dmc2015/data/train_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(test_backbone,file = "~/dmc2015/data/test_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+<<savemelt2, echo=TRUE, cache=FALSE, include = TRUE>>=
+   write.csv(train_backbone,file = "~/dmc2015/data/clean_data/train_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(test_backbone,file = "~/dmc2015/data/clean_data/test_simple_name.csv",row.names=FALSE,na="",quote=FALSE)
 @
 We can also save each map:
-<<savemap, echo=TRUE, cache=TRUE, include = TRUE>>=
-   write.csv(couponIDmap$mapping,file = "~/dmc2015/ian/written_data/couponIDmap.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(brandIDmap$mapping,file = "~/dmc2015/ian/written_data/brandIDmap.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(groupIDmap$mapping,file = "~/dmc2015/ian/written_data/groupIDmap.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(userIDmap$mapping,file = "~/dmc2015/ian/written_data/userIDmap.csv",row.names=FALSE,na="",quote=FALSE)
-   write.csv(catIDmap$mapping,file = "~/dmc2015/ian/written_data/catIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+<<savemap, echo=TRUE, cache=FALSE, include = TRUE>>=
+   write.csv(couponIDmap$mapping,file = "~/dmc2015/data/clean_data/IDmaps/couponIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(brandIDmap$mapping,file = "~/dmc2015/data/clean_data/IDmaps/brandIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(groupIDmap$mapping,file = "~/dmc2015/data/clean_data/IDmaps/groupIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(userIDmap$mapping,file = "~/dmc2015/data/clean_data/IDmaps/userIDmap.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(catIDmap$mapping,file = "~/dmc2015/data/clean_data/IDmaps/catIDmap.csv",row.names=FALSE,na="",quote=FALSE)
 @

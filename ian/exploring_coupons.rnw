@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 12:21:48 2015
+%  Last Modified: Wed Apr 22 14:33:05 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -189,12 +189,6 @@ replace=TRUE
       }
 
       return(ret)
-   }
-
-   splitTrain=function(combined.dsn,splitvar='dsn'){
-      train = combined.dsn[which(combined.dsn[,splitvar] == "train"),] 
-      test = combined.dsn[which(combined.dsn[,splitvar] == "test"),] 
-      return(list("train" = train,"test"=test))
    }
 @
 %-- changeLabels: R code (Code in Document)
