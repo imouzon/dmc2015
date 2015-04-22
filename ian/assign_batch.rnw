@@ -1,0 +1,82 @@
+% For LaTeX-Box: root = exploring_coupons.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: exploring_coupons.rnw
+%  Purpose:
+%
+%  Creation Date: 12-04-2015
+%  Last Modified: Wed Apr 22 17:07:28 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent fil
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian/"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+%-- title page and quote
+\HWinfo{April 14 2015}{}{}
+\titleheader
+
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(plyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+@
+and my working directory is set to \verb!dmc2015/ian!.
+
+\section{Reading the Data}
+Read the data into R:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #training set ("historical data")
+   trn.raw = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   trn = read.csv("../data/clean_data/train_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
+
+   #test set ("future data")
+   tst.raw = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   tst = read.csv("../data/clean_data/test_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
+@
+add the time features:
+<<manageTime, echo=TRUE, cache=FALSE, include = TRUE>>=
+   source("~/dmc2015/ian/R/TimeFeatures.R")
+
+   #Whatever you do to the training set
+   trn = TimeFeatures(trn,"orderTime")
+   trn = TimeFeatures(trn,"couponsReceived")
+
+   #try if you can to do the same to the test set
+   tst = TimeFeatures(tst,"orderTime")
+   tst = TimeFeatures(tst,"couponsReceived")
+@
+and identify orders as belonging to batches starting at every Tuesday at midnight and lasting for one week.
+%-- assign_batch: R code (Code in Document)
+<<assign_batch, echo=TRUE, cache=FALSE, include = TRUE>>=
+   #add batch information
+   source("~/dmc2015/ian/R/GetBatchInfo.R")
+   batchres = GetBatchInfo("2015-01-06 00:00:01",unts="hours")
+   
+   trn = batchres$train
+   tst = batchres$test
+
+   #write the batchID and couponsSent as features:
+   write.csv(trn[,c("orderID",names(trn)[!(names(trn) %in% names(trn.raw))])],file="~/dmc2015/features/feature_files/batchInfo_train.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(tst[,c("orderID",names(tst)[!(names(tst) %in% names(tst.raw))])],file="~/dmc2015/features/feature_files/batchInfo_test.csv",row.names=FALSE,na="",quote=FALSE)
+@

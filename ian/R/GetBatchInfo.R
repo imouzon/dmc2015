@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 12-04-2015
-#  Last Modified: Tue Apr 21 10:40:52 2015
+#  Last Modified: Wed Apr 22 17:00:09 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -13,7 +13,7 @@
 #  .Fortran("subroutine name",as.integer(input1),as.double(input2), etc)
 #
 
-GetBatchInfo = function(initial_batch.ymd_hms, nbatch=10, weeks2expire = 1, train=trn, test=tst){
+GetBatchInfo = function(initial_batch.ymd_hms, nbatch=10, weeks2expire = 1, train=trn, test=tst,unts,keep.units=FALSE){
    # start sending coupons: initial_batch.ymd_hms = "2015-01-06 1:00:00"
    #                        initial_batch.ymd_hms = "2015-01-03 1:00:00"
    # How many batches are there?  nbatch = 10
@@ -91,15 +91,27 @@ GetBatchInfo = function(initial_batch.ymd_hms, nbatch=10, weeks2expire = 1, trai
    test = test[,-which(names(test) == "dataset")]
 
    #add custom variables
-   train$TimeBtwnSentRec = difftime(train$couponsReceived,train$couponsSent,units='hours')
-   train$TimeBtwnRecExpire = difftime(train$couponsExpire,train$couponsReceived,units='hours')
-   train$TimeBtwnRecOrder = difftime(train$orderTime,train$couponsReceived,units='hours')
-   train$TimeBtwnOrderExpire = difftime(train$couponsExpire,train$orderTime,units='hours')
+   train$TimeBtwnSentRec = difftime(train$couponsReceived,train$couponsSent,units=unts)
+   train$TimeBtwnRecExpire = difftime(train$couponsExpire,train$couponsReceived,units=unts)
+   train$TimeBtwnRecOrder = difftime(train$orderTime,train$couponsReceived,units=unts)
+   train$TimeBtwnOrderExpire = difftime(train$couponsExpire,train$orderTime,units=unts)
 
-   test$TimeBtwnSentRec = difftime(test$couponsReceived,test$couponsSent,units='hours')
-   test$TimeBtwnRecExpire = difftime(test$couponsExpire,test$couponsReceived,units='hours')
-   test$TimeBtwnRecOrder = difftime(test$orderTime,test$couponsReceived,units='hours')
-   test$TimeBtwnOrderExpire = difftime(test$couponsExpire,test$orderTime,units='hours')
+   test$TimeBtwnSentRec = difftime(test$couponsReceived,test$couponsSent,units=unts)
+   test$TimeBtwnRecExpire = difftime(test$couponsExpire,test$couponsReceived,units=unts)
+   test$TimeBtwnRecOrder = difftime(test$orderTime,test$couponsReceived,units=unts)
+   test$TimeBtwnOrderExpire = difftime(test$couponsExpire,test$orderTime,units=unts)
+
+   if(!keep.units){
+      train$TimeBtwnSentRec = as.numeric(train$TimeBtwnSentRec)
+      train$TimeBtwnRecExpire = as.numeric(train$TimeBtwnRecExpire)
+      train$TimeBtwnRecOrder = as.numeric(train$TimeBtwnRecOrder)
+      train$TimeBtwnOrderExpire = as.numeric(train$TimeBtwnOrderExpire)
+
+      test$TimeBtwnSentRec = as.numeric(test$TimeBtwnSentRec)
+      test$TimeBtwnRecExpire = as.numeric(test$TimeBtwnRecExpire)
+      test$TimeBtwnRecOrder = as.numeric(test$TimeBtwnRecOrder)
+      test$TimeBtwnOrderExpire = as.numeric(test$TimeBtwnOrderExpire)
+   }
 
    results = list('train' = train, 'test' = test, 'plots' = list(p1,p2,p3))
 

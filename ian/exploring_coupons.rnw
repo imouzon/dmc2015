@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 14:33:05 2015
+%  Last Modified: Wed Apr 22 17:05:42 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -47,12 +47,12 @@ Read the data into R:
 %-- readDat: R code (Code in Document)
 <<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
    #training set ("historical data")
-   trn = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
-   trn.raw = trn
+   trn.raw = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   trn = read.csv("../data/clean_data/train_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
 
    #test set ("future data")
-   tst = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
-   tst.raw = tst
+   tst.raw = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   tst = read.csv("../data/clean_data/test_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
 @
 add the time features:
 <<manageTime, echo=TRUE, cache=FALSE, include = TRUE>>=
@@ -71,9 +71,14 @@ and identify orders as belonging to batches starting at every Tuesday at midnigh
 <<assign_batch, echo=TRUE, cache=FALSE, include = TRUE>>=
    #add batch information
    source("~/dmc2015/ian/R/GetBatchInfo.R")
-   batchres = GetBatchInfo("2015-01-06 00:00:00")
+   batchres = GetBatchInfo("2015-01-06 00:00:01",unts="hours")
+   
    trn = batchres$train
    tst = batchres$test
+
+   #write the batchID and couponsSent as features:
+   write.csv(trn[,c("orderID",names(trn)[!(names(trn) %in% names(trn.raw))])],file="~/dmc2015/features/feature_files/batchInfo_train.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(tst[,c("orderID",names(tst)[!(names(tst) %in% names(tst.raw))])],file="~/dmc2015/features/feature_files/batchInfo_test.csv",row.names=FALSE,na="",quote=FALSE)
 @
 
 %-- trainSave1: R code (Code in Document)
