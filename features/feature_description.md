@@ -30,4 +30,4 @@ TimeBtwnOrderExpire| N | N | N | Time between order being placed and coupons exp
 nCoupon1 | N | C | N | Total times coupon 1 was seen across test and train set | |
 nCoupon2 | N | C | N | Total times coupon 2 was seen across test and train set | | 
 nCoupon3 | N | C | N | Total times coupon 3 was seen across test and train set | |
-nCoup[i]Col[j] | Y | C | N | Total times coupon [i] appeared in column [j] for i = 1, 2, 3, and j = 1, 2, 3 
+nCoup[ i ]Col[ j ] | Y | C | N | Total times coupon [i] appeared in column [j] for i = 1, 2, 3, and j = 1, 2, 3 
