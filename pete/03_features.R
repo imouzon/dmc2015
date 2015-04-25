@@ -66,6 +66,34 @@ nCoupClass$nCoup3Col1 <- unname(coupTab1[as.character(class$couponID3)])
 nCoupClass$nCoup3Col2 <- unname(coupTab2[as.character(class$couponID3)])
 nCoupClass$nCoup3Col3 <- unname(coupTab3[as.character(class$couponID3)])
 
+# Proportion of times each coupon seen in each column
+# ===================================================================
 
+# Training set
+nCoupTrain$pCoup1Col1 <- nCoupTrain$nCoup1Col1 / nCoupTrain$nCoupon1
+nCoupTrain$pCoup1Col2 <- nCoupTrain$nCoup1Col2 / nCoupTrain$nCoupon1
+nCoupTrain$pCoup1Col3 <- nCoupTrain$nCoup1Col3 / nCoupTrain$nCoupon1
 
+nCoupTrain$pCoup2Col1 <- nCoupTrain$nCoup2Col1 / nCoupTrain$nCoupon2
+nCoupTrain$pCoup2Col2 <- nCoupTrain$nCoup2Col2 / nCoupTrain$nCoupon2
+nCoupTrain$pCoup2Col3 <- nCoupTrain$nCoup2Col3 / nCoupTrain$nCoupon2
 
+nCoupTrain$pCoup3Col1 <- nCoupTrain$nCoup3Col1 / nCoupTrain$nCoupon3
+nCoupTrain$pCoup3Col2 <- nCoupTrain$nCoup3Col2 / nCoupTrain$nCoupon3
+nCoupTrain$pCoup3Col3 <- nCoupTrain$nCoup3Col3 / nCoupTrain$nCoupon3
+
+# Test set
+nCoupClass$pCoup1Col1 <- nCoupClass$nCoup1Col1 / nCoupClass$nCoupon1
+nCoupClass$pCoup1Col2 <- nCoupClass$nCoup1Col2 / nCoupClass$nCoupon1
+nCoupClass$pCoup1Col3 <- nCoupClass$nCoup1Col3 / nCoupClass$nCoupon1
+
+nCoupClass$pCoup2Col1 <- nCoupClass$nCoup2Col1 / nCoupClass$nCoupon2
+nCoupClass$pCoup2Col2 <- nCoupClass$nCoup2Col2 / nCoupClass$nCoupon2
+nCoupClass$pCoup2Col3 <- nCoupClass$nCoup2Col3 / nCoupClass$nCoupon2
+
+nCoupClass$pCoup3Col1 <- nCoupClass$nCoup3Col1 / nCoupClass$nCoupon3
+nCoupClass$pCoup3Col2 <- nCoupClass$nCoup3Col2 / nCoupClass$nCoupon3
+nCoupClass$pCoup3Col3 <- nCoupClass$nCoup3Col3 / nCoupClass$nCoupon3
+
+nCoupTrain[is.na(nCoupTrain)] <- 0
+nCoupClass[is.na(nCoupClass)] <- 0
