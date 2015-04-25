@@ -1,0 +1,217 @@
+
+
+
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[]{graphicx}\usepackage[]{xcolor}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
+\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
+\newcommand{\Sexpr}[1]{}       % will only be parsed by R
+
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[DMC,none]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+
+
+
+
+\begin{document}
+% For LaTeX-Box: root = feature_files/R/featureMatrix_v1.1.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name:
+%  Purpose:
+%
+%  Creation Date: 22-04-2015
+%  Last Modified: Sat Apr 25 13:51:13 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+
+
+\HWinfo{April 25 2015}{}{}
+\titleheader
+I am using the following packages:
+%-- paks: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(lubridate)}
+\hlkwd{library}\hlstd{(dplyr)}
+\hlkwd{library}\hlstd{(reshape2)}
+\hlkwd{library}\hlstd{(sqldf)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+and my working directory is set to \verb!dmc2015/ian/features/feature_files/R/!.
+
+\section{Reading the Data}
+This file updates the feature matrix \verb!featureMatrix_v0!. 
+I am adding features Pete created:
+%-- readDat: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# read in the training set}
+\hlstd{featureMatrix} \hlkwb{<-} \hlkwd{readRDS}\hlstd{(}\hlstr{"~/dmc2015/data/featureMatrix/featMat_v0.0.rds"}\hlstd{)}
+
+\hlcom{# split the list feature matrix}
+\hlstd{trn} \hlkwb{<-} \hlstd{featureMatrix}\hlopt{$}\hlstd{train}
+\hlstd{cls} \hlkwb{<-} \hlstd{featureMatrix}\hlopt{$}\hlstd{class}
+
+\hlcom{# get the raw training and test set too for}
+\hlcom{# reference}
+\hlstd{trn.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"~/dmc2015/data/raw_data/DMC_2015_orders_train.txt"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
+\hlstd{cls.raw} \hlkwb{<-} \hlkwd{read.delim}\hlstd{(}\hlstr{"~/dmc2015/data/raw_data/DMC_2015_orders_class.txt"}\hlstd{,}
+    \hlkwc{stringsAsFactors} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{"|"}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlstr{""}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\section{Reading the Features}
+Pete stored his features in files that can be read into R using the following: 
+%-- readBatch: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Training and test features of coupon counts}
+\hlstd{nCoupTrain} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"../nCoupTrain.csv"}\hlstd{)}
+\hlstd{nCoupClass} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"../nCoupClass.csv"}\hlstd{)}
+
+\hlcom{# NAs should be 0}
+\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{nrow}\hlstd{(nCoupTrain)) \{}
+    \hlkwa{for} \hlstd{(j} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{ncol}\hlstd{(nCoupTrain)) \{}
+        \hlkwa{if} \hlstd{(}\hlkwd{is.na}\hlstd{(nCoupTrain[i, j]))}
+            \hlstd{nCoupTrain[i, j]} \hlkwb{<-} \hlnum{0}
+    \hlstd{\}}
+\hlstd{\}}
+
+\hlcom{# NAs should be 0}
+\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{nrow}\hlstd{(nCoupClass)) \{}
+    \hlkwa{for} \hlstd{(j} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{ncol}\hlstd{(nCoupClass)) \{}
+        \hlkwa{if} \hlstd{(}\hlkwd{is.na}\hlstd{(nCoupClass[i, j]))}
+            \hlstd{nCoupClass[i, j]} \hlkwb{<-} \hlnum{0}
+    \hlstd{\}}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Add the batch features:
+%-- addFeatures: R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# It's so easy with dplyr}
+\hlstd{trn} \hlkwb{<-} \hlstd{trn} \hlopt{%>%} \hlkwd{left_join}\hlstd{(nCoupTrain,} \hlkwc{by} \hlstd{=} \hlstr{"orderID"}\hlstd{)}
+\hlstd{cls} \hlkwb{<-} \hlstd{cls} \hlopt{%>%} \hlkwd{left_join}\hlstd{(nCoupClass,} \hlkwc{by} \hlstd{=} \hlstr{"orderID"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+61 Features!
+
+\section{Writing the Feature Matrix}
+We can save the features as CSV files and R objects (using \verb!saveRDS! and writing the training and test sets as lists):
+%-- : R code (Code in Document)
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(trn,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/train_ver1.1.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlkwd{write.csv}\hlstd{(cls,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/class_ver1.1.csv"}\hlstd{,}
+    \hlkwc{row.names} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{na} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{quote} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+
+\hlstd{featMat} \hlkwb{<-} \hlkwd{list}\hlstd{(}\hlkwc{train} \hlstd{= trn,} \hlkwc{class} \hlstd{= cls)}
+\hlkwd{saveRDS}\hlstd{(featMat,} \hlkwc{file} \hlstd{=} \hlstr{"~/dmc2015/data/featureMatrix/featMat_v1.1.rds"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+\end{document}
