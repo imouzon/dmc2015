@@ -27,3 +27,6 @@ TimeBtwnSentRec| N | N | N | Time between couponse being sent and coupons being 
 TimeBtwnRecExpire| N | N | N | Time between coupons being received and coupons expiring (in hours) | |
 TimeBtwnRecOrder| N | N | N | Time between coupons being received and order being placed (in hours) | |
 TimeBtwnOrderExpire| N | N | N | Time between order being placed and coupons expiring (in hours) ||
+nCoupon1 | N | C | N | Total times coupon 1 was seen across test and train set | |
+nCoupon2 | N | C | N | Total times coupon 2 was seen across test and train set | | 
+nCoupon3 | N | C | N | Total times coupon 3 was seen across test and train set | |
