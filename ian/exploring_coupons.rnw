@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Wed Apr 22 18:21:12 2015
+%  Last Modified: Thu Apr 23 18:48:37 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -23,7 +23,7 @@
 @
 
 %-- title page and quote
-\HWinfo{April 14 2015}{}{}
+\HWinfo{April 23 2015}{}{}
 \titleheader
 
 I am using the following packages:
@@ -36,6 +36,7 @@ I am using the following packages:
    library(rCharts)
    library(plyr)
    library(dplyr)
+   options(dplyr.width = Inf)
    library(reshape2)
    library(gtools)
    library(sqldf)
@@ -43,105 +44,56 @@ I am using the following packages:
 and my working directory is set to \verb!dmc2015/ian!.
 
 \section{Reading the Data}
-Read the data into R:
+I am now reading the feature matrix:
 %-- readDat: R code (Code in Document)
 <<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
    #training set ("historical data")
-   trn.raw = read.delim("../data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
-   trn = read.csv("../data/clean_data/train_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
+   featMat = readRDS("../data/featureMatrix/featMat_v0.0.rds")
+   trn = featMat$train
+   cls = featMat$class
 
-   #test set ("future data")
-   tst.raw = read.delim("../data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
-   tst = read.csv("../data/clean_data/test_simple_name.csv", stringsAsFactors = FALSE,na.strings="")
-@
-add the time features:
-<<manageTime, echo=TRUE, cache=FALSE, include = TRUE>>=
-   source("~/dmc2015/ian/R/TimeFeatures.R")
-
-   #Whatever you do to the training set
-   trn = TimeFeatures(trn,"orderTime")
-   trn = TimeFeatures(trn,"couponsReceived")
-
-   #try if you can to do the same to the test set
-   tst = TimeFeatures(tst,"orderTime")
-   tst = TimeFeatures(tst,"couponsReceived")
-@
-and identify orders as belonging to batches starting at every Tuesday at midnight and lasting for one week.
-%-- assign_batch: R code (Code in Document)
-<<assign_batch, echo=TRUE, cache=FALSE, include = TRUE>>=
-   #add batch information
-   source("~/dmc2015/ian/R/GetBatchInfo.R")
-   batchres = GetBatchInfo("2015-01-06 00:00:01",unts="hours")
-   
-   trn = batchres$train
-   tst = batchres$test
-
-   #write the batchID and couponsSent as features:
-   trn.w = trn[,c("orderID",names(trn)[!(names(trn) %in% names(trn.raw))])]
-   tst.w = tst[,c("orderID",names(tst)[!(names(tst) %in% names(tst.raw))])]
-   head(trn.w)
-@
-
-%-- trainSave1: R code (Code in Document)
-<<trainSave1, echo=FALSE, cache=TRUE, include = TRUE>>=
-   training.set = trn
-   testing.set = tst
+   #combine the two sets and stack the coupons to focus on coupon specifics information
+   source("./R/stackCoupons.R")
+   d.stack = stackCoupons(trn,cls)
 @
 
 \section{Exploring Coupons}
-The data is formatted in a poor way to examine coupon level behavior (the coupon1, coupon2, coupon3 structure).
-We can alter this fairly simply:
-%-- dds: R code (Code in Document)
-<<stackfunc, echo=TRUE, cache=TRUE, include = TRUE>>=
-   stackCoupons = function(train,test,idcols = NULL){
-      #coupon rows have 1, 2, or 3 in column name
-      cpn.i = lapply(1:3, function(i) which(grepl(i,names(train))))
+Exploring customer behavior with respect to coupons:
+\subsection{Guillermo's Game}
+%-- guillermosGame: R code (Code in Document)
+<<guillermosGame, echo=TRUE, cache=TRUE, include = TRUE>>=
+   set.seed(1999)
 
-      #if we don't specify, all non-coupon columns are id columns
-      if(is.null(idcols)) idcols = (1:ncol(train))[-unlist(cpn.i)]
+   names(d.stack)
+   names(d.stack$combined)
+   ggplot(data=d.stack$train,aes(x=couponsReceived,y=reward,geom='line',group=interaction(couponCol,userID))) +geom_line()
 
-      #print messages so that it is obvious if there is a column problem
-      m1 = "using columns:\n\tidcols\nas id columns"
-      m2 = "using columns:\n\tcpncols\nas measure columns"
-      message(gsub("idcols",paste(names(train)[idcols],collapse=',\n\t'),m1))
-      message(gsub("cpncols",paste(names(train)[unlist(cpn.i)],collapse=',\n\t'),m2))
-
-      #identify observations as coming from training or test set
-      train$dsn = "train"
-      test$dsn = "test"
-
-      #add that dataset identifier to the id columns
-      idcols = c(idcols,which(names(train) == "dsn"))
-
-      cpnisolate = function(i){
-         ret = rbind(train,test)[,c(idcols,cpn.i[[i]])]
-         ret$couponCol = i
-         names(ret) = gsub(i,'',names(ret))
-         return(ret)
+   GuillermosGame = function(userID,showOrder=FALSE){
+      if(!showOrder){
+         res = d.stack$combined %>% 
+            filter(userID %in% randomID) %>% 
+            do(plots=ggplot(data=.,aes(x=couponsReceived,y=basketValue,color=userID,group=interaction(couponCol,userID)))+facet_wrap(~couponCol)+ geom_line()+geom_point())
+      }else{
+         res = d.stack$combined %>% 
+            filter(userID %in% randomID) %>% 
+            do(plots=ggplot(data=.,aes(x=couponsReceived,y=basketValue,color=userID,group=interaction(couponCol,userID)))+facet_wrap(~couponCol)+geom_line()+geom_point(data=.,aes(x=couponsReceived,y=basketValue,shape=as.factor(couponUsed),size=as.factor(couponUsed))))
       }
-
-      d.stack = do.call("rbind", lapply(1:3, cpnisolate))
-      d.stack$dsn = factor(d.stack$dsn,levels=c("train","test"))
-      d.stack = d.stack[with(d.stack,order(orderID,dsn)),]
-
-      d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
-               "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
-               "combined" = d.stack)
-
-      return(d)
+      return(res$plots)
    }
+      
 @
-
-%-- trainSave1: R code (Code in Document)
-<<trainSave2, echo=FALSE, cache=TRUE, include = TRUE>>=
-   trn = training.set
-   tst = testing.set
-@
-
+   
 %-- Name: R code (Code in Document)
-<<stack, echo=TRUE, cache=TRUE, include = TRUE>>=
-   #combine the two sets and stack coupons
-   d.stack = stackCoupons(trn,tst)
+<<echo=TRUE, cache=TRUE, include = TRUE>>=
+   randomID = sample(d.stack$combined$userID)[1]
+   GuillermosGame(randomID)
+   GuillermosGame(randomID,TRUE)
+   res$plots.show
+   names(res)
+      
+
+
+   
 @
 
 \subsection{Basic Questions About Coupons}
