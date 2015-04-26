@@ -1,0 +1,53 @@
+# Category analysis
+
+```{r external-code, cashe=FALSE, echo=FALSE}
+knitr::read_chunk('categoryExploration.R')
+```
+## Q0: How many unique categories?
+
+### Ans: 31
+
+## Q1: We know some coupons belong to several categories, but what is the maximum number of categories they have?
+
+### Ans: 5
+
+```{r Q1, echo=FALSE}
+```
+## Q2: Is coupon usage rate and the basketValue related to the number of categories it belongs to?
+
+### Ans: Not quite significant but yes. For example, for coupons in `couponID2`, if their `categoryIDs2` has five categories, then their coupon usage rate seems to be much lower.
+
+Stat for `categoryIDs1`. Row i stands for `categoryIDs1` that has i categories.
+
+```{r Q2-1, echo=FALSE}
+```
+
+Stat for `categoryIDs2`
+
+```{r Q2-2, echo=FALSE}
+```
+
+Stat for `categoryIDs3`
+
+```{r Q2-3, echo=FALSE}
+```
+
+## Q3: Is the coupon usage rate and the basketValue related to categories?
+
+### Ans: Yes. For exmaple, for coupoons in `couponID2`, if they belong to `category8`, then the coupon usage rate is as high as 0.42!
+
+Stat for `categoryIDs1`
+
+```{r Q3-1, echo=FALSE}
+```
+
+Stat for `categoryIDs2`
+
+```{r Q3-2, echo=FALSE}
+```
+
+Stat for `categoryIDs3`
+
+```{r Q3-3, echo=FALSE}
+```
+
