@@ -95,5 +95,7 @@ nCoupClass$pCoup3Col1 <- nCoupClass$nCoup3Col1 / nCoupClass$nCoupon3
 nCoupClass$pCoup3Col2 <- nCoupClass$nCoup3Col2 / nCoupClass$nCoupon3
 nCoupClass$pCoup3Col3 <- nCoupClass$nCoup3Col3 / nCoupClass$nCoupon3
 
-nCoupTrain[is.na(nCoupTrain)] <- 0
-nCoupClass[is.na(nCoupClass)] <- 0
+# nCoupTrain[is.na(nCoupTrain)] <- 0
+# nCoupClass[is.na(nCoupClass)] <- 0
+
+
