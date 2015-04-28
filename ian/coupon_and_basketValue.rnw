@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 25-04-2015
-%  Last Modified: Mon Apr 27 22:08:04 2015
+%  Last Modified: Mon Apr 27 22:25:06 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent file
@@ -160,15 +160,25 @@ And we can get the same statistics for coupons being used and coupons not being 
 We can save these results:
 %-- : R code (Code in Document)
 <<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
-   trn = stack.res$train %>% left_join(statXcoupon, by="couponID") %>% as.data.frame
-   trn = trn[,c("orderID",names(statXcoupon))]
-   saveRDS(trn,file="../features/feature_files/coupon_basket_stats_train.rds") 
-   write.csv(trn,file="../features/feature_files/coupon_basket_stats_train.csv",quote=FALSE,na="",row.names=FALSE)
+   statXcoupon1 = statXcoupon %>% renm(c("couponID1",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col1')))
+   statXcoupon2 = statXcoupon %>% renm(c("couponID2",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col2')))
+   statXcoupon3 = statXcoupon %>% renm(c("couponID3",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col3')))
 
-   cls = stack.res$test %>% left_join(statXcoupon, by="couponID") %>% as.data.frame
-   cls = cls[,c("orderID",names(statXcoupon))]
-   saveRDS(cls,file="../features/feature_files/coupon_basket_stats_class.rds") 
-   write.csv(cls,file="../features/feature_files/coupon_basket_stats_class.csv",quote=FALSE,na="",row.names=FALSE)
+   trn.col = trn[,c("orderID","couponID1","couponID2","couponID3")]
+   trn.col = trn.col %>% left_join(statXcoupon1,by="couponID1")
+   trn.col = trn.col %>% left_join(statXcoupon2,by="couponID2")
+   trn.col = trn.col %>% left_join(statXcoupon3,by="couponID3")
+
+   saveRDS(trn.col,file="../features/feature_files/coupon_basket_stats_train_byorder.rds") 
+   write.csv(trn.col,file="../features/feature_files/coupon_basket_stats_train_byorder.csv",quote=FALSE,na="",row.names=FALSE)
+
+   cls.col = cls[,c("orderID","couponID1","couponID2","couponID3")]
+   cls.col = cls.col %>% left_join(statXcoupon1,by="couponID1")
+   cls.col = cls.col %>% left_join(statXcoupon2,by="couponID2")
+   cls.col = cls.col %>% left_join(statXcoupon3,by="couponID3")
+   
+   saveRDS(cls.col,file="../features/feature_files/coupon_basket_stats_class_byorder.rds") 
+   write.csv(cls.col,file="../features/feature_files/coupon_basket_stats_class_byorder.csv",quote=FALSE,na="",row.names=FALSE)
 @
 
 
