@@ -105,8 +105,8 @@ catlist = lapply(dat$categoryIDs1, FUN = function(x)
 for(i in 1:31)
     catmat[, i] = sapply(catlist, FUN = function(x) sum(x%in%i))
 catcor = cor(catmat)
-which(catcor>0.5 & catcor <1)
-c(331%/%31+1, 331%%31)
+index = which(catcor[upper.tri(catcor)] >0.3)
+catcor[upper.tri(catcor)][index]
 catcor[11,21]
 
 ## ---- others
