@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 15-04-2015
-#  Last Modified: Wed Apr 22 12:26:08 2015
+#  Last Modified: Sun Apr 26 01:00:55 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -14,9 +14,9 @@
 
 stackCoupons = function(train,test,idcols = NULL){
    #coupon rows have 1, 2, or 3 in column name
+   #if we don't specify, all non-coupon columns are id columns
    cpn.i = lapply(1:3, function(i) which(grepl(i,names(train))))
 
-   #if we don't specify, all non-coupon columns are id columns
    if(is.null(idcols)) idcols = (1:ncol(train))[-unlist(cpn.i)]
 
    #print messages so that it is obvious if there is a column problem

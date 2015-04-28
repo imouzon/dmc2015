@@ -3,8 +3,8 @@
 %  File Name: main_document
 %  Purpose: 
 %
-%  Creation Date: 2015-04-07
-%  Last Modified: Wed Apr 22 17:06:58 2015
+%  Creation Date: 2015-04-27
+%  Last Modified: Mon Apr 27 19:23:56 2015
 %  Created By: imouzon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -62,7 +62,7 @@
 \usepackage{mdframed}
 \usepackage{clrscode3e}
 \usepackage{formalHW}
-\usepackage[DMC,none]{formatHW}
+\usepackage[dmc2015,none]{formatHW}
 \usepackage{fancyquote}
 \usepackage{fancyenvironments}
 \usepackage{mymathmacros}

@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 22-04-2015
-%  Last Modified: Sat Apr 25 00:04:19 2015
+%  Last Modified: Mon Apr 27 15:54:27 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent file
@@ -36,9 +36,8 @@ We are using the following packages:
    library(xtable)
    library(foreach)
    library(rCharts)
-   library(plyr)
+   library(tidyr)
    library(dplyr)
-   library(reshape2)
    library(gtools)
    library(sqldf)
 @

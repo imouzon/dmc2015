@@ -1,0 +1,175 @@
+% For LaTeX-Box: root = coupon_and_basketValue.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: coupon_and_basketValue.rnw
+%  Purpose:
+%
+%  Creation Date: 25-04-2015
+%  Last Modified: Mon Apr 27 19:24:54 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+%-- title page and quote
+\HWinfo{April 27 2015}{}{}
+\titleheader
+
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+@
+I am also using the simple renaming function:
+%-- Name: R code (Code in Document)
+<<renm, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   renm = function(dsn,colnum=NULL,newname=NULL){
+      if(is.null(newname)) newname=colnum; colnum=NULL
+      if (is.null(colnum)) colnum = 1:ncol(dsn)
+      names(dsn)[colnum] = newname
+      return(dsn)
+   }
+
+@
+and my working directory is set to \verb!dmc2015/ian!.
+\section{Reading the Data}
+I am working from the current feature matrix:
+%-- readFeatMat: R code (Code in Document)
+<<readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v1.1.rds")
+   trn = featMat$train
+   cls = featMat$class
+@
+In case I need to reference the raw data, I will read that too:
+%-- readRaw: R code (Code in Document)
+<<readRaw, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   raw.trn = read.csv("~/dmc2015/data/clean_data/train_simple_name.csv")
+   raw.cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv")
+@
+
+\section{Working with the data}
+Since we are looking at coupon by batch information, 
+I am going to melt the data using my coupon melt function:
+%-- meltCoupon: R code (Code in Document)
+<<meltCoupon, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   source("./R/stackCoupons.R")
+   stack.res = stackCoupons(trn[,1:49],cls[,1:49])
+
+   bvalues = stack.res$train %>% 
+      select(couponID,basketValue) %>% 
+      arrange(basketValue) %$% 
+      basketValue %>% 
+      unique %>% 
+      data.frame %>% 
+      renm("basketValue")
+
+   bvalues$bValRank = 1:nrow(bvalues)
+
+   stack.res$train = stack.res$train %>% left_join(bvalues,by='basketValue')
+@
+
+\section{Basic Summary Stats}
+%-- meanbval: R code (Code in Document)
+We can get the 5-number summary stats quickly using \verb!dplyr! and this function:
+<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   sum_stats = function(dsn){
+      dsn %>% summarise(
+         min_bValXcpn = min(basketValue),
+         q05_bValXcpn = quantile(basketValue,.05),
+         q25_bValXcpn = quantile(basketValue,.25), 
+         mean_bValXcpn = mean(basketValue),
+         med_bValXcpn = median(basketValue),
+         max_bValXcpn = max(basketValue),
+         q75_bValXcpn = quantile(basketValue,.75),
+         q95_bValXcpn = quantile(basketValue,.95),
+
+         min_bValrankXcpn = min(bValRank),
+         mean_bValrankXcpn = mean(bValRank),
+         max_bValrankXcpn = max(bValRank),
+
+         minOrderTimeXcpn = min(orderTimeTime),
+         meanOrderTimeXcpn = mean(orderTimeTime),
+         medOrderTimeXcpn = median(orderTimeTime),
+         maxOrderTimeXcpn = max(orderTimeTime),
+
+         minSentRecTimeXcpn = min(TimeBtwnSentRec),
+         meanSentRecTimeXcpn = mean(TimeBtwnSentRec),
+         medSentRecTimeXcpn = median(TimeBtwnSentRec),
+         maxSentRecTimeXcpn = max(TimeBtwnSentRec),
+
+         minRecExpTimeXcpn = min(TimeBtwnRecExpire),
+         meanRecExpTimeXcpn = mean(TimeBtwnRecExpire),
+         medRecExpTimeXcpn = median(TimeBtwnRecExpire),
+         maxRecExpTimeXcpn = max(TimeBtwnRecExpire),
+
+         minRecOrderTimeXcpn = min(TimeBtwnRecOrder),
+         meanRecOrderTimeXcpn = mean(TimeBtwnRecOrder),
+         medRecOrderTimeXcpn = median(TimeBtwnRecOrder),
+         maxRecOrderTimeXcpn = max(TimeBtwnRecOrder),
+
+         minOrderExpTimeXcpn = min(TimeBtwnOrderExpire),
+         meanOrderExpTimeXcpn = mean(TimeBtwnOrderExpire),
+         medOrderExpTimeXcpn = median(TimeBtwnOrderExpire),
+         maxOrderExpTimeXcpn = max(TimeBtwnOrderExpire))
+   } 
+@
+
+I can store stats in statXcoupon
+%-- getStats: R code (Code in Document)
+<<getStats, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   statXcoupon = stack.res$train %>% 
+      group_by(couponID) %>% 
+      sum_stats
+@
+And we can get the same statistics for coupons being used and coupons not being used:
+<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   statXcoupon = stack.res$train %>%
+        group_by(couponID,couponUsed) %>%
+        sum_stats %>%
+        gather(couponID,couponUsed) %>% 
+        renm(c("couponID","couponUsed","var","value")) %>% 
+        group_by(couponID,value) %>%
+        summarise(varname = paste(var,couponUsed,sep=".used")) %>% 
+        select(-couponID) %>%
+        spread(varname,value) %>%
+        left_join(statXcoupon,by="couponID") %>%
+        arrange(couponID)
+@
+
+We can save these results:
+%-- : R code (Code in Document)
+<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+   trn = stack.res$train %>% left_join(statXcoupon, by="couponID") %>% as.data.frame
+   trn = trn[,c("orderID",names(statXcoupon))]
+   saveRDS(trn,file="../features/feature_files/coupon_basket_stats_train.rds") 
+   write.csv(trn,file="../features/feature_files/coupon_basket_stats_train.csv",quote=FALSE,na="",row.names=FALSE)
+
+   cls = stack.res$test %>% left_join(statXcoupon, by="couponID") %>% as.data.frame
+   cls = cls[,c("orderID",names(statXcoupon))]
+   saveRDS(cls,file="../features/feature_files/coupon_basket_stats_class.rds") 
+   write.csv(cls,file="../features/feature_files/coupon_basket_stats_class.csv",quote=FALSE,na="",row.names=FALSE)
+@
+
+
+
