@@ -1,34 +1,30 @@
-% For LaTeX-Box: root = coupon_and_basketValue.tex 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  File Name: coupon_and_basketValue.rnw
-%  Purpose:
-%
-%  Creation Date: 25-04-2015
-%  Last Modified: Tue Apr 28 18:41:30 2015
-%  Created By:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%-- Set parent file
-<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, tidy=FALSE, include = TRUE>>=
-   #set up knitr
-   #devtools::install_github('imouzon/usefulR')
-   library(usefulR)
+---
+title: Testing the DMC template
+author: none
+course: DMC
+date: April 28, 2015
+---
+<!--pandoc
+s:
+number-sections:
 
-   working.dir = "/Users/user/dmc2015/ian"
-   setwd(working.dir)
-   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+t: html
+mathjax:
+o: coupon_and_basketValue.html
 
-   #set up file locations
-   parent.file = makeParent(parenarticletDir = getwd(),overwrite=FALSE)
-   set_parent(parent.file)
-@
+t: latex
+template: /User/users/dmc2015/ian/main_document.latex
+latex-engine: pdflatex
+o: coupon_and_basketValue.pdf
+-->
 
-%-- title page and quote
-\HWinfo{April 27 2015}{}{}
-\titleheaderA{1}
+<!--- : R code (No Results in Document) -->
+
 
 I am using the following packages:
-%-- paks: R code (Code in Document)
-<<paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE>>=
+<!---  paks: R code (Code in Document) -->
+
+```r
    library(ggplot2)
    library(lubridate)
    library(xtable)
@@ -40,42 +36,102 @@ I am using the following packages:
    library(reshape2)
    library(gtools)
    library(sqldf)
-@
+```
 I am also using the simple renaming function:
-%-- Name: R code (Code in Document)
-<<renm, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  Name: R code (Code in Document) -->
+
+```r
    renm = function(dsn,colnum=NULL,newname=NULL){
       if(is.null(newname)) newname=colnum; colnum=NULL
       if (is.null(colnum)) colnum = 1:ncol(dsn)
       names(dsn)[colnum] = newname
       return(dsn)
    }
-
-@
+```
 and my working directory is set to \verb!dmc2015/ian!.
-\section{Reading the Data}
+# Reading the Data
 I am working from the current feature matrix:
-%-- readFeatMat: R code (Code in Document)
-<<readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  readFeatMat: R code (Code in Document) -->
+
+```r
    featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v1.1.rds")
    trn = featMat$train
    cls = featMat$class
-@
+```
 In case I need to reference the raw data, I will read that too:
-%-- readRaw: R code (Code in Document)
-<<readRaw, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  readRaw: R code (Code in Document) -->
+
+```r
    raw.trn = read.csv("~/dmc2015/data/clean_data/train_simple_name.csv")
    raw.cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv")
-@
+```
 
-\section{Working with the data}
+# Working with the data
 Since we are looking at coupon by batch information, 
 I am going to melt the data using my coupon melt function:
-%-- meltCoupon: R code (Code in Document)
-<<meltCoupon, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  meltCoupon: R code (Code in Document) -->
+
+```r
    source("./R/stackCoupons.R")
    stack.res = stackCoupons(trn[,1:49],cls[,1:49])
+```
 
+```
+## using the following as id:
+## 	orderID,
+## 	orderTime,
+## 	userID,
+## 	couponsReceived,
+## 	basketValue,
+## 	couponsReceivedDate,
+## 	couponsReceivedTime,
+## 	couponsReceivedDoW,
+## 	couponsReceivedWeekend,
+## 	couponsReceivedFriSat,
+## 	orderTimeDate,
+## 	orderTimeTime,
+## 	orderTimeDoW,
+## 	orderTimeWeekend,
+## 	orderTimeFriSat,
+## 	batchID,
+## 	couponsExpire,
+## 	couponsSent,
+## 	TimeBtwnSentRec,
+## 	TimeBtwnRecExpire,
+## 	TimeBtwnRecOrder,
+## 	TimeBtwnOrderExpire
+## 
+## using the following as measure columns:
+## 	couponID1,
+## 	price1,
+## 	basePrice1,
+## 	reward1,
+## 	premiumProduct1,
+## 	brand1,
+## 	productGroup1,
+## 	categoryIDs1,
+## 	coupon1Used,
+## 	couponID2,
+## 	price2,
+## 	basePrice2,
+## 	reward2,
+## 	premiumProduct2,
+## 	brand2,
+## 	productGroup2,
+## 	categoryIDs2,
+## 	coupon2Used,
+## 	couponID3,
+## 	price3,
+## 	basePrice3,
+## 	reward3,
+## 	premiumProduct3,
+## 	brand3,
+## 	productGroup3,
+## 	categoryIDs3,
+## 	coupon3Used
+```
+
+```r
    bvalues = stack.res$train %>% 
       select(couponID,basketValue) %>% 
       arrange(basketValue) %$% 
@@ -87,12 +143,13 @@ I am going to melt the data using my coupon melt function:
    bvalues$bValRank = 1:nrow(bvalues)
 
    stack.res$train = stack.res$train %>% left_join(bvalues,by='basketValue')
-@
+```
 
-\section{Basic Summary Stats}
-%-- meanbval: R code (Code in Document)
+# Basic Summary Stats
+<!---  meanbval: R code (Code in Document) -->
 We can get the 5-number summary stats quickly using \verb!dplyr! and this function:
-<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+
+```r
    sum_stats = function(dsn){
       dsn %>% summarise(
          min_bValXcpn = min(basketValue),
@@ -133,17 +190,19 @@ We can get the 5-number summary stats quickly using \verb!dplyr! and this functi
          medOrderExpTimeXcpn = median(TimeBtwnOrderExpire),
          maxOrderExpTimeXcpn = max(TimeBtwnOrderExpire))
    } 
-@
+```
 
 I can store stats in statXcoupon
-%-- getStats: R code (Code in Document)
-<<getStats, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  getStats: R code (Code in Document) -->
+
+```r
    statXcoupon = stack.res$train %>% 
       group_by(couponID) %>% 
       sum_stats
-@
+```
 And we can get the same statistics for coupons being used and coupons not being used:
-<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+
+```r
    statXcoupon = stack.res$train %>%
         group_by(couponID,couponUsed) %>%
         sum_stats %>%
@@ -155,12 +214,12 @@ And we can get the same statistics for coupons being used and coupons not being 
         spread(varname,value) %>%
         left_join(statXcoupon,by="couponID") %>%
         arrange(couponID)
-@
-d %>% ggplot(e) + 
+```
 
 We can save these results:
-%-- : R code (Code in Document)
-<<echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE>>=
+<!---  : R code (Code in Document) -->
+
+```r
    statXcoupon1 = statXcoupon %>% renm(c("couponID1",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col1')))
    statXcoupon2 = statXcoupon %>% renm(c("couponID2",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col2')))
    statXcoupon3 = statXcoupon %>% renm(c("couponID3",paste0(names(statXcoupon)[which(names(statXcoupon) != "couponID")],'.col3')))
@@ -180,7 +239,8 @@ We can save these results:
    
    saveRDS(cls.col,file="../features/feature_files/coupon_basket_stats_class_byorder.rds") 
    write.csv(cls.col,file="../features/feature_files/coupon_basket_stats_class_byorder.csv",quote=FALSE,na="",row.names=FALSE)
-@
+```
+
 
 
 

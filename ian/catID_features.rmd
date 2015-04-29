@@ -1,0 +1,172 @@
+---
+title: Getting Category IDs Under Control
+author: none
+course: DMC
+date: April 29, 2015
+---
+
+[//]: # (R code (No Results in Document))
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knit
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
+```
+
+I am using the following packages:
+[//]: # (R code (No Results in Document))
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+```
+and my working directory is set to \verb!dmc2015/ian!.
+
+# Reading the Data
+I am working from the current feature matrix:
+<!---  readFeatMat: R code (Code in Document) -->
+```{r readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE}
+   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v1.1.rds")
+   trn = featMat$train
+   cls = featMat$class
+
+   #Also reading the melted train and test sets
+   trn.m = read.csv("~/dmc2015/data/clean_data/melted_train_simple_name.csv")
+   cls.m = read.csv("~/dmc2015/data/clean_data/melted_test_simple_name.csv")
+
+   stack.trn = trn.m
+   stack.trn$dsn = "trn"
+
+   stack.cls = cls.m
+   stack.cls$dsn = "cls"
+
+   stack.m = rbind(stack.trn,stack.cls)
+
+   stack.m$dsn = factor(stack.m$dsn,levels=c('trn','cls'))
+```
+
+In case I need to reference the raw data, I will read that too:
+<!---  readRaw: R code (Code in Document) -->
+```{r readRaw, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE}
+   raw.trn = read.csv("~/dmc2015/data/clean_data/train_simple_name.csv")
+   raw.cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv")
+```
+
+[//]: # (splitcols: R code (No Results in Document))
+```{r splitcols,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   source("~/dmc2015/ian/R/splitColumn.R")
+   stack.m$categoryIDs = as.character(stack.m$categoryIDs)
+   splitCats = splitColumn(stack.m,"categoryIDs","orderID",splitby=":")
+
+   melt.cats = splitCats[,c(1,15:21)] %>% 
+      gather(variable,value,-orderID,-couponCol,-dsn) %>% 
+      arrange(orderID,couponCol,dsn) %>%
+      select(-variable) %>%
+      filter(!is.na(value)) 
+
+   catFreq = melt.cats %>% with(table(value)) %>% data.frame %>% arrange(-Freq) %>% renm(c("catID","nTotal"))
+
+   catFreq = melt.cats %>% with(table(value,couponCol)) %>% 
+      data.frame %>% 
+      arrange(-Freq) %>% 
+      renm(c("catID","couponCol","nTotal")) %>%
+      spread(couponCol,nTotal) %>%
+      renm(c("catID","nTotalCol1","nTotalCol2","nTotalCol3")) %>%
+      left_join(catFreq,by="catID")
+
+   trn.m$categoryIDs = as.character(trn.m$categoryIDs)
+   split.trn = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
+
+   melt.trn = split.trn[,c(1,14:20)] %>% 
+      gather(variable,value,-orderID,-couponCol,-couponUsed) %>% 
+      arrange(orderID,couponCol) %>% 
+      select(-variable) %>% 
+      filter(!is.na(value))
+
+   trnFreq = melt.trn %>% with(table(value)) %>% data.frame %>% arrange(-Freq) %>% renm(c("catID","nTotal"))
+
+   trnFreq = melt.trn %>% 
+      filter(couponUsed == 1) %>% 
+      with(table(value,couponCol)) %>% 
+      data.frame %>% 
+      arrange(-Freq) %>% 
+      renm(c("catID","couponCol","nTotalUsed")) %>%
+      spread(couponCol,nTotalUsed) %>%
+      renm(c("catID","nTotalUsedCol1","nTotalUsedCol2","nTotalUsedCol3")) %>%
+      full_join(catFreq,by="catID")
+
+   trnFreq[31,is.na(trnFreq[31,])] = 0
+
+   trnFreq$nTotalUsed = with(trnFreq,nTotalUsedCol1 + nTotalUsedCol2 + nTotalUsedCol3)
+
+   trnFreq$propUsedCol1 = trnFreq$nTotalUsedCol1/trnFreq$nTotalCol1
+   trnFreq$propUsedCol2 = trnFreq$nTotalUsedCol2/trnFreq$nTotalCol2
+   trnFreq$propUsedCol3 = trnFreq$nTotalUsedCol3/trnFreq$nTotalCol3
+   trnFreq$propUsed = trnFreq$nTotalUsed/trnFreq$nTotal
+
+   catFreq = catFreq %>% full_join(trnFreq[,c("catID","propUsedCol1","propUsedCol2","propUsedCol3","propUsed")],by="catID")
+
+   qplot(catID, propUsed,size=nTotal, data=catFreq)
+```
+
+[//]: # (corrplot: R code (No Results in Document))
+```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   head(splitCats)
+```
+
+
+[//]: # (plotCats: R code (No Results in Document))
+```{r plotCats,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   trn.m$categoryIDs = as.character(trn.m$categoryIDs)
+   splitCats = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
+
+   melt.cats = melt(splitCats,id=c("orderID","couponCol","couponUsed"),16:20)
+   melt.cats = melt.cats %>% arrange(orderID,couponCol,couponUsed) %>% as.data.frame 
+   melt.cats = melt.cats[which(!is.na(melt.cats$value)),]
+   head(melt.cats)
+
+   install.packages("hclust")
+   library(hclust)
+   
+
+   df_tots = data.frame(table(melt.cats$value)) %>% arrange(-Freq)
+   df_usage = data.frame(with(melt.cats, table(value,couponUsed))) %>% arrange(-Freq)
+   names(df_tots) = c("catID", "total_seen")
+   names(df_usage) = c("catID","couponUsed","times")
+
+   df_usage = df_usage %>% left_join(df_tots,by="catID") %>% arrange(-total_seen)
+   df_usage$propCatID = df_usage$total_seen/(sum(df_usage$total_seen)/2)
+   qplot(propCatID,prop_time,data=df_usage[which(df_usage$couponUsed == 1),])
+   head(df_usage)
+
+   
+   df_usage$prop_time = df_usage$times/df_usage$total_seen
+
+   qplot(catID,couponUsed,size=prop_time,data=df_usage)
+   melt.cats$varname = paste(melt.cats$value,melt.cats$couponCol,sep='.col')
+   melt.cats = melt.cats[,c("orderID","varname")]
+   melt.cats$value = 1
+   qplot(categoryIDs,basketValue,ylim=c(0,200),data=stack.m,geom='boxplot') 
+   + theme(axis.text.x = element_text(angle=90))
+```
+
+[//]: # (randomforestopts: R code (No Results in Document))
+```{r randomforestopts,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   library(randomForest)
+   randomForest
+```
+

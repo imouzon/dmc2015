@@ -1,8 +1,5 @@
+\documentclass[10pt]{article}
 
-
-
-\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
-\documentclass[10pt]{report}
 \usepackage[]{graphicx}\usepackage[]{xcolor}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
@@ -53,56 +50,6 @@
 \newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
 
 \usepackage{alltt}
-\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
-\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
-\newcommand{\Sexpr}[1]{}       % will only be parsed by R
-
-
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{pdfcolmk}
-\usepackage{multirow}
-\usepackage{graphicx}
-\usepackage{pifont}
-\usepackage{amsmath,amsfonts,amsthm,amssymb}
-\usepackage{setspace}
-\usepackage{Tabbing}
-\usepackage{etoolbox}
-\usepackage{fancyhdr}
-\usepackage{lastpage}
-\usepackage{listings}
-\usepackage{extramarks}
-\usepackage{enumerate}
-\usepackage{soul,color}
-\usepackage{graphicx,float,wrapfig}
-\usepackage{amsmath,amssymb,rotating}
-\usepackage{epsfig}
-\usepackage{color}
-\usepackage{hyperref}
-\usepackage{animate}
-\usepackage{array}
-\usepackage{graphics, color}
-\usepackage{graphicx}
-\usepackage{epsfig}
-\usepackage{setspace}
-\usepackage{verbatim}
-\usepackage[margin=1.0in]{geometry}
-\usepackage{tikz}
-\usepackage{mdframed}
-\usepackage{clrscode3e}
-\usepackage{formalHW}
-\usepackage[dmc2015,none]{formatHW}
-\usepackage{fancyquote}
-\usepackage{fancyenvironments}
-\usepackage{mymathmacros}
-\usepackage{algorithm}
-\usepackage[noend]{algpseudocode}
-\usepackage{pgfplots}
-
-
-
-
-
 \begin{document}
 % For LaTeX-Box: root = coupon_and_basketValue.tex 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,15 +57,22 @@
 %  Purpose:
 %
 %  Creation Date: 25-04-2015
-%  Last Modified: Mon Apr 27 19:24:54 2015
+%  Last Modified: Tue Apr 28 18:41:30 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent file
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in makeParent(parenarticletDir = getwd(), overwrite = FALSE): unused argument (parenarticletDir = getwd())}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in readLines(parent, warn = FALSE): object 'parent.file' not found}}\end{kframe}
+\end{knitrout}
 
 %-- title page and quote
 \HWinfo{April 27 2015}{}{}
-\titleheader
+\titleheaderA{1}
 
 I am using the following packages:
 %-- paks: R code (Code in Document)
@@ -284,21 +238,32 @@ And we can get the same statistics for coupons being used and coupons not being 
 \end{alltt}
 \end{kframe}
 \end{knitrout}
+d %>% ggplot(e) + 
 
 We can save these results:
 %-- : R code (Code in Document)
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-   \hlstd{trn} \hlkwb{=} \hlstd{stack.res}\hlopt{$}\hlstd{train} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon,} \hlkwc{by}\hlstd{=}\hlstr{"couponID"}\hlstd{)} \hlopt{%>%} \hlstd{as.data.frame}
-   \hlstd{trn} \hlkwb{=} \hlstd{trn[,}\hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,}\hlkwd{names}\hlstd{(statXcoupon))]}
-   \hlkwd{saveRDS}\hlstd{(trn,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_train.rds"}\hlstd{)}
-   \hlkwd{write.csv}\hlstd{(trn,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_train.csv"}\hlstd{,}\hlkwc{quote}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{na}\hlstd{=}\hlstr{""}\hlstd{,}\hlkwc{row.names}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+   \hlstd{statXcoupon1} \hlkwb{=} \hlstd{statXcoupon} \hlopt{%>%} \hlkwd{renm}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"couponID1"}\hlstd{,}\hlkwd{paste0}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)[}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)} \hlopt{!=} \hlstr{"couponID"}\hlstd{)],}\hlstr{'.col1'}\hlstd{)))}
+   \hlstd{statXcoupon2} \hlkwb{=} \hlstd{statXcoupon} \hlopt{%>%} \hlkwd{renm}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"couponID2"}\hlstd{,}\hlkwd{paste0}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)[}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)} \hlopt{!=} \hlstr{"couponID"}\hlstd{)],}\hlstr{'.col2'}\hlstd{)))}
+   \hlstd{statXcoupon3} \hlkwb{=} \hlstd{statXcoupon} \hlopt{%>%} \hlkwd{renm}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"couponID3"}\hlstd{,}\hlkwd{paste0}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)[}\hlkwd{which}\hlstd{(}\hlkwd{names}\hlstd{(statXcoupon)} \hlopt{!=} \hlstr{"couponID"}\hlstd{)],}\hlstr{'.col3'}\hlstd{)))}
 
-   \hlstd{cls} \hlkwb{=} \hlstd{stack.res}\hlopt{$}\hlstd{test} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon,} \hlkwc{by}\hlstd{=}\hlstr{"couponID"}\hlstd{)} \hlopt{%>%} \hlstd{as.data.frame}
-   \hlstd{cls} \hlkwb{=} \hlstd{cls[,}\hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,}\hlkwd{names}\hlstd{(statXcoupon))]}
-   \hlkwd{saveRDS}\hlstd{(cls,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_class.rds"}\hlstd{)}
-   \hlkwd{write.csv}\hlstd{(cls,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_class.csv"}\hlstd{,}\hlkwc{quote}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{na}\hlstd{=}\hlstr{""}\hlstd{,}\hlkwc{row.names}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+   \hlstd{trn.col} \hlkwb{=} \hlstd{trn[,}\hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,}\hlstr{"couponID1"}\hlstd{,}\hlstr{"couponID2"}\hlstd{,}\hlstr{"couponID3"}\hlstd{)]}
+   \hlstd{trn.col} \hlkwb{=} \hlstd{trn.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon1,}\hlkwc{by}\hlstd{=}\hlstr{"couponID1"}\hlstd{)}
+   \hlstd{trn.col} \hlkwb{=} \hlstd{trn.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon2,}\hlkwc{by}\hlstd{=}\hlstr{"couponID2"}\hlstd{)}
+   \hlstd{trn.col} \hlkwb{=} \hlstd{trn.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon3,}\hlkwc{by}\hlstd{=}\hlstr{"couponID3"}\hlstd{)}
+
+   \hlkwd{saveRDS}\hlstd{(trn.col,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_train_byorder.rds"}\hlstd{)}
+   \hlkwd{write.csv}\hlstd{(trn.col,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_train_byorder.csv"}\hlstd{,}\hlkwc{quote}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{na}\hlstd{=}\hlstr{""}\hlstd{,}\hlkwc{row.names}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+
+   \hlstd{cls.col} \hlkwb{=} \hlstd{cls[,}\hlkwd{c}\hlstd{(}\hlstr{"orderID"}\hlstd{,}\hlstr{"couponID1"}\hlstd{,}\hlstr{"couponID2"}\hlstd{,}\hlstr{"couponID3"}\hlstd{)]}
+   \hlstd{cls.col} \hlkwb{=} \hlstd{cls.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon1,}\hlkwc{by}\hlstd{=}\hlstr{"couponID1"}\hlstd{)}
+   \hlstd{cls.col} \hlkwb{=} \hlstd{cls.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon2,}\hlkwc{by}\hlstd{=}\hlstr{"couponID2"}\hlstd{)}
+   \hlstd{cls.col} \hlkwb{=} \hlstd{cls.col} \hlopt{%>%} \hlkwd{left_join}\hlstd{(statXcoupon3,}\hlkwc{by}\hlstd{=}\hlstr{"couponID3"}\hlstd{)}
+
+   \hlkwd{saveRDS}\hlstd{(cls.col,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_class_byorder.rds"}\hlstd{)}
+   \hlkwd{write.csv}\hlstd{(cls.col,}\hlkwc{file}\hlstd{=}\hlstr{"../features/feature_files/coupon_basket_stats_class_byorder.csv"}\hlstd{,}\hlkwc{quote}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{na}\hlstd{=}\hlstr{""}\hlstd{,}\hlkwc{row.names}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
