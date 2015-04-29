@@ -32,3 +32,11 @@ nCoupon2 | N | C | N | Total times coupon 2 was seen across test and train set |
 nCoupon3 | N | C | N | Total times coupon 3 was seen across test and train set | |
 nCoup[ i ]Col[ j ] | N | C | N | Total times coupon ```[i]``` appeared in column ```[j]``` for i = 1, 2, 3, and j = 1, 2, 3 
 pCoup[ i ]Col[ j ] | N | C | N | Proportion of times coupon ```[i]``` appeared in column ```[j]``` for i = 1, 2, 3 and j = 1, 2, 3
+nCoupon1Used | N | H | Y | Total times coupon 1 was used across all columns in train set | |
+nCoupon2Used | N | H | Y | Total times coupon 2 was used across all columns in train set | | 
+nCoupon3Used | N | H | Y | Total times coupon 3 was used across all columns in train set | |
+pCoupon1Used | N | H | Y | nCoupon1Used / (total times coupon 1 was seen in the train set) | |
+pCoupon2Used | N | H | Y | nCoupon2Used / (total times coupon 2 was seen in the train set) | | 
+pCoupon3Used | N | H | Y | nCoupon3Used / (total times coupon 3 was seen in the train set) | |
+nCoup[ i ]Col[ j ]Used | N | H | Y | Similar definition as before. $\sum_{j=1}^{3}nCoup[i]Col[j]Used = nCoupon[i]Used$
+pCoup[ i ]Col[ j ]Used | N | H | Y | Similar definition as before. nCoup[ i ]Col[ j ]Used / nCoupon[i]Used.
