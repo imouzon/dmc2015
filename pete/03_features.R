@@ -10,7 +10,8 @@ nCoupClass <- read.csv("~/GitHub/dmc2015/features/feature_files/nCoupClass.csv")
 write.csv(nCoupTrain, "~/GitHub/dmc2015/features/feature_files/nCoupTrain.csv", quote = F, na = "", row.names = F)
 write.csv(nCoupClass, "~/GitHub/dmc2015/features/feature_files/nCoupClass.csv", quote = F, na = "", row.names = F)
 
-
+library(reshape2)
+library(dplyr)
 library(lubridate)
 
 train$orderTime <- ymd_hms(train$orderTime)
@@ -97,5 +98,69 @@ nCoupClass$pCoup3Col3 <- nCoupClass$nCoup3Col3 / nCoupClass$nCoupon3
 
 # nCoupTrain[is.na(nCoupTrain)] <- 0
 # nCoupClass[is.na(nCoupClass)] <- 0
+
+# Number of times each coupon appears in the current batch nCoupBatch
+# ===================================================================
+
+
+
+# First time the coupon was seen firstTimeCoupRec
+# ===================================================================
+
+
+
+# First time the coupon was used firstTimeCoupUsed
+# ===================================================================
+
+
+
+
+# Coupon categories
+# ===================================================================
+
+# Read in the melted training and test data
+trainM <- read.csv("~/GitHub/dmc2015/data/clean_data/melted_train_simple_name.csv")
+classM <- read.csv("~/GitHub/dmc2015/data/clean_data/melted_test_simple_name.csv")
+
+d <- rbind(trainM, classM)
+
+rm(list = c("trainM", "classM"))
+
+d$categoryIDs <- as.character(d$categoryIDs)
+
+catIDs <- sapply(d$categoryIDs, strsplit, split = ":")
+d$cat1 <- NA
+d$cat2 <- NA
+d$cat3 <- NA
+d$cat4 <- NA
+d$cat5 <- NA
+
+outCats <- matrix(rep(NA, 5*nrow(d)), ncol = 5)
+
+for (i in 1:nrow(d)) {
+	cats <- unlist(catIDs[[i]])
+	for (j in 1:length(cats)) {
+		outCats[i,j] <- cats[j]
+	}
+}
+
+colnames(outCats) <- c("cat1", "cat2", "cat3", "cat4", "cat5")
+d <- cbind(d, outCats)
+d$cat1 <- as.character(d$cat1)
+d$cat2 <- as.character(d$cat2)
+d$cat3 <- as.character(d$cat3)
+d$cat4 <- as.character(d$cat4)
+d$cat5 <- as.character(d$cat5)
+catM <- melt(d, id = c("orderID", "couponCol"), 16:20)
+catI <- dcast(catM, orderID + couponCol ~ value, length, fill = 0)
+
+d <- d[, -c(16:20)]
+
+d <- cbind(d, catI[,-c(1:2)])
+d <- d[, -ncol(d)]
+rm(list=c("catM", "catI", "catIDs", "trainM", "classM"))
+
+# We now have indicator columns for each unique category ID
+
 
 
