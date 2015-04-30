@@ -51,6 +51,3 @@ dataset_new = dataset_new %>%
 #break it back into training/test again
 tr_new = dataset_new %>% filter(dataset == "train") %>% select(-dataset)
 te_new = dataset_new %>% filter(dataset == "test") %>% select(-dataset)
-
-
-

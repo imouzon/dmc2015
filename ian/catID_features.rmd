@@ -80,7 +80,11 @@ In case I need to reference the raw data, I will read that too:
       select(-variable) %>%
       filter(!is.na(value)) 
 
-   catFreq = melt.cats %>% with(table(value)) %>% data.frame %>% arrange(-Freq) %>% renm(c("catID","nTotal"))
+   catFreq = melt.cats %>% 
+      with(table(value)) %>% 
+      data.frame %>% 
+      arrange(-Freq) %>% 
+      renm(c("catID","nTotal"))
 
    catFreq = melt.cats %>% with(table(value,couponCol)) %>% 
       data.frame %>% 
@@ -90,7 +94,6 @@ In case I need to reference the raw data, I will read that too:
       renm(c("catID","nTotalCol1","nTotalCol2","nTotalCol3")) %>%
       full_join(catFreq,by="catID")
 
-   #
    trn.m$categoryIDs = as.character(trn.m$categoryIDs)
    split.trn = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
 
@@ -135,21 +138,51 @@ In case I need to reference the raw data, I will read that too:
 ```
 
 [//]: # (corrplot: R code (No Results in Document))
-```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
    #load weicheng's correlation matrix:
    #need catcor, catmat
-   setwd("../weicheng/"); source("./categoryExploration.R"); setwd("../ian/");
+   #setwd("../weicheng/"); source("./categoryExploration.R"); setwd("../ian/");
 
    #get counts of times any tow catIDs are seen together
-   catmat = matrix(0,nrow(splitCats),32)
-   for(i in 1:nrow(catmat)){
-      catmat[i,1:31] = as.numeric( paste0("cat",1:31) %in% splitCats[i,17:21])
-      catmat[i,32] = splitCats$couponCol[i]
+   catmat = data.frame(cbind(splitCats[,17:21], matrix(sapply(1:nrow(splitCats), function(i) as.numeric(paste0("cat",1:31) %in% splitCats[i,17:21])),byrow=FALSE,nrow=nrow(splitCats))))
+   names(catmat)[6:36] = paste0("cat",1:31)
+
+   allFreqs = catmat %>% 
+      group_by(cat1,cat2,cat3,cat4,cat5,cat6,cat7,cat8,cat9, cat10,cat11,cat12,cat13,cat14,cat15,cat16,cat17,cat18,cat19, cat20,cat21,cat22,cat23,cat24,cat25,cat26,cat27,cat28,cat29, cat30,cat31) %>%
+      summarise(CategoryFreq = n()) %>%
+      data.frame %>% 
+      arrange(-cat1,-cat2,-cat3,-cat4,-cat5,-cat6,-cat7,-cat8,-cat9, -cat10,-cat11,-cat12,-cat13,-cat14,-cat15,-cat16,-cat17,-cat18,-cat19, -cat20,-cat21,-cat22,-cat23,-cat24,-cat25,-cat26,-cat27,-cat28,-cat29, -cat30,-cat31)
+
+   extend.columns = function(dcats,dcnts){
+      Xcats = as.matrix(dcats[,which(names(dcats) %in% paste0("cat",1:31))])
+      Xcnts = as.matrix(dcnts[,which(names(dcnts) %in% paste0("cat",1:31))])
+      Xmat = Xcats%*%t(Xcnts)
+      resdat = cbind(dcats,data.frame(matrix(0,nrow(dcats),5)))
+      names(resdat) = c(names(dcats), paste0('nTimesMatch',1:5))
+
+      for(i in 1:nrow(dcats)){
+         for(j in 1:5){
+            if(length(which(Xmat[i,] == j)) > 0){
+               resdat[i,(ncol(dcats)+j)] = sum(dcnts$CategoryFreq[which(Xmat[i,] == j)])
+            }
+         }
+      }
+      return(resdat)
    }
 
-   pcorrmat = cor(catmat[,1:31])
+   cntsXcat = extend.columns(catmat,allFreqs)
+@
 
-   #get counts of times any tow catIDs are seen together
+[//]: # (corrplot: R code (No Results in Document))
+```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   Xtest = data.frame(matrix(c(1,rep(0,30)),1,31))
+   names(Xtest) = names(catmat)[6:36]
+   extend.columns(Xtest, dcnts)
+   catFreq
+
+   pcorrmat = cor(catmat[,6:36])
+
+   #get counts of times any two catIDs are seen together
    countMat = matrix(0,3*31,32)
    for(i in 1:3){
       for(j in 1:31){ 
@@ -253,8 +286,6 @@ We can get correlation matrix and count matrix for when coupons are being used a
 
    propTable = countDataTR %>% full_join(countUsedData,by=c("catID1","catID2"))
 
-   names(propTable)
-
    propTable$propUsedCol1 = with(propTable,nUsedCol1/nTotalCol1)
    propTable$propUsedCol2 = with(propTable,nUsedCol2/nTotalCol2)
    propTable$propUsedCol3 = with(propTable,nUsedCol3/nTotalCol3)
@@ -264,20 +295,13 @@ We can get correlation matrix and count matrix for when coupons are being used a
 
    dogFreq = countData %>% full_join(propTable[,c("catID1","catID2","propUsedCol1", "propUsedCol2", "propUsedCol3", "propUsed")],by=c("catID1","catID2"))
    dogFreq = dogFreq %>% filter(nTotal > 0)
+
+   qplot(catID1,catID2,color=nTotal,size=propUsed,data=dogFreq)
 ```
 
-We can convert all of these matrices to datasets to facilitate adding them to a feature matrix:
+We can save this output:
 [//]: # (chunk-label: R code (No Results in Document))
 ```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   cpnJoiner = splitCats %>% select(couponID, categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) 
-   cpnJoiner = 
-
-   dogFreq$catID1 %in% cpnJoiner[1,2:6] & dogFreq$catID2 %in% cpnJoiner[1,2:6]  
+   saveRDS(catFreq,file="../features/feature_files/one-way_categoricalProportions.rds")
+   saveRDS(dogFreq,file="../features/feature_files/two-way_categoricalProportions.rds")
 ```
-
-[//]: # (randomforestopts: R code (No Results in Document))
-```{r randomforestopts,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   library(randomForest)
-   randomForest
-```
-
