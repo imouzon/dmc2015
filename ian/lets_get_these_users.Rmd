@@ -98,7 +98,7 @@ These are some wonderful features. Lets write them to a dataset:
    features.cls = features[which(features$dataset == "test"),-2]
 
    #save it as a RDS file
-   saveRDS(list(train=features.train,class = features.cls),"~/dmc2015/features/feature_files/UserVisitFeatures.rds")
+   saveRDS(list(train=features.trn,class = features.cls),"~/dmc2015/features/feature_files/UserVisitFeatures.rds")
 
    #save it as a CSV
    write.csv(features.trn,file="~/dmc2015/features/feature_files/UserVisitFeatures_train.csv",na="",quote=FALSE,row.names=FALSE)
@@ -111,7 +111,6 @@ These are some wonderful features. Lets write them to a dataset:
 
 dataset_new %>% filter(couponSwitch) %>% select(batchID,couponsReceived,couponID1,coupon1Used,couponID2,coupon2Used,couponID3,coupon3Used) %>% arrange(userID,batchID) %>% data.frame
 writeset = dataset_new %>% data.frame
-
 
 userd = dataset_new
 userd = userd %>% mutate(coupUsed = paste0(coupon1Used,coupon2Used,coupon3Used))

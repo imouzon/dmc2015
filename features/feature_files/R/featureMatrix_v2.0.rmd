@@ -1,0 +1,28 @@
+---
+title: 
+author: 
+course: 
+date: 
+---
+
+[//]: # (R code (No Results in Document))
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
+   set_parent(parent.file)
+
+   library(ggplot2)
+   library(lubridate)
+   library(dplyr)
+   library(reshape2)
+   library(sqldf)
+```
+
