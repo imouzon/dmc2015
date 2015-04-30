@@ -17,6 +17,8 @@ date: April 29, 2015
 
    #set up file locations
    parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
+
+   source("./R/renm.R")
 ```
 
 I am using the following packages:
@@ -86,8 +88,9 @@ In case I need to reference the raw data, I will read that too:
       renm(c("catID","couponCol","nTotal")) %>%
       spread(couponCol,nTotal) %>%
       renm(c("catID","nTotalCol1","nTotalCol2","nTotalCol3")) %>%
-      left_join(catFreq,by="catID")
+      full_join(catFreq,by="catID")
 
+   #
    trn.m$categoryIDs = as.character(trn.m$categoryIDs)
    split.trn = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
 
@@ -97,7 +100,15 @@ In case I need to reference the raw data, I will read that too:
       select(-variable) %>% 
       filter(!is.na(value))
 
-   trnFreq = melt.trn %>% with(table(value)) %>% data.frame %>% arrange(-Freq) %>% renm(c("catID","nTotal"))
+   trnFreq = melt.trn %>% 
+      with(table(value,couponCol)) %>% 
+      data.frame %>% 
+      arrange(-Freq) %>% 
+      renm(c("catID","couponCol","nTotalUsed")) %>%
+      spread(couponCol,nTotalUsed) %>%
+      renm(c("catID","nTotalCol1","nTotalCol2","nTotalCol3"))
+
+   trnFreq$nTotal = with(trnFreq,nTotalCol1 + nTotalCol2 + nTotalCol3)
 
    trnFreq = melt.trn %>% 
       filter(couponUsed == 1) %>% 
@@ -107,9 +118,9 @@ In case I need to reference the raw data, I will read that too:
       renm(c("catID","couponCol","nTotalUsed")) %>%
       spread(couponCol,nTotalUsed) %>%
       renm(c("catID","nTotalUsedCol1","nTotalUsedCol2","nTotalUsedCol3")) %>%
-      full_join(catFreq,by="catID")
+      full_join(trnFreq,by="catID")
 
-   trnFreq[31,is.na(trnFreq[31,])] = 0
+   trnFreq[31,2:4] = 0
 
    trnFreq$nTotalUsed = with(trnFreq,nTotalUsedCol1 + nTotalUsedCol2 + nTotalUsedCol3)
 
@@ -117,51 +128,151 @@ In case I need to reference the raw data, I will read that too:
    trnFreq$propUsedCol2 = trnFreq$nTotalUsedCol2/trnFreq$nTotalCol2
    trnFreq$propUsedCol3 = trnFreq$nTotalUsedCol3/trnFreq$nTotalCol3
    trnFreq$propUsed = trnFreq$nTotalUsed/trnFreq$nTotal
-
-   catFreq = catFreq %>% full_join(trnFreq[,c("catID","propUsedCol1","propUsedCol2","propUsedCol3","propUsed")],by="catID")
+   
+   catFreq = catFreq %>% full_join(trnFreq[,c("catID","propUsedCol1","propUsedCol2","propUsedCol3","propUsed")],by="catID") 
 
    qplot(catID, propUsed,size=nTotal, data=catFreq)
 ```
 
 [//]: # (corrplot: R code (No Results in Document))
 ```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   head(splitCats)
+   #load weicheng's correlation matrix:
+   #need catcor, catmat
+   setwd("../weicheng/"); source("./categoryExploration.R"); setwd("../ian/");
+
+   #get counts of times any tow catIDs are seen together
+   catmat = matrix(0,nrow(splitCats),32)
+   for(i in 1:nrow(catmat)){
+      catmat[i,1:31] = as.numeric( paste0("cat",1:31) %in% splitCats[i,17:21])
+      catmat[i,32] = splitCats$couponCol[i]
+   }
+
+   pcorrmat = cor(catmat[,1:31])
+
+   #get counts of times any tow catIDs are seen together
+   countMat = matrix(0,3*31,32)
+   for(i in 1:3){
+      for(j in 1:31){ 
+         for (k in (j+1):31){ 
+            row.j = (i-1)*31 + j
+            countMat[row.j,k] = sum(catmat[which(catmat[,32] == i),j]*catmat[which(catmat[,32] == i),k]) 
+         } 
+         countMat[row.j,32] = i
+      }
+   }
+
+   countData = as.data.frame(countMat)
+   names(countData) = c(paste0("cat",1:31),'couponCol')
+   countData$cols = rep(names(countData)[1:31],3)
+
+   countData = countData %>% 
+      gather(catID2,prop,-cols,-couponCol) %>%  
+      arrange(cols,catID2) %>% 
+      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
+      unique %>% 
+      spread(couponCol,nTotal) %>%
+      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
+```
+We now have a matrix identifying correlation between two categories and the number of times they occur.
+
+We can get correlation matrix and count matrix for when coupons are being used as well:
+[//]: # (-label: R code (No Results in Document))
+```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
+   catmatTR = matrix(0,nrow(split.trn),32)
+   for(i in 1:nrow(catmatTR)){
+      catmatTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% split.trn[i,16:20])
+      catmatTR[i,32] = split.trn$couponCol[i]
+   }
+
+   pcorrmatTR = cor(catmatTR[,1:31])
+
+   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
+   countMatTR = matrix(0,3*31,32)
+   for(i in 1:3){
+      for(j in 1:31){ 
+         for (k in (j+1):31){ 
+            row.j = (i-1)*31 + j
+            countMatTR[row.j,k] = sum(catmatTR[which(catmatTR[,32] == i),j]*catmatTR[which(catmatTR[,32] == i),k]) 
+         } 
+         countMatTR[row.j,32] = i
+      }
+   }
+
+   countDataTR = as.data.frame(countMatTR)
+   names(countDataTR) = c(paste0("cat",1:31),'couponCol')
+   countDataTR$cols = rep(names(countDataTR)[1:31],3)
+
+   countDataTR = countDataTR %>% 
+      gather(catID2,prop,-cols,-couponCol) %>%  
+      arrange(cols,catID2) %>% 
+      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
+      unique %>% 
+      spread(couponCol,nTotal) %>%
+      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
+
+
+   #do the same for when coupons are used
+   splitCatsUsedTR = split.trn[which(split.trn$couponUsed == 1),]
+
+   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
+   catmatUsedTR = matrix(0,nrow(splitCatsUsedTR),32)
+   for(i in 1:nrow(catmatUsedTR)){
+      catmatUsedTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% splitCatsUsedTR[i,16:20])
+      catmatUsedTR[i,32] = splitCatsUsedTR$couponCol[i]
+   }
+
+   pcorrmatUsedTR = cor(catmatUsedTR[,1:31])
+
+   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
+   countMatUsedTR = matrix(0,3*31,32)
+   for(i in 1:3){
+      for(j in 1:31){ 
+         for (k in (j+1):31){ 
+            row.j = (i-1)*31 + j
+            countMatUsedTR[row.j,k] = sum(catmatUsedTR[which(catmatUsedTR[,32] == i),j]*catmatUsedTR[which(catmatUsedTR[,32] == i),k]) 
+         } 
+         countMatUsedTR[row.j,32] = i
+      }
+   }
+
+   countUsedData = as.data.frame(countMatUsedTR)
+   names(countUsedData) = c(paste0("cat",1:31),'couponCol')
+   countUsedData$cols = rep(names(countUsedData)[1:31],3)
+
+   countUsedData = countUsedData %>% 
+      gather(catID2,propUsed,-cols,-couponCol) %>%  
+      arrange(cols,catID2) %>% 
+      renm(c("couponCol","catID1","catID2","nUsed")) %>% 
+      unique %>% 
+      spread(couponCol,nUsed) %>%
+      renm(c("catID1","catID2","nUsedCol1","nUsedCol2","nUsedCol3"))
+
+   countDataTR$nTotal = with(countDataTR,nTotalCol1 + nTotalCol2 + nTotalCol3)
+   countUsedData$nUsed = with(countUsedData,nUsedCol1 + nUsedCol2 + nUsedCol3)
+
+   propTable = countDataTR %>% full_join(countUsedData,by=c("catID1","catID2"))
+
+   names(propTable)
+
+   propTable$propUsedCol1 = with(propTable,nUsedCol1/nTotalCol1)
+   propTable$propUsedCol2 = with(propTable,nUsedCol2/nTotalCol2)
+   propTable$propUsedCol3 = with(propTable,nUsedCol3/nTotalCol3)
+   propTable$propUsed = with(propTable,nUsed/nTotal)
+
+   countData$nTotal = with(countData,nTotalCol1 + nTotalCol2 + nTotalCol3)
+
+   dogFreq = countData %>% full_join(propTable[,c("catID1","catID2","propUsedCol1", "propUsedCol2", "propUsedCol3", "propUsed")],by=c("catID1","catID2"))
+   dogFreq = dogFreq %>% filter(nTotal > 0)
 ```
 
+We can convert all of these matrices to datasets to facilitate adding them to a feature matrix:
+[//]: # (chunk-label: R code (No Results in Document))
+```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   cpnJoiner = splitCats %>% select(couponID, categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) 
+   cpnJoiner = 
 
-[//]: # (plotCats: R code (No Results in Document))
-```{r plotCats,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   trn.m$categoryIDs = as.character(trn.m$categoryIDs)
-   splitCats = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
-
-   melt.cats = melt(splitCats,id=c("orderID","couponCol","couponUsed"),16:20)
-   melt.cats = melt.cats %>% arrange(orderID,couponCol,couponUsed) %>% as.data.frame 
-   melt.cats = melt.cats[which(!is.na(melt.cats$value)),]
-   head(melt.cats)
-
-   install.packages("hclust")
-   library(hclust)
-   
-
-   df_tots = data.frame(table(melt.cats$value)) %>% arrange(-Freq)
-   df_usage = data.frame(with(melt.cats, table(value,couponUsed))) %>% arrange(-Freq)
-   names(df_tots) = c("catID", "total_seen")
-   names(df_usage) = c("catID","couponUsed","times")
-
-   df_usage = df_usage %>% left_join(df_tots,by="catID") %>% arrange(-total_seen)
-   df_usage$propCatID = df_usage$total_seen/(sum(df_usage$total_seen)/2)
-   qplot(propCatID,prop_time,data=df_usage[which(df_usage$couponUsed == 1),])
-   head(df_usage)
-
-   
-   df_usage$prop_time = df_usage$times/df_usage$total_seen
-
-   qplot(catID,couponUsed,size=prop_time,data=df_usage)
-   melt.cats$varname = paste(melt.cats$value,melt.cats$couponCol,sep='.col')
-   melt.cats = melt.cats[,c("orderID","varname")]
-   melt.cats$value = 1
-   qplot(categoryIDs,basketValue,ylim=c(0,200),data=stack.m,geom='boxplot') 
-   + theme(axis.text.x = element_text(angle=90))
+   dogFreq$catID1 %in% cpnJoiner[1,2:6] & dogFreq$catID2 %in% cpnJoiner[1,2:6]  
 ```
 
 [//]: # (randomforestopts: R code (No Results in Document))
