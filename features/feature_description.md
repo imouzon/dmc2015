@@ -40,3 +40,4 @@ pCoupon2Used | N | H | Y | nCoupon2Used / (total times coupon 2 was seen in the 
 pCoupon3Used | N | H | Y | nCoupon3Used / (total times coupon 3 was seen in the train set) | |
 nCoup[ i ]Col[ j ]Used | N | H | Y | Similar definition as before. $\sum_{j=1}^{3}nCoup[i]Col[j]Used = nCoupon[i]Used$
 pCoup[ i ]Col[ j ]Used | N | H | Y | Similar definition as before. nCoup[ i ]Col[ j ]Used / nCoupon[i]Used.
+nCoup[ i ]Batch | N | C | N | The number of times coupon from column ```i``` appeared in the current batch.
