@@ -122,15 +122,36 @@ names(batchCountsW)[3:5] <- c("nCoup1Batch", "nCoup2Batch", "nCoup3Batch")
 nCoupTrain <- cbind(nCoupTrain, batchCountsW[1:nrow(nCoupTrain), 3:5])
 nCoupClass <- cbind(nCoupClass, batchCountsW[nCoupClass$orderID, 3:5])
 
-# First time the coupon was seen firstTimeCoupRec
+
+
+# First time the coupon was seen: firstTimeCoupRec
+# ===================================================================
+d$couponsReceived <- ymd_hms(d$couponsReceived)
+dMelt <- d %>% melt(id = c("orderID", "couponsReceived"), c(5, 13, 21),
+										variable.name = "couponCol",
+										value.name = "couponID")
+
+coupRecTimes <- dMelt %>% group_by(couponID) %>%
+	summarize(firstTime = min(couponsReceived))
+
+dMelt <- inner_join(dMelt, coupRecTimes, by = "couponID")
+
+dMelt$firstTime <- as.character(dMelt$firstTime)
+dWide <- dMelt %>% select(c(1, 3, 5)) %>%
+	dcast(orderID ~ couponCol, value.var = "firstTime") 
+
+names(dWide)[2:4] <- c("firstTimeCoup1Rec",
+											 "firstTimeCoup2Rec", 
+											 "firstTimeCoup3Rec")
+
+nCoupTrain <- cbind(nCoupTrain, dWide[nCoupTrain$orderID, 2:4])
+nCoupClass <- cbind(nCoupClass, dWide[nCoupClass$orderID, 2:4])
+
+
+# First time the coupon was used: firstTimeCoupUsed
 # ===================================================================
 
-
-
-# First time the coupon was used firstTimeCoupUsed
-# ===================================================================
-
-
+# ? Do we even need this?
 
 
 # Coupon categories
