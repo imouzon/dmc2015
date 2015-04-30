@@ -101,8 +101,26 @@ nCoupClass$pCoup3Col3 <- nCoupClass$nCoup3Col3 / nCoupClass$nCoupon3
 
 # Number of times each coupon appears in the current batch nCoupBatch
 # ===================================================================
+class <- read.csv("~/GitHub/dmc2015/data/featureMatrix/class_ver1.1.csv")
+train <- read.csv("~/GitHub/dmc2015/data/featureMatrix/train_ver1.1.csv")
+d <- rbind(train[, -c(29:32)], class[, -c(29:32)])
 
+allCoups <- melt(d, id = c("orderID", "batchID"), c(5, 13, 21),
+								 variable.name = "couponCol",
+								 value.name = "couponID")
 
+batchCounts <- allCoups %>% group_by(batchID, couponID) %>%
+	summarize(counts = length(orderID))
+
+allCoups2 <- inner_join(allCoups, batchCounts)
+
+batchCountsW <- allCoups2[,-4] %>%
+	dcast(orderID + batchID ~ couponCol, value.var = "counts")
+
+names(batchCountsW)[3:5] <- c("nCoup1Batch", "nCoup2Batch", "nCoup3Batch")
+
+nCoupTrain <- cbind(nCoupTrain, batchCountsW[1:nrow(nCoupTrain), 3:5])
+nCoupClass <- cbind(nCoupClass, batchCountsW[nCoupClass$orderID, 3:5])
 
 # First time the coupon was seen firstTimeCoupRec
 # ===================================================================
