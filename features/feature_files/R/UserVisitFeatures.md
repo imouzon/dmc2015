@@ -105,9 +105,9 @@ These are some wonderful features. Lets write them to a dataset:
    write.csv(features.cls,file="~/dmc2015/features/feature_files/UserVisitFeatures_class.csv",na="",quote=FALSE,row.names=FALSE)
 ```
 
-
 [//]: # (: R code (No Results in Document))
 ```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+
 
 dataset_new %>% filter(couponSwitch) %>% select(batchID,couponsReceived,couponID1,coupon1Used,couponID2,coupon2Used,couponID3,coupon3Used) %>% arrange(userID,batchID) %>% data.frame
 writeset = dataset_new %>% data.frame
