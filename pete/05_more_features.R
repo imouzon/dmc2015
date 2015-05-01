@@ -97,3 +97,5 @@ d <- cbind(d, catI[,-c(1:2)])
 d <- d[, -ncol(d)]
 # We now have indicator columns for all 31 categories
 
+out <- c("a", "b",
+         "c", "d")
