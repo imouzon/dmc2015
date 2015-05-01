@@ -168,11 +168,6 @@ rm(list = c("trainM", "classM"))
 d$categoryIDs <- as.character(d$categoryIDs)
 
 catIDs <- sapply(d$categoryIDs, strsplit, split = ":")
-d$cat1 <- NA
-d$cat2 <- NA
-d$cat3 <- NA
-d$cat4 <- NA
-d$cat5 <- NA
 
 outCats <- matrix(rep(NA, 5*nrow(d)), ncol = 5)
 
