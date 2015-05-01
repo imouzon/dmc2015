@@ -197,4 +197,18 @@ rm(list=c("catM", "catI", "catIDs", "trainM", "classM"))
 # We now have indicator columns for each unique category ID
 
 
+# Brand and premium product
+# ===================================================================
+premSum <- d %>% group_by(couponID) %>%
+	summarize(n = length(premiumProduct),
+						prop = mean(premiumProduct))
 
+d[1:nrow(trainM),] %>% group_by(brand) %>%
+	summarize(propPrem = mean(premiumProduct),
+						bVal = mean(basketValue),
+						propUsed = mean(couponUsed)) %>%
+	ggplot(aes(x = propPrem, y = bVal)) + geom_point()
+
+d %>% group_by(brand) %>%
+	summarize(propPrem = mean(premiumProduct),
+						count = length(premiumProduct))

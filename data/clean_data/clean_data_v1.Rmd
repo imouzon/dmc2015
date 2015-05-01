@@ -1,0 +1,74 @@
+---
+title: Clean Data Version 1
+author: imouzon
+course: DMC
+date: April 30, 2015
+---
+
+[//]: # (R code (No Results in Document))
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/data/clean_data/"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
+   set_parent(parent.file)
+```
+
+[//]: # (R code (No Results in Document))
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+```
+
+#Reading in the data
+All the columns in the training and test set are also contained in the feature matrix.
+I will read from there:
+[//]: # (readdata: R code (No Results in Document))
+```{r readdata,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   featMat = readRDS("../featureMatrix/featMat_v1.1.rds")
+   trn = featMat$train
+   cls = featMat$class
+```
+To make sure that we have captured all of the raw data columns, I will 
+also read in the raw training and classification sets:
+[//]: # (readdata: R code (No Results in Document))
+```{r data,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   raw.trn = read.csv("~/dmc2015/data/clean_data/train_simple_name.csv")
+   raw.cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv")
+```
+
+I want to add some general purpose columns to this dataset.
+I am adding:
+[//]: # (addCols: R code (No Results in Document))
+```{r addCols,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   trn.new = trn[,1:49] 
+   cls.new = cls[,1:49]
+```
+We would like to keep an ordering that resembles the original dataset:
+[//]: # (ordcols: R code (No Results in Document))
+```{r ordcols,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   trn.new = trn.new[,c(1,3,43,45,44,4,2,46:49,33:42,5:32)]
+   cls.new = cls.new[,c(1,3,43,45,44,4,2,46:49,33:42,5:32)]
+```
+and we can save the results:
+[//]: # (: R code (No Results in Document))
+```{r echo=FALSE,warning=FALSE,error=FALSE,eval=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   saveRDS(list("train" = trn.new, "class" = cls.new),file="~/dmc2015/data/clean_data/clean_data_v1.rds")
+   write.csv(trn.new,file="~/dmc2015/data/clean_data/clean_data_v1_train.csv",row.names=FALSE,quote=FALSE,na="")
+   write.csv(cls.new,file="~/dmc2015/data/clean_data/clean_data_v1_class.csv",row.names=FALSE,quote=FALSE,na="")
+```

@@ -1,0 +1,131 @@
+% For LaTeX-Box: root = feature_files/R/featureMatrix_v2.0.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name:
+%  Purpose:
+%
+%  Creation Date: 22-04-2015
+%  Last Modified: Thu Apr 30 18:42:55 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-- Set parent file
+<<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/features/feature_files/R"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=FALSE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),overwrite=FALSE)
+   set_parent(parent.file)
+@
+
+\HWinfo{April 30 2015}{}{}
+\titleheader
+I am using the following packages:
+%-- paks: R code (Code in Document)
+<<paks, echo=TRUE, cache=FALSE, message=FALSE, include=TRUE>>=
+   library(ggplot2)
+   library(lubridate)
+   library(dplyr)
+   library(reshape2)
+   library(sqldf)
+@
+and my working directory is set to \verb!dmc2015/ian/features/feature_files/R/!.
+
+\section{Reading the Data}
+This file updates the feature matrix \verb!featureMatrix_v1.1!. 
+I am adding features Pete, Weicheng, Alex and I have been working on:
+%-- readDat: R code (Code in Document)
+<<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
+   #read in the training set
+   featureMatrix = readRDS("~/dmc2015/data/featureMatrix/featMat_v1.1.rds")
+
+   #split the list feature matrix
+   trn = featureMatrix$train
+   cls = featureMatrix$class
+
+   #get the raw training and test set too for reference
+   trn.raw = read.delim("~/dmc2015/data/raw_data/DMC_2015_orders_train.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+   cls.raw = read.delim("~/dmc2015/data/raw_data/DMC_2015_orders_class.txt", stringsAsFactors = FALSE, sep = "|", quote = "")
+@
+
+\section{Reading the Features}
+The features are stored the \verb!feature_file!.
+In addition to the features we already have in the dataset, I am adding the following:
+%-- readBatch: R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   #user visit features
+   UserVisit = readRDS("~/dmc2015/features/feature_files/UserVisitFeatures.rds")
+   
+   #couponUsed
+   couponUsed_class = read.csv("~/dmc2015/features/feature_files/couponUsed_class.csv")
+   couponUsed_train = read.csv("~/dmc2015/features/feature_files/couponUsed_class.csv")
+
+   #coupon and basket
+   coupon_basket_stats = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats.rds")
+
+   #coupon and order
+   coupon_basket_statsclass_Xorder = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_class_byorder.rds")
+   coupon_basket_statstrain_Xorder = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_train_byorder.rds")
+
+   #coupon count update
+   nCoupClass = read.csv("~/dmc2015/features/feature_files/nCoupClass.csv")
+   nCoupTrain = read.csv("~/dmc2015/features/feature_files/nCoupTrain.csv")
+
+   #NAs should be 0
+   for(i in 1:nrow(nCoupTrain)){
+      for(j in 1:ncol(nCoupTrain)){
+         if(is.na(nCoupTrain[i,j])) nCoupTrain[i,j] = 0
+      }
+   }
+
+   #NAs should be 0
+   for(i in 1:nrow(nCoupClass)){
+      for(j in 1:ncol(nCoupClass)){
+         if(is.na(nCoupClass[i,j])) nCoupClass[i,j] = 0
+      }
+   }
+@
+
+We need to make sure that we are not doubling up on features.
+Since I am updating the old matrix, I will remove the old features.
+%-- dxdf: R code (Code in Document)
+<<dxdf, echo=TRUE, cache=TRUE, include = TRUE>>=
+   names(trn) %in% names(nCoupTrain)
+   trn = trn[,-(50:ncol(trn))]
+
+   names(cls) %in% names(nCoupClass)
+   cls = cls[,-(50:ncol(cls))]
+@
+
+Add the features:
+%-- addFeatures: R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   #It's so easy with dplyr
+   trn = trn %>% left_join(UserVisit$train,by="orderID")
+   cls = cls %>% left_join(UserVisit$class,by="orderID")
+
+   trn = trn %>% left_join(couponUsed_train,by="orderID")
+   cls = cls %>% left_join(couponUsed_class,by="orderID")
+
+   trn = trn %>% left_join(coupon_basket_statstrain_Xorder,by="orderID")
+   cls = cls %>% left_join(coupon_basket_statsclass_Xorder,by="orderID")
+
+   trn = trn %>% left_join(nCoupClass,by="orderID")
+   cls = cls %>% left_join(nCoupClass,by="orderID")
+@
+395 Features!
+
+\section{Writing the Feature Matrix}
+We can save the features as CSV files and R objects (using \verb!saveRDS! and writing the training and test sets as lists):
+%-- : R code (Code in Document)
+<<echo=TRUE, cache=FALSE, include = TRUE>>=
+   write.csv(trn,file="~/dmc2015/data/featureMatrix/train_ver2.0.csv",row.names=FALSE,na="",quote=FALSE)
+   write.csv(cls,file="~/dmc2015/data/featureMatrix/class_ver2.0.csv",row.names=FALSE,na="",quote=FALSE)
+
+   featMat = list("train" = trn, "class" = cls)
+   saveRDS(featMat, file="~/dmc2015/data/featureMatrix/featMat_v2.0.rds")
+@
