@@ -10,25 +10,24 @@ d <- rbind(train[, -c(29:32)], class[, -c(29:32)])
 # Premium products
 # ===================================================================
 train %>% ggplot(aes(x = factor(premiumProduct), y = basketValue)) + 
-	geom_point() + geom_jitter()
+  geom_point() + geom_jitter()
 # Note: all of the huge basketValue's are associated with non-premium products
 
 train %>% group_by(premiumProduct) %>% 
-	summarize(average = mean(basketValue),
-						median = median(basketValue),
-						sd = sd(basketValue))
+  summarize(average = mean(basketValue),
+            median = median(basketValue), sd = sd(basketValue))
 
 train %>% group_by(premiumProduct, couponUsed) %>%
-	summarize(mean = mean(basketValue),
-						median = median(basketValue),
-						sd = sd(basketValue))
+  summarize(mean = mean(basketValue),
+            median = median(basketValue),
+            sd = sd(basketValue))
 # Note: the highest basketValue's are all from people who did received
 # coupons for non-premium products and who did not use the coupons
 
 train %>% group_by(premiumProduct) %>%
-	summarize(propUsed = sum(couponUsed) / length(couponUsed),
-						nUsed = sum(couponUsed),
-						n = length(couponUsed))
+  summarize(propUsed = sum(couponUsed) / length(couponUsed),
+            nUsed = sum(couponUsed),
+            n = length(couponUsed))
 # There is not much of a difference in coupon usage between premium and
 # non-premium products
 
