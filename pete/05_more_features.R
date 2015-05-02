@@ -1,11 +1,15 @@
 # Read in latest feature matrix 
-class <- read.csv("~/GitHub/dmc2015/data/featureMatrix/class_ver1.1.csv")
-train <- read.csv("~/GitHub/dmc2015/data/featureMatrix/train_ver1.1.csv")
+class <- read.csv("~/GitHub/dmc2015/data/featureMatrix/class_ver2.0.csv")
+train <- read.csv("~/GitHub/dmc2015/data/featureMatrix/train_ver2.0.csv")
 # ... or read in long form data
 class <- read.csv("~/GitHub/dmc2015/data/clean_data/melted_test_simple_name.csv")
 train <- read.csv("~/GitHub/dmc2015/data/clean_data/melted_train_simple_name.csv")
 # Combine rows of train and test set
 d <- rbind(train[, -c(29:32)], class[, -c(29:32)])
+# ... or read in rds format
+dataObjects <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_v2.0.rds")
+train <- dataObjects$train
+class <- dataObjects$class
 
 # Premium products
 # ===================================================================
@@ -39,25 +43,24 @@ coupIDs <- matrix(rep(NA, 5 * 31), nrow = 31)
 for (i in 1:31) {
   # number of times coupon category ID seen
   coupIDs[i,1] <- sum(d[,14+i]) 	
-	# proportion of times coupon used with that category ID
-	coupIDs[i,2] <- mean(d$couponUsed[d[,14+i] == 1])
-	# mean basketValue associated with that category ID
-	coupIDs[i,3] <- mean(d$basketValue[d[,14+i] == 1])
-	# number of times associated with premiumProduct
+  # proportion of times coupon used with that category id
+  coupIDs[i,2] <- mean(d$couponUsed[d[,14+i] == 1])
+  # mean basketValue associated with that category id
+  coupIDs[i,3] <- mean(d$basketValue[d[,14+i] == 1])
+  # number of times associated with premiumProduct
   coupIDs[i,4] <- sum(d$premiumProduct[d[,14+i] == 1])
-	# proportion of times associated with premiumProduct
+  # proportion of times associated with premiumProduct
   coupIDs[i,5] <- mean(d$premiumProduct[d[14+i] == 1])
 }
-colnames(coupIDs) <- c("count", "propUsed", "mBasketVal", 
-											 "nPrem", "propPrem")
+colnames(coupIDs) <- c("count", "propUsed", "mBasketVal", "nPrem", "propPrem")
 coupIDs <- data.frame(coupIDs)
 coupIDs <- cbind(names(d)[15:45], coupIDs)
 names(coupIDs)[1] <- "catID"
 
 qplot(propUsed, mBasketVal, data = coupIDs, geom = "point", 
-			size = count, colour = propPrem)
+      size = count, colour = propPrem)
 qplot(propUsed, mBasketVal, data = coupIDs, geom = "point",
-			size = propPrem)
+      size = propPrem)
 qplot(propUsed, propPrem, data = coupIDs, goem = "point")
 qplot(propPrem, mBasketVal, data = coupIDs, geom = "point")
 # Note: there is a strong association between the proportion of times 
@@ -96,5 +99,3 @@ d <- cbind(d, catI[,-c(1:2)])
 d <- d[, -ncol(d)]
 # We now have indicator columns for all 31 categories
 
-out <- c("a", "b",
-         "c", "d")
