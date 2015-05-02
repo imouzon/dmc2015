@@ -1,6 +1,7 @@
-# Fast code to compute estimated log-likelihood ratios for categorical 
-# variables and binary response.
-# Based on the work by Cory Lanker.
+# Code to compute estimated log-likelihood ratios for categorical 
+# variables and binary response. The second function is two calculate the 
+# log-likelihood ratios for an interaction between two categorical variables.
+# This is based on the work by Cory Lanker.
 
 compute_ll <- function(x, y, epsilon = 0.5) {
   # Takes a categorical predictor variable, x, and a binary response
