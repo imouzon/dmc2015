@@ -2,14 +2,22 @@
 # variables and binary response. The second function is two calculate the 
 # log-likelihood ratios for an interaction between two categorical variables.
 # This is based on the work by Cory Lanker.
+#
+# If you want to understand exactly what the code below is doing, I 
+# recommend running the code within the functions step-by-step using the 
+# examples that I created below each function. Let me know if you have any
+# questions. The justification for this approach is explained in Cory Lanker's
+# thesis paper.
 
 compute_ll <- function(x, y, epsilon = 0.5) {
   # Takes a categorical predictor variable, x, and a binary response
   # variable, y, and produces a vector of the estimated log-likelihood
   # statistics. An epsilon > 0 is added to the numerator and denominator
   # to prevent numerical instability.
-  stopifnot(all(y %in% c(0,1)))
+  stopifnot(all(y %in% c(0,1))) # response has to be binary
   levs <- unique(x)
+  # This will create a vector of the estimated log-likelihood ratios for
+  # each level of the explanatory variable. 
   lls <- sapply(levs, FUN = function(levs) {
                   log((sum(x == levs & y == 1) + epsilon) / 
                       (sum(x == levs & y == 0) + epsilon))
@@ -33,14 +41,17 @@ compute_ll_2w <- function(x1, x2, y, epsilon = 0.5) {
   # statistics for all combinations between the levels of each predictor. 
   # An epsilon > 0 is added to the numerator and denominator to prevent 
   # numerical instability.
-  stopifnot(all(y %in% c(0,1)))
+  stopifnot(all(y %in% c(0,1))) # response has to be binary
   levs_1 <- unique(x1)
   levs_2 <- unique(x2)
+  # Using sapply within sapply will create a matrix. This will create a matrix 
+  # of the estimated log-likelihood ratios for each unique combination of the 
+  # levels of each explanatory variable.
   lls <- sapply(levs_2, FUN = function(levs_2) {
                   sapply(levs_1, FUN = function(levs_1) {
                            log((sum(x1 == levs_1 & x2 == levs_2 & y == 1) + 0.5) / 
                                (sum(x1 == levs_1 & x2 == levs_2 & y == 0) + 0.5))
-                    })
+                         })
                 })
   index <- 1:length(x1)
   res <- sapply(index, FUN = function(index) lls[x1[index], x2[index]])
