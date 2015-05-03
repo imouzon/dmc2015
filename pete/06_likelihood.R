@@ -1,5 +1,5 @@
 # Code to compute estimated log-likelihood ratios for categorical 
-# variables and binary response. The second function is two calculate the 
+# variables and binary response. The second function is to calculate the 
 # log-likelihood ratios for an interaction between two categorical variables.
 # This is based on the work by Cory Lanker.
 #
