@@ -166,7 +166,7 @@ Fix the formatting:
 ##nCoup
 <!--- nCoupon: R code (No Results in Document) -->
 ```{r nCoupon,cache=FALSE}
-   nc = list("train" = read.csv("~/dmc2015/features/feature_files/csv/couponUsed_train.csv"), "class" = read.csv("~/dmc2015/features/feature_files/csv/couponUsed_class.csv"))
+   nc = list("train" = read.csv("~/dmc2015/features/feature_files/csv/nCoupTrain.csv"), "class" = read.csv("~/dmc2015/features/feature_files/csv/nCoupClass.csv"))
 ```
 
 # Putting the pieces together
@@ -183,7 +183,7 @@ We create our X and y using these features:
      left_join(cbXo$train,by="orderID") %>%
      left_join(cu$train,by="orderID") %>% 
      left_join(nc$train,by="orderID") %>%
-     left_join(trn[,c("orderID","couponsReceived", "orderTime", "price1","price2","price3", "basePrice1","basePrice2","basePrice3", "reward1","reward2","reward3", "premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
+     left_join(trn[,c("orderID","couponsReceived", "orderTime","price1","price2","price3","basePrice1","basePrice2","basePrice3","reward1","reward2","reward3","premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
 
   X = X[,-(which(names(X) == "orderID"))]
 ```
