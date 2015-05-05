@@ -1,28 +1,36 @@
 ---
-title: Getting Category IDs Under Control
-author: none
-course: DMC
-date: April 29, 2015
+title: Homework 2
+titleshort: HW 2
+instructions: Submit all code; show all methods
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: Machine Learning
+groupshort: STAT 602
+leader: Dr. Stephen Vardeman
+leadershort: Vardeman
+semester: Spring 2014
+assignment: Problem 1 - 5
+duedate: Monday May 4, 2015
+output:
+  usefulR::hw_format
 ---
-
-[//]: # (R code (No Results in Document))
+<!--- # (R code (No Results in Document))-->
 ```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   #set up knit
-   #devtools::install_github('imouzon/usefulR')
+   # devtools::install_github("imouzon/usefulR")
    library(usefulR)
-
    working.dir = "/Users/user/dmc2015/ian"
    setwd(working.dir)
-   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
 
    #set up file locations
-   parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
-
    source("./R/renm.R")
+
+   if(FALSE)
+      rmarkdown::render("~/dmc2015/ian/catID_features.rmd")
 ```
 
 I am using the following packages:
-[//]: # (R code (No Results in Document))
+<!--- # (R code (No Results in Document))-->
 ```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
    library(ggplot2)
    library(lubridate)
@@ -35,6 +43,7 @@ I am using the following packages:
    library(reshape2)
    library(gtools)
    library(sqldf)
+   library(missForest)
 ```
 and my working directory is set to \verb!dmc2015/ian!.
 
@@ -42,7 +51,7 @@ and my working directory is set to \verb!dmc2015/ian!.
 I am working from the current feature matrix:
 <!---  readFeatMat: R code (Code in Document) -->
 ```{r readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE}
-   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v1.1.rds")
+   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v2.0.rds")
    trn = featMat$train
    cls = featMat$class
 
@@ -68,7 +77,7 @@ In case I need to reference the raw data, I will read that too:
    raw.cls = read.csv("~/dmc2015/data/clean_data/test_simple_name.csv")
 ```
 
-[//]: # (splitcols: R code (No Results in Document))
+<!--- (splitcols: R code (No Results in Document))-->
 ```{r splitcols,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
    source("~/dmc2015/ian/R/splitColumn.R")
    stack.m$categoryIDs = as.character(stack.m$categoryIDs)
@@ -94,6 +103,7 @@ In case I need to reference the raw data, I will read that too:
       renm(c("catID","nTotalCol1","nTotalCol2","nTotalCol3")) %>%
       full_join(catFreq,by="catID")
 
+   #get order rates where we know the order outcome (i.e., training set)
    trn.m$categoryIDs = as.character(trn.m$categoryIDs)
    split.trn = splitColumn(trn.m,"categoryIDs","orderID",splitby=":")
 
@@ -131,177 +141,235 @@ In case I need to reference the raw data, I will read that too:
    trnFreq$propUsedCol2 = trnFreq$nTotalUsedCol2/trnFreq$nTotalCol2
    trnFreq$propUsedCol3 = trnFreq$nTotalUsedCol3/trnFreq$nTotalCol3
    trnFreq$propUsed = trnFreq$nTotalUsed/trnFreq$nTotal
+
+   #There are some missing values in this use frequenct matrix (this is to be expected) I can impute the values using missForest
+   impute.missing1000 = missForest(trnFreq[,2:ncol(trnFreq)],maxiter=10, ntree = 1000, verbose =TRUE, mtry = 5, replace = TRUE)
+
+   trnFreq.imp = trnFreq[,1] %>% cbind(impute.missing1000$ximp)
+   names(trnFreq.imp)[1] = "catID"
    
-   catFreq = catFreq %>% full_join(trnFreq[,c("catID","propUsedCol1","propUsedCol2","propUsedCol3","propUsed")],by="catID") 
+   catFreq = catFreq %>% full_join(trnFreq.imp[,c("catID","propUsedCol1","propUsedCol2","propUsedCol3","propUsed")],by="catID")  %>% arrange(catID)
 
    qplot(catID, propUsed,size=nTotal, data=catFreq)
 ```
-
-[//]: # (corrplot: R code (No Results in Document))
+#Getting the results for all 2, 3, 4, and 5 way combinations of categories:
+We can repeat what we did above for all 2-3-4-5 way combinations of these categories:
 ```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
    #load weicheng's correlation matrix:
    #need catcor, catmat
    #setwd("../weicheng/"); source("./categoryExploration.R"); setwd("../ian/");
 
-   #get counts of times any tow catIDs are seen together
-   catmat = data.frame(cbind(splitCats[,17:21], matrix(sapply(1:nrow(splitCats), function(i) as.numeric(paste0("cat",1:31) %in% splitCats[i,17:21])),byrow=FALSE,nrow=nrow(splitCats))))
-   names(catmat)[6:36] = paste0("cat",1:31)
+   #get counts of times any tow catIDs are seen together by column
+   catmat = data.frame(cbind(splitCats[,c(1,15,17:21)], matrix(sapply(1:nrow(splitCats), function(i) as.numeric(paste0("cat",1:31) %in% splitCats[i,17:21])),byrow=TRUE,nrow=nrow(splitCats))))[,-(3:7)] %>% 
+      renm(c("orderID","couponCol",paste0("cat",1:31))) 
+   catID = catmat %>%  
+      mutate(nCats = rowSums(catmat[,3:33])) %>%
+      gather(catID,incpn,-couponCol,-orderID,-nCats) %>% 
+      filter(incpn == 1) 
+   catID = catID %>% 
+      mutate(catIDnum = as.numeric(gsub('cat','',as.character(catID$catID)))) %>% 
+      arrange(orderID,couponCol,catIDnum)
 
-   allFreqs = catmat %>% 
-      group_by(cat1,cat2,cat3,cat4,cat5,cat6,cat7,cat8,cat9, cat10,cat11,cat12,cat13,cat14,cat15,cat16,cat17,cat18,cat19, cat20,cat21,cat22,cat23,cat24,cat25,cat26,cat27,cat28,cat29, cat30,cat31) %>%
-      summarise(CategoryFreq = n()) %>%
-      data.frame %>% 
-      arrange(-cat1,-cat2,-cat3,-cat4,-cat5,-cat6,-cat7,-cat8,-cat9, -cat10,-cat11,-cat12,-cat13,-cat14,-cat15,-cat16,-cat17,-cat18,-cat19, -cat20,-cat21,-cat22,-cat23,-cat24,-cat25,-cat26,-cat27,-cat28,-cat29, -cat30,-cat31)
+   catID1 = catID[which(catID$nCats >= 1),] %>% renm(c("orderID","couponCol","nCats","catID1","incpn","catID1num"))
+   catID2 = catID[which(catID$nCats >= 2),] %>% renm(c("orderID","couponCol","nCats","catID2","incpn","catID2num")) %>% left_join(catID1[which(catID1$nCats > 1),],by=c("orderID","couponCol","nCats","incpn")) %>% filter(catID1num < catID2num)
+   catID3 = catID[which(catID$nCats >= 3),] %>% renm(c("orderID","couponCol","nCats","catID3","incpn","catID3num")) %>% left_join(catID2[which(catID2$nCats > 2),],by=c("orderID","couponCol","nCats","incpn")) %>% filter(catID2num < catID3num)
+   catID4 = catID[which(catID$nCats >= 4),] %>% renm(c("orderID","couponCol","nCats","catID4","incpn","catID4num")) %>% left_join(catID3[which(catID3$nCats > 3),],by=c("orderID","couponCol","nCats","incpn")) %>% filter(catID3num < catID4num)
+   catID5 = catID[which(catID$nCats >= 5),] %>% renm(c("orderID","couponCol","nCats","catID5","incpn","catID5num")) %>% left_join(catID4[which(catID4$nCats > 4),],by=c("orderID","couponCol","nCats","incpn")) %>% filter(catID4num < catID5num) 
 
-   extend.columns = function(dcats,dcnts){
-      Xcats = as.matrix(dcats[,which(names(dcats) %in% paste0("cat",1:31))])
-      Xcnts = as.matrix(dcnts[,which(names(dcnts) %in% paste0("cat",1:31))])
-      Xmat = Xcats%*%t(Xcnts)
-      resdat = cbind(dcats,data.frame(matrix(0,nrow(dcats),5)))
-      names(resdat) = c(names(dcats), paste0('nTimesMatch',1:5))
+   catID2 = catID1 %>% mutate(catID2num = NA, catID2 = NA) %>% rbind(catID2)
+   catID3 = catID2 %>% mutate(catID3num = NA, catID3 = NA) %>% rbind(catID3)
+   catID4 = catID3 %>% mutate(catID4num = NA, catID4 = NA) %>% rbind(catID4)
+   catID5 = catID4 %>% mutate(catID5num = NA, catID5 = NA) %>% rbind(catID5) %>% arrange(orderID,couponCol,catID5num,catID4num,catID3num,catID2num,catID1num)
 
-      for(i in 1:nrow(dcats)){
-         for(j in 1:5){
-            if(length(which(Xmat[i,] == j)) > 0){
-               resdat[i,(ncol(dcats)+j)] = sum(dcnts$CategoryFreq[which(Xmat[i,] == j)])
-            }
-         }
-      }
-      return(resdat)
-   }
+   catCombFreq = catID5 %>% 
+      group_by(catID1,catID2,catID3,catID4,catID5,couponCol) %>% 
+      summarize(nCatCount = sum(incpn)) %>% 
+      arrange(catID1, catID2, catID3, catID4, catID5) %>% 
+      spread(couponCol,nCatCount) %>% 
+      renm(c(paste0("catID",1:5),paste0("nCatXcol",1:3))) %>% 
+      mutate(nCatXtotal = nCatXcol1 + nCatXcol2 + nCatXcol3) %>%
+      gather(varname,value,-catID1,-catID2,-catID3,-catID4,-catID5)
+   catCombFreq$value[which(is.na(catCombFreq$value))] = 0
+```
 
-   cntsXcat = extend.columns(catmat,allFreqs)
-@
+```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   catmatTR = data.frame(cbind(split.trn[,c(1,14:20)], matrix(sapply(1:nrow(split.trn), function(i) as.numeric(paste0("cat",1:31) %in% split.trn[i,16:20])),byrow=TRUE,nrow=nrow(split.trn))))[,-(4:8)] %>% renm(c("orderID","couponUsed","couponCol",paste0("cat",1:31))) 
+   catIDTR = catmatTR %>%  
+      mutate(nCats = rowSums(catmatTR[,4:34])) %>%
+      gather(catID,incpn,-couponCol,-orderID,-nCats,-couponUsed) %>% 
+      filter(incpn == 1) 
+   catIDTR = catIDTR %>% 
+      mutate(catIDnum = as.numeric(gsub('cat','',as.character(catIDTR$catID)))) %>% 
+      arrange(orderID,couponCol,catIDnum)
 
-[//]: # (corrplot: R code (No Results in Document))
+   catIDTR1 = catIDTR[which(catIDTR$nCats >= 1),] %>% renm(c("orderID","couponUsed","couponCol","nCats","catID1","incpn","catID1num"))
+   catIDTR2 = catIDTR[which(catIDTR$nCats >= 2),] %>% renm(c("orderID","couponUsed","couponCol","nCats","catID2","incpn","catID2num")) %>% left_join(catIDTR1[which(catIDTR1$nCats > 1),],by=c("orderID","couponUsed","couponCol","nCats","incpn")) %>% filter(catID1num < catID2num)
+   catIDTR3 = catIDTR[which(catIDTR$nCats >= 3),] %>% renm(c("orderID","couponUsed","couponCol","nCats","catID3","incpn","catID3num")) %>% left_join(catIDTR2[which(catIDTR2$nCats > 2),],by=c("orderID","couponUsed","couponCol","nCats","incpn")) %>% filter(catID2num < catID3num)
+   catIDTR4 = catIDTR[which(catIDTR$nCats >= 4),] %>% renm(c("orderID","couponUsed","couponCol","nCats","catID4","incpn","catID4num")) %>% left_join(catIDTR3[which(catIDTR3$nCats > 3),],by=c("orderID","couponUsed","couponCol","nCats","incpn")) %>% filter(catID3num < catID4num)
+   catIDTR5 = catIDTR[which(catIDTR$nCats >= 5),] %>% renm(c("orderID","couponUsed","couponCol","nCats","catID5","incpn","catID5num")) %>% left_join(catIDTR4[which(catIDTR4$nCats > 4),],by=c("orderID","couponUsed","couponCol","nCats","incpn")) %>% filter(catID4num < catID5num) 
+
+   catIDTR2 = catIDTR1 %>% mutate(catID2num = NA, catID2 = NA) %>% rbind(catIDTR2)
+   catIDTR3 = catIDTR2 %>% mutate(catID3num = NA, catID3 = NA) %>% rbind(catIDTR3)
+   catIDTR4 = catIDTR3 %>% mutate(catID4num = NA, catID4 = NA) %>% rbind(catIDTR4)
+   catIDTR5 = catIDTR4 %>% mutate(catID5num = NA, catID5 = NA) %>% rbind(catIDTR5) %>% arrange(orderID,couponCol,catID5num,catID4num,catID3num,catID2num,catID1num)
+
+   catCombFreqTR = catIDTR5 %>% 
+      group_by(catID1,catID2,catID3,catID4,catID5,couponCol,couponUsed) %>% 
+      summarize(nCatCount = sum(incpn)) %>% 
+      arrange(catID1, catID2, catID3, catID4, catID5) %>% 
+      spread(couponCol,nCatCount) %>% 
+      renm(c(paste0("catID",1:5),"couponUsed",paste0("propCatUsedXcol",1:3))) %>% 
+      mutate(propCatUsedTotal = propCatUsedXcol1 + propCatUsedXcol2 + propCatUsedXcol3) %>%
+      gather(couponCol, count, -catID1, -catID2, -catID3, -catID4, -catID5, -couponUsed) %>%
+      spread(couponUsed,count) %>%
+      renm(c(paste0("catID",1:5),"couponCol",paste0("used",0:1))) 
+   catCombFreqTR$used0[which(is.na(catCombFreqTR$used0))] = 0
+   catCombFreqTR$used1[which(is.na(catCombFreqTR$used1))] = 0
+   catCombFreqTR = catCombFreqTR %>% mutate(value = used1/(used0 + used1)) 
+   catCombFreqTR = catCombFreqTR[,-which(names(catCombFreqTR) %in% c("used0","used1"))] %>% spread(couponCol,value)
+
+   catCombFreq = catCombFreqTR %>% 
+      gather(varname,value,-catID1,-catID2,-catID3,-catID4,-catID5) %>% 
+      rbind(catCombFreq) %>% 
+      spread(varname,value) %>% 
+      data.frame
+
+   #There are some missing values in this use frequenct matrix (this is to be expected) I can impute the values using missForest
+   impute.missing1000 = missForest(catCombFreq[,6:ncol(catCombFreq)],
+                                   maxiter=10, ntree = 1000, verbose =TRUE, mtry = 5, replace = TRUE)
+
+   catCombFreq = catCombFreq[,1:5] %>% cbind(impute.missing1000$ximp)
+```
+We now have two valuable tools: \verb!catFreq! and \verb!catCombFreq!
+<!---
 ```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   Xtest = data.frame(matrix(c(1,rep(0,30)),1,31))
-   names(Xtest) = names(catmat)[6:36]
-   extend.columns(Xtest, dcnts)
-   catFreq
-
-   pcorrmat = cor(catmat[,6:36])
-
-   #get counts of times any two catIDs are seen together
-   countMat = matrix(0,3*31,32)
-   for(i in 1:3){
-      for(j in 1:31){ 
-         for (k in (j+1):31){ 
-            row.j = (i-1)*31 + j
-            countMat[row.j,k] = sum(catmat[which(catmat[,32] == i),j]*catmat[which(catmat[,32] == i),k]) 
-         } 
-         countMat[row.j,32] = i
-      }
-   }
-
-   countData = as.data.frame(countMat)
-   names(countData) = c(paste0("cat",1:31),'couponCol')
-   countData$cols = rep(names(countData)[1:31],3)
-
-   countData = countData %>% 
-      gather(catID2,prop,-cols,-couponCol) %>%  
-      arrange(cols,catID2) %>% 
-      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
-      unique %>% 
-      spread(couponCol,nTotal) %>%
-      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
+#   names(cntsXcat)
+#   Xtest = data.frame(matrix(c(1,rep(0,30)),1,31))
+#   names(Xtest) = names(catmat)[6:36]
+#   extend.columns(Xtest, dcnts)
+#   catFreq
+#
+#   pcorrmat = cor(catmat[,6:36])
+#
+#   #get counts of times any two catIDs are seen together
+#   countMat = matrix(0,3*31,32)
+#   for(i in 1:3){
+#      for(j in 1:31){ 
+#         for (k in (j+1):31){ 
+#            row.j = (i-1)*31 + j
+#            countMat[row.j,k] = sum(catmat[which(catmat[,32] == i),j]*catmat[which(catmat[,32] == i),k]) 
+#         } 
+#         countMat[row.j,32] = i
+#      }
+#   }
+#
+#   countData = as.data.frame(countMat)
+#   names(countData) = c(paste0("cat",1:31),'couponCol')
+#   countData$cols = rep(names(countData)[1:31],3)
+#
+#   countData = countData %>% 
+#      gather(catID2,prop,-cols,-couponCol) %>%  
+#      arrange(cols,catID2) %>% 
+#      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
+#      unique %>% 
+#      spread(couponCol,nTotal) %>%
+#      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
 ```
 We now have a matrix identifying correlation between two categories and the number of times they occur.
 
 We can get correlation matrix and count matrix for when coupons are being used as well:
-[//]: # (-label: R code (No Results in Document))
 ```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
-   catmatTR = matrix(0,nrow(split.trn),32)
-   for(i in 1:nrow(catmatTR)){
-      catmatTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% split.trn[i,16:20])
-      catmatTR[i,32] = split.trn$couponCol[i]
-   }
-
-   pcorrmatTR = cor(catmatTR[,1:31])
-
-   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
-   countMatTR = matrix(0,3*31,32)
-   for(i in 1:3){
-      for(j in 1:31){ 
-         for (k in (j+1):31){ 
-            row.j = (i-1)*31 + j
-            countMatTR[row.j,k] = sum(catmatTR[which(catmatTR[,32] == i),j]*catmatTR[which(catmatTR[,32] == i),k]) 
-         } 
-         countMatTR[row.j,32] = i
-      }
-   }
-
-   countDataTR = as.data.frame(countMatTR)
-   names(countDataTR) = c(paste0("cat",1:31),'couponCol')
-   countDataTR$cols = rep(names(countDataTR)[1:31],3)
-
-   countDataTR = countDataTR %>% 
-      gather(catID2,prop,-cols,-couponCol) %>%  
-      arrange(cols,catID2) %>% 
-      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
-      unique %>% 
-      spread(couponCol,nTotal) %>%
-      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
-
-
-   #do the same for when coupons are used
-   splitCatsUsedTR = split.trn[which(split.trn$couponUsed == 1),]
-
-   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
-   catmatUsedTR = matrix(0,nrow(splitCatsUsedTR),32)
-   for(i in 1:nrow(catmatUsedTR)){
-      catmatUsedTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% splitCatsUsedTR[i,16:20])
-      catmatUsedTR[i,32] = splitCatsUsedTR$couponCol[i]
-   }
-
-   pcorrmatUsedTR = cor(catmatUsedTR[,1:31])
-
-   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
-   countMatUsedTR = matrix(0,3*31,32)
-   for(i in 1:3){
-      for(j in 1:31){ 
-         for (k in (j+1):31){ 
-            row.j = (i-1)*31 + j
-            countMatUsedTR[row.j,k] = sum(catmatUsedTR[which(catmatUsedTR[,32] == i),j]*catmatUsedTR[which(catmatUsedTR[,32] == i),k]) 
-         } 
-         countMatUsedTR[row.j,32] = i
-      }
-   }
-
-   countUsedData = as.data.frame(countMatUsedTR)
-   names(countUsedData) = c(paste0("cat",1:31),'couponCol')
-   countUsedData$cols = rep(names(countUsedData)[1:31],3)
-
-   countUsedData = countUsedData %>% 
-      gather(catID2,propUsed,-cols,-couponCol) %>%  
-      arrange(cols,catID2) %>% 
-      renm(c("couponCol","catID1","catID2","nUsed")) %>% 
-      unique %>% 
-      spread(couponCol,nUsed) %>%
-      renm(c("catID1","catID2","nUsedCol1","nUsedCol2","nUsedCol3"))
-
-   countDataTR$nTotal = with(countDataTR,nTotalCol1 + nTotalCol2 + nTotalCol3)
-   countUsedData$nUsed = with(countUsedData,nUsedCol1 + nUsedCol2 + nUsedCol3)
-
-   propTable = countDataTR %>% full_join(countUsedData,by=c("catID1","catID2"))
-
-   propTable$propUsedCol1 = with(propTable,nUsedCol1/nTotalCol1)
-   propTable$propUsedCol2 = with(propTable,nUsedCol2/nTotalCol2)
-   propTable$propUsedCol3 = with(propTable,nUsedCol3/nTotalCol3)
-   propTable$propUsed = with(propTable,nUsed/nTotal)
-
-   countData$nTotal = with(countData,nTotalCol1 + nTotalCol2 + nTotalCol3)
-
-   dogFreq = countData %>% full_join(propTable[,c("catID1","catID2","propUsedCol1", "propUsedCol2", "propUsedCol3", "propUsed")],by=c("catID1","catID2"))
-   dogFreq = dogFreq %>% filter(nTotal > 0)
-
-   qplot(catID1,catID2,color=nTotal,size=propUsed,data=dogFreq)
+#   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
+#   catmatTR = matrix(0,nrow(split.trn),32)
+#   for(i in 1:nrow(catmatTR)){
+#      catmatTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% split.trn[i,16:20])
+#      catmatTR[i,32] = split.trn$couponCol[i]
+#   }
+#
+#   pcorrmatTR = cor(catmatTR[,1:31])
+#
+#   #get counts of times any tow catIDs are seen together IN THE TRAINING SET
+#   countMatTR = matrix(0,3*31,32)
+#   for(i in 1:3){
+#      for(j in 1:31){ 
+#         for (k in (j+1):31){ 
+#            row.j = (i-1)*31 + j
+#            countMatTR[row.j,k] = sum(catmatTR[which(catmatTR[,32] == i),j]*catmatTR[which(catmatTR[,32] == i),k]) 
+#         } 
+#         countMatTR[row.j,32] = i
+#      }
+#   }
+#
+#   countDataTR = as.data.frame(countMatTR)
+#   names(countDataTR) = c(paste0("cat",1:31),'couponCol')
+#   countDataTR$cols = rep(names(countDataTR)[1:31],3)
+#
+#   countDataTR = countDataTR %>% 
+#      gather(catID2,prop,-cols,-couponCol) %>%  
+#      arrange(cols,catID2) %>% 
+#      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
+#      unique %>% 
+#      spread(couponCol,nTotal) %>%
+#      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
+#
+#
+#   #do the same for when coupons are used
+#   splitCatsUsedTR = split.trn[which(split.trn$couponUsed == 1),]
+#
+#   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
+#   catmatUsedTR = matrix(0,nrow(splitCatsUsedTR),32)
+#   for(i in 1:nrow(catmatUsedTR)){
+#      catmatUsedTR[i,1:31] = as.numeric(paste0("cat",1:31) %in% splitCatsUsedTR[i,16:20])
+#      catmatUsedTR[i,32] = splitCatsUsedTR$couponCol[i]
+#   }
+#
+#   pcorrmatUsedTR = cor(catmatUsedTR[,1:31])
+#
+#   #get counts of times any tow catIDs are seen together IN THE UsedTRAINING SET
+#   countMatUsedTR = matrix(0,3*31,32)
+#   for(i in 1:3){
+#      for(j in 1:31){ 
+#         for (k in (j+1):31){ 
+#            row.j = (i-1)*31 + j
+#            countMatUsedTR[row.j,k] = sum(catmatUsedTR[which(catmatUsedTR[,32] == i),j]*catmatUsedTR[which(catmatUsedTR[,32] == i),k]) 
+#         } 
+#         countMatUsedTR[row.j,32] = i
+#      }
+#   }
+#
+#   countUsedData = as.data.frame(countMatUsedTR)
+#   names(countUsedData) = c(paste0("cat",1:31),'couponCol')
+#   countUsedData$cols = rep(names(countUsedData)[1:31],3)
+#
+#   countUsedData = countUsedData %>% 
+#      gather(catID2,propUsed,-cols,-couponCol) %>%  
+#      arrange(cols,catID2) %>% 
+#      renm(c("couponCol","catID1","catID2","nUsed")) %>% 
+#      unique %>% 
+#      spread(couponCol,nUsed) %>%
+#      renm(c("catID1","catID2","nUsedCol1","nUsedCol2","nUsedCol3"))
+#
+#   countDataTR$nTotal = with(countDataTR,nTotalCol1 + nTotalCol2 + nTotalCol3)
+#   countUsedData$nUsed = with(countUsedData,nUsedCol1 + nUsedCol2 + nUsedCol3)
+#
+#   propTable = countDataTR %>% full_join(countUsedData,by=c("catID1","catID2"))
+#
+#   propTable$propUsedCol1 = with(propTable,nUsedCol1/nTotalCol1)
+#   propTable$propUsedCol2 = with(propTable,nUsedCol2/nTotalCol2)
+#   propTable$propUsedCol3 = with(propTable,nUsedCol3/nTotalCol3)
+#   propTable$propUsed = with(propTable,nUsed/nTotal)
+#
+#   countData$nTotal = with(countData,nTotalCol1 + nTotalCol2 + nTotalCol3)
+#
+#   dogFreq = countData %>% full_join(propTable[,c("catID1","catID2","propUsedCol1", "propUsedCol2", "propUsedCol3", "propUsed")],by=c("catID1","catID2"))
+#   dogFreq = dogFreq %>% filter(nTotal > 0)
+#
+#   qplot(catID1,catID2,color=nTotal,size=propUsed,data=dogFreq)
 ```
 
 We can save this output:
-[//]: # (chunk-label: R code (No Results in Document))
 ```{r echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   saveRDS(catFreq,file="../features/feature_files/one-way_categoricalProportions.rds")
-   saveRDS(dogFreq,file="../features/feature_files/two-way_categoricalProportions.rds")
+#   saveRDS(catFreq,file="../features/feature_files/one-way_categoricalProportions.rds")
+#   saveRDS(dogFreq,file="../features/feature_files/two-way_categoricalProportions.rds")
 ```
+-->

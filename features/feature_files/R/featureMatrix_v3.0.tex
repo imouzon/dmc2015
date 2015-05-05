@@ -1,0 +1,464 @@
+% For LaTeX-Box: root = 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name:
+%  Purpose:
+%
+%  Creation Date: 04-05-2015
+%  Last Modified: Mon May  4 18:37:05 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% example yaml
+% ---
+% title: Homework 2
+% titleshort: HW 2
+% instructions: Submit all code; show all methods
+% author: Ian Mouzon
+% authorshort: Mouzon
+% contact: imouzon@iastate.edu
+% grouplong: Machine Learning
+% groupshort: STAT 602
+% leader: Dr. Stephen Vardeman
+% leadershort: Vardeman
+% semester: Spring 2014
+% assignment: Problem 1 - 5
+% duedate: Monday May 4, 2015
+% output:
+%   usefulR::hw_template:
+% ---
+
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+%\usepackage[Ian Mouzon,]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+%%
+\pagestyle{fancy}
+   \lhead{\href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}}
+   \lhead{authorshort}
+   \chead{DMC 2015\ (\href{mailto:DMC@ISU}{\nolinkurl{DMC@ISU}}\ Spring 2015): }  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+
+\begin{document}
+
+%make title:
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{DMC 2015: Data Mining Coupons}\\
+       \\
+       Spring 2015, Iowa State University Data Mining Cup Team\\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+    Name& Ian Mouzon\\
+    email& \href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}\\
+    Instructions& \\
+    Assignment& \\
+    Due Date&  May 5th, 2015\\
+    \hline
+ \end{tabular*}
+\end{center}
+
+I am using the following packages to create this feature matrix:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(lubridate)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\KeywordTok{library}\NormalTok{(reshape2)}
+\KeywordTok{library}\NormalTok{(sqldf)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Getting the data}\label{getting-the-data}
+
+I read the raw and clean data into R using the following simple
+commands:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# training set ('historical data')}
+\NormalTok{trn.raw =}\StringTok{ }\KeywordTok{read.delim}\NormalTok{(}\StringTok{"~/dmc2015/data/raw_data/DMC_2015_orders_train.txt"}\NormalTok{, }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{, }
+    \DataTypeTok{sep =} \StringTok{"|"}\NormalTok{, }\DataTypeTok{quote =} \StringTok{""}\NormalTok{)}
+\NormalTok{trn =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/data/clean_data/train_simple_name.csv"}\NormalTok{, }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{, }
+    \DataTypeTok{na.strings =} \StringTok{""}\NormalTok{)[, }\KeywordTok{names}\NormalTok{(trn.raw)]}
+
+\CommentTok{# test set ('future data')}
+\NormalTok{cls.raw =}\StringTok{ }\KeywordTok{read.delim}\NormalTok{(}\StringTok{"~/dmc2015/data/raw_data/DMC_2015_orders_class.txt"}\NormalTok{, }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{, }
+    \DataTypeTok{sep =} \StringTok{"|"}\NormalTok{, }\DataTypeTok{quote =} \StringTok{""}\NormalTok{)}
+\NormalTok{cls =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/data/clean_data/test_simple_name.csv"}\NormalTok{, }\DataTypeTok{stringsAsFactors =} \OtherTok{FALSE}\NormalTok{, }
+    \DataTypeTok{na.strings =} \StringTok{""}\NormalTok{)[, }\KeywordTok{names}\NormalTok{(cls.raw)]}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Formatting the data}\label{formatting-the-data}
+
+The data in thi raw form has the following formatting:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(trn)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    6053 obs. of  32 variables:
+##  $ orderID        : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ orderTime      : chr  "2015-01-06 09:38:35" "2015-01-06 10:03:19" "2015-01-06 10:08:13" "2015-01-06 13:23:23" ...
+##  $ userID         : chr  "user1" "user2" "user3" "user4" ...
+##  $ couponsReceived: chr  "2015-01-06 09:34:53" "2015-01-06 10:00:44" "2015-01-06 09:29:16" "2015-01-06 13:13:12" ...
+##  $ couponID1      : chr  "cpn1" "cpn4" "cpn7" "cpn10" ...
+##  $ price1         : num  3.24 2.32 7.92 2.5 12.27 ...
+##  $ basePrice1     : num  5.4 1.59 2.64 2.08 2.45 1.25 2.59 2.04 4.54 1.25 ...
+##  $ reward1        : num  1.57 1.57 1.26 1.57 1.26 0.63 1.26 0.94 1.26 0.94 ...
+##  $ premiumProduct1: int  0 0 1 0 0 0 1 1 0 0 ...
+##  $ brand1         : chr  "brand1" "brand2" "brand4" "brand6" ...
+##  $ productGroup1  : chr  "prod1" "prod4" "prod7" "prod10" ...
+##  $ categoryIDs1   : chr  "cat1:cat2" "cat5" "cat1:cat7" "cat1" ...
+##  $ couponID2      : chr  "cpn2" "cpn5" "cpn8" "cpn11" ...
+##  $ price2         : num  5.19 3.7 4.17 3.66 5.74 4.35 10 4.82 3.98 3.06 ...
+##  $ basePrice2     : num  0.57 1.85 1.39 0.73 0.88 1.44 1.33 0.6 1.99 0.61 ...
+##  $ reward2        : num  1.57 0.94 1.26 1.57 1.57 1.26 0.94 1.57 1.88 1.26 ...
+##  $ premiumProduct2: int  0 0 1 1 1 0 0 0 0 1 ...
+##  $ brand2         : chr  "brand2" "brand3" "brand4" "brand4" ...
+##  $ productGroup2  : chr  "prod2" "prod5" "prod8" "prod11" ...
+##  $ categoryIDs2   : chr  "cat3:cat4" "cat6" "cat3:cat7" "cat3:cat7:cat4" ...
+##  $ couponID3      : chr  "cpn3" "cpn6" "cpn9" "cpn12" ...
+##  $ price3         : num  12.92 3.89 2.73 5.74 4.91 ...
+##  $ basePrice3     : num  12.92 0.06 0.88 4.25 2.45 ...
+##  $ reward3        : num  2.2 2.2 1.26 1.57 1.57 3.14 1.88 1.57 1.26 1.26 ...
+##  $ premiumProduct3: int  0 0 0 0 1 0 0 1 0 0 ...
+##  $ brand3         : chr  "brand3" "brand2" "brand5" "brand5" ...
+##  $ productGroup3  : chr  "prod3" "prod6" "prod9" "prod12" ...
+##  $ categoryIDs3   : chr  "cat5:cat4:cat2" "cat6" "cat5:cat2" "cat5:cat2" ...
+##  $ coupon1Used    : int  0 1 0 1 0 1 0 1 0 1 ...
+##  $ coupon2Used    : int  1 0 0 1 0 0 0 1 0 0 ...
+##  $ coupon3Used    : int  0 1 0 0 0 1 0 1 0 1 ...
+##  $ basketValue    : num  188 186 208 186 272 ...
+\end{verbatim}
+
+We would like to properly format the data/time variables and convert
+factors to factors:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# first we stack together}
+\NormalTok{trn$dsn =}\StringTok{ "train"}
+\NormalTok{cls$dsn =}\StringTok{ "class"}
+\NormalTok{d =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(trn, cls)}
+\NormalTok{d$dsn =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$dsn, }\DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{"train"}\NormalTok{, }\StringTok{"class"}\NormalTok{))}
+
+\CommentTok{# formatting orderTime}
+\NormalTok{d$orderTime =}\StringTok{ }\KeywordTok{ymd_hms}\NormalTok{(d$orderTime)}
+
+\CommentTok{# formatting couponsReceived}
+\NormalTok{d$couponsReceived =}\StringTok{ }\KeywordTok{ymd_hms}\NormalTok{(d$couponsReceived)}
+
+\CommentTok{# formatting userID}
+\NormalTok{d$userID =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(d$userID)}
+
+\CommentTok{# formatting brands:}
+\NormalTok{d$brand1 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$brand1, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"brand"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$brand1, }
+    \NormalTok{d$brand2, d$brand3)))))}
+\NormalTok{d$brand2 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$brand2, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"brand"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$brand1, }
+    \NormalTok{d$brand2, d$brand3)))))}
+\NormalTok{d$brand3 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$brand3, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"brand"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$brand1, }
+    \NormalTok{d$brand2, d$brand3)))))}
+
+\CommentTok{# formatting productGroups:}
+\NormalTok{d$productGroup1 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$productGroup1, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"prod"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$productGroup1, }
+    \NormalTok{d$productGroup2, d$productGroup3)))))}
+\NormalTok{d$productGroup2 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$productGroup2, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"prod"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$productGroup1, }
+    \NormalTok{d$productGroup2, d$productGroup3)))))}
+\NormalTok{d$productGroup3 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$productGroup3, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"prod"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$productGroup1, }
+    \NormalTok{d$productGroup2, d$productGroup3)))))}
+
+\CommentTok{# formatting couponIDs:}
+\NormalTok{d$couponID1 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$couponID1, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"cpn"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$couponID1, }
+    \NormalTok{d$couponID2, d$couponID3)))))}
+\NormalTok{d$couponID2 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$couponID2, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"cpn"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$couponID1, }
+    \NormalTok{d$couponID2, d$couponID3)))))}
+\NormalTok{d$couponID3 =}\StringTok{ }\KeywordTok{factor}\NormalTok{(d$couponID3, }\DataTypeTok{levels =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"cpn"}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(d$couponID1, }
+    \NormalTok{d$couponID2, d$couponID3)))))}
+\end{Highlighting}
+\end{Shaded}
+
+which gives the following structure:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(d)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    6722 obs. of  33 variables:
+##  $ orderID        : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ orderTime      : POSIXct, format: "2015-01-06 09:38:35" "2015-01-06 10:03:19" ...
+##  $ userID         : Factor w/ 3096 levels "user1","user10",..: 1 1112 2223 2431 2542 2653 2764 2875 2986 2 ...
+##  $ couponsReceived: POSIXct, format: "2015-01-06 09:34:53" "2015-01-06 10:00:44" ...
+##  $ couponID1      : Factor w/ 3446 levels "cpn1","cpn2",..: 1 4 7 10 13 16 19 22 25 28 ...
+##  $ price1         : num  3.24 2.32 7.92 2.5 12.27 ...
+##  $ basePrice1     : num  5.4 1.59 2.64 2.08 2.45 1.25 2.59 2.04 4.54 1.25 ...
+##  $ reward1        : num  1.57 1.57 1.26 1.57 1.26 0.63 1.26 0.94 1.26 0.94 ...
+##  $ premiumProduct1: int  0 0 1 0 0 0 1 1 0 0 ...
+##  $ brand1         : Factor w/ 28 levels "brand1","brand2",..: 1 2 4 6 6 2 4 4 3 2 ...
+##  $ productGroup1  : Factor w/ 231 levels "prod1","prod2",..: 1 4 7 10 7 15 7 7 20 15 ...
+##  $ categoryIDs1   : chr  "cat1:cat2" "cat5" "cat1:cat7" "cat1" ...
+##  $ couponID2      : Factor w/ 4159 levels "cpn1","cpn2",..: 2 5 8 11 14 17 20 23 26 29 ...
+##  $ price2         : num  5.19 3.7 4.17 3.66 5.74 4.35 10 4.82 3.98 3.06 ...
+##  $ basePrice2     : num  0.57 1.85 1.39 0.73 0.88 1.44 1.33 0.6 1.99 0.61 ...
+##  $ reward2        : num  1.57 0.94 1.26 1.57 1.57 1.26 0.94 1.57 1.88 1.26 ...
+##  $ premiumProduct2: int  0 0 1 1 1 0 0 0 0 1 ...
+##  $ brand2         : Factor w/ 54 levels "brand1","brand2",..: 2 3 4 4 4 3 3 3 2 4 ...
+##  $ productGroup2  : Factor w/ 399 levels "prod1","prod2",..: 2 5 8 11 13 16 18 11 14 22 ...
+##  $ categoryIDs2   : chr  "cat3:cat4" "cat6" "cat3:cat7" "cat3:cat7:cat4" ...
+##  $ couponID3      : Factor w/ 4573 levels "cpn1","cpn2",..: 3 6 9 12 15 18 21 24 27 30 ...
+##  $ price3         : num  12.92 3.89 2.73 5.74 4.91 ...
+##  $ basePrice3     : num  12.92 0.06 0.88 4.25 2.45 ...
+##  $ reward3        : num  2.2 2.2 1.26 1.57 1.57 3.14 1.88 1.57 1.26 1.26 ...
+##  $ premiumProduct3: int  0 0 0 0 1 0 0 1 0 0 ...
+##  $ brand3         : Factor w/ 52 levels "brand1","brand2",..: 3 2 5 5 4 3 2 4 3 3 ...
+##  $ productGroup3  : Factor w/ 413 levels "prod1","prod2",..: 3 6 9 12 14 17 14 19 21 23 ...
+##  $ categoryIDs3   : chr  "cat5:cat4:cat2" "cat6" "cat5:cat2" "cat5:cat2" ...
+##  $ coupon1Used    : int  0 1 0 1 0 1 0 1 0 1 ...
+##  $ coupon2Used    : int  1 0 0 1 0 0 0 1 0 0 ...
+##  $ coupon3Used    : int  0 1 0 0 0 1 0 1 0 1 ...
+##  $ basketValue    : num  188 186 208 186 272 ...
+##  $ dsn            : Factor w/ 2 levels "train","class": 1 1 1 1 1 1 1 1 1 1 ...
+\end{verbatim}
+
+We can save this raw dataset first by splitting the pieces back up:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{trn =}\StringTok{ }\NormalTok{d[}\KeywordTok{which}\NormalTok{(d$dsn ==}\StringTok{ "train"}\NormalTok{), ]}
+\NormalTok{trn =}\StringTok{ }\NormalTok{trn[, -}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(trn) ==}\StringTok{ "dsn"}\NormalTok{)]}
+\NormalTok{cls =}\StringTok{ }\NormalTok{d[}\KeywordTok{which}\NormalTok{(d$dsn ==}\StringTok{ "class"}\NormalTok{), ]}
+\NormalTok{cls =}\StringTok{ }\NormalTok{cls[, -}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(cls) ==}\StringTok{ "dsn"}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+Then by writing the following \verb!RDS! file
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{saveRDS}\NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \NormalTok{trn, }\DataTypeTok{class =} \NormalTok{cls), }\DataTypeTok{file =} \StringTok{"~/dmc2015/data/clean_data/clean_simple.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Adding the Features}\label{adding-the-features}
+
+\subsection{Batch ID}\label{batch-id}
+
+I read the batch ID file as follows: \%-- readBatch: R code (Code in
+Document)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# batch features in ~/dmc2015/features/feature_files/batchInfo_test.csv,}
+\CommentTok{# batchInfo_train.csv}
+\NormalTok{bit =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/batchInfo_train.rds"}\NormalTok{)}
+\NormalTok{bic =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/batchInfo_test.rds"}\NormalTok{)}
+\NormalTok{bi =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(bit, bic)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Check the batch to make sure it's
+clean}\label{check-the-batch-to-make-sure-its-clean}
+
+Check for no missing features:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# check for no missing values}
+\KeywordTok{nrow}\NormalTok{(bi) -}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{complete.cases}\NormalTok{(bi))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+Fix the formatting:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bi$couponsReceivedTime =}\StringTok{ }\KeywordTok{period_to_seconds}\NormalTok{(bi$couponsReceivedTime)/}\DecValTok{3600}
+\NormalTok{bi$orderTimeTime =}\StringTok{ }\KeywordTok{period_to_seconds}\NormalTok{(bi$orderTimeTime)/}\DecValTok{3600}
+
+\NormalTok{bi =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \NormalTok{bi[}\KeywordTok{which}\NormalTok{(bi$orderID <=}\StringTok{ }\DecValTok{6053}\NormalTok{), ], }\DataTypeTok{class =} \NormalTok{bi[}\KeywordTok{which}\NormalTok{(bi$orderID >}\StringTok{ }
+\StringTok{    }\DecValTok{6053}\NormalTok{), ])}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{User Visit Features}\label{user-visit-features}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{uv =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/UserVisitFeatures.rds"}\NormalTok{)}
+
+\CommentTok{# no missing values}
+\KeywordTok{length}\NormalTok{(}\KeywordTok{complete.cases}\NormalTok{(uv$train)) -}\StringTok{ }\KeywordTok{nrow}\NormalTok{(uv$train)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\subsection{Coupon Basket Stats}\label{coupon-basket-stats}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cb =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/coupon_basket_stats_train.rds"}\NormalTok{), }
+    \DataTypeTok{class =} \KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/coupon_basket_stats_class.rds"}\NormalTok{))}
+\NormalTok{cbXo =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/coupon_basket_stats_train_byorder.rds"}\NormalTok{), }
+    \DataTypeTok{class =} \KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/coupon_basket_stats_class_byorder.rds"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Coupon Used}\label{coupon-used}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cu =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/csv/couponUsed_train.csv"}\NormalTok{), }
+    \DataTypeTok{class =} \KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/csv/couponUsed_class.csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{nCoup}\label{ncoup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nc =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/csv/couponUsed_train.csv"}\NormalTok{), }
+    \DataTypeTok{class =} \KeywordTok{read.csv}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/csv/couponUsed_class.csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Putting the pieces together}\label{putting-the-pieces-together}
+
+We create our X and y using these features:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{orderID =} \NormalTok{trn$orderID)}
+\NormalTok{y =}\StringTok{ }\NormalTok{trn[, }\KeywordTok{c}\NormalTok{(}\StringTok{"coupon1Used"}\NormalTok{, }\StringTok{"coupon2Used"}\NormalTok{, }\StringTok{"coupon3Used"}\NormalTok{, }\StringTok{"basketValue"}\NormalTok{)]}
+
+\NormalTok{X =}\StringTok{ }\NormalTok{X %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(bi$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(uv$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }
+\StringTok{    }\KeywordTok{left_join}\NormalTok{(cb$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(cbXo$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }
+\StringTok{    }\KeywordTok{left_join}\NormalTok{(cu$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(nc$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }
+\StringTok{    }\KeywordTok{left_join}\NormalTok{(trn[, }\KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponsReceived"}\NormalTok{, }\StringTok{"orderTime"}\NormalTok{, }\StringTok{"price1"}\NormalTok{, }\StringTok{"price2"}\NormalTok{, }
+        \StringTok{"price3"}\NormalTok{, }\StringTok{"basePrice1"}\NormalTok{, }\StringTok{"basePrice2"}\NormalTok{, }\StringTok{"basePrice3"}\NormalTok{, }\StringTok{"reward1"}\NormalTok{, }\StringTok{"reward2"}\NormalTok{, }
+        \StringTok{"reward3"}\NormalTok{, }\StringTok{"premiumProduct1"}\NormalTok{, }\StringTok{"premiumProduct2"}\NormalTok{, }\StringTok{"premiumProduct3"}\NormalTok{)], }
+        \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
+
+\NormalTok{X =}\StringTok{ }\NormalTok{X[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X) ==}\StringTok{ "orderID"}\NormalTok{))]}
+\end{Highlighting}
+\end{Shaded}
+
+and do the same for classification:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X.cls =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{orderID =} \NormalTok{cls$orderID)}
+\NormalTok{y.cls =}\StringTok{ }\NormalTok{cls[, }\KeywordTok{c}\NormalTok{(}\StringTok{"coupon1Used"}\NormalTok{, }\StringTok{"coupon2Used"}\NormalTok{, }\StringTok{"coupon3Used"}\NormalTok{, }\StringTok{"basketValue"}\NormalTok{)]}
+
+\NormalTok{X.cls =}\StringTok{ }\NormalTok{X.cls %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(bi$class, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(uv$class, }
+    \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(cb$class, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(cbXo$class, }
+    \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(cu$class, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(nc$class, }
+    \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(cls[, }\KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponsReceived"}\NormalTok{, }\StringTok{"orderTime"}\NormalTok{, }
+    \StringTok{"price1"}\NormalTok{, }\StringTok{"price2"}\NormalTok{, }\StringTok{"price3"}\NormalTok{, }\StringTok{"basePrice1"}\NormalTok{, }\StringTok{"basePrice2"}\NormalTok{, }\StringTok{"basePrice3"}\NormalTok{, }
+    \StringTok{"reward1"}\NormalTok{, }\StringTok{"reward2"}\NormalTok{, }\StringTok{"reward3"}\NormalTok{, }\StringTok{"premiumProduct1"}\NormalTok{, }\StringTok{"premiumProduct2"}\NormalTok{, }\StringTok{"premiumProduct3"}\NormalTok{)], }
+    \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
+
+\NormalTok{X.cls =}\StringTok{ }\NormalTok{X.cls[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X.cls) ==}\StringTok{ "orderID"}\NormalTok{))]}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Write the feature matrix}\label{write-the-feature-matrix}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{FeatMat3 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{X, }\DataTypeTok{y =} \NormalTok{y), }\DataTypeTok{class =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{X.cls, }\DataTypeTok{y =} \NormalTok{y.cls))}
+
+\KeywordTok{saveRDS}\NormalTok{(FeatMat3, }\DataTypeTok{file =} \StringTok{"~/dmc2015/data/featureMatrix/featMat_v3.0.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

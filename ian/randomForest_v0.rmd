@@ -1,0 +1,84 @@
+---
+title: Attempting Random Forest (with Feature Matrix version 2)
+author: imouzon
+course: DMC
+date: May 1, 2015
+output:
+   pdf_document:
+   fig_capton: yes
+   number_sections: yes
+   template: main_document.latex
+---
+
+<!--- # (R code (No Results in Document))-->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+   knitrSetup(rootDir=FALSE,use.tikz=TRUE)
+
+   #set up file locations
+   parent.file = makeParent(parentDir = getwd(),type="markdown",overwrite=FALSE)
+```
+
+I am using the following packages:
+<!---# (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+```
+and my working directory is set to \verb!dmc2015/ian!.
+# Reading the Data
+I am working from the current feature matrix:
+<!---  readFeatMat: R code (Code in Document) -->
+```{r readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE}
+   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v2.0.rds")
+   trn = featMat$train
+   cls = featMat$class
+
+   X.trn = trn
+   X.trn = X.trn[,c("orderID",names(X.trn)[33:ncol(X.trn)])]
+   X.trn = X.trn[,-c(56:58)]
+   X = X.trn
+   head(X)
+
+   y = trn[,c("orderID","coupon1Used","coupon2Used","coupon3Used","basketValue")]
+
+   X.cls = cls[,names(X.trn)]
+   y.cls = cls[,names(y)]
+```
+
+#Random Forest
+[//]: # (randomForest: R code (No Results in Document))
+```{r randomForest,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   require(randomForest)
+   require(rpart)
+
+   Xy = X %>% left_join(y,by="orderID") %>% melt(id=1:361,measure=362:365) %>% data.frame
+
+   ncol(X)
+   X = Xy[,1:361]
+   y = Xy[,363]
+
+   head(X)
+
+
+
+   rf.trn = randomForest
+   
+```
+
+
+
