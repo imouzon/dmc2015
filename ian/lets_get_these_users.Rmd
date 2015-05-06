@@ -86,7 +86,7 @@ dataset_new = dataset_new %>% group_by(userID,batchID) %>%
    mutate(batchTimesReceived = length(unique(couponsReceived)), 
           batchCountReceived = rank(couponsReceived),
           couponSwitch = (length(unique(couponID1)) > 1 | length(unique(couponID2)) > 1 | length(unique(couponID3)) > 1))
-@
+```
 
 These are some wonderful features. Lets write them to a dataset:
 

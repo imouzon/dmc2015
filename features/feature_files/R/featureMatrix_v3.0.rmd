@@ -1,7 +1,7 @@
 ---
-title: 
-titleshort:
-instructions:
+title: Feature Matrix 3
+titleshort: FeatMat3
+instructions: 
 author: Ian Mouzon
 authorshort: Mouzon
 contact: imouzon@iastate.edu
@@ -107,7 +107,7 @@ We can save this raw dataset first by splitting the pieces back up:
    cls = cls[,-which(names(cls) == "dsn")]
 ```
 Then by writing the following \verb!RDS! file
-```{r chunk-label,cache=FALSE,eval=FALSE}
+```{r bel,cache=FALSE,eval=FALSE}
    saveRDS(list("train" = trn, "class" = cls),file="~/dmc2015/data/clean_data/clean_simple.rds")
 ```
 
@@ -171,6 +171,13 @@ Fix the formatting:
 
 # Putting the pieces together
 
+We don't want any of these variables in our dataset:
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+  bannedvars = c("orderID", "batchID", "couponID","couponID1","couponID2","couponID3") 
+```
+
+
 We create our X and y using these features:
 <!--- : R code (No Results in Document) -->
 ```{r ,cache=FALSE}
@@ -185,7 +192,7 @@ We create our X and y using these features:
      left_join(nc$train,by="orderID") %>%
      left_join(trn[,c("orderID","couponsReceived", "orderTime","price1","price2","price3","basePrice1","basePrice2","basePrice3","reward1","reward2","reward3","premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
 
-  X = X[,-(which(names(X) == "orderID"))]
+  X = X[,-(which(names(X) %in% bannedvars))]
 ```
 
 and do the same for classification:
@@ -202,7 +209,7 @@ and do the same for classification:
      left_join(nc$class,by="orderID") %>%
      left_join(cls[,c("orderID","couponsReceived", "orderTime", "price1","price2","price3", "basePrice1","basePrice2","basePrice3", "reward1","reward2","reward3", "premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
 
-  X.cls = X.cls[,-(which(names(X.cls) == "orderID"))]
+  X.cls = X.cls[,-(which(names(X.cls) %in% bannedvars))]
 ```
 
 #Write the feature matrix

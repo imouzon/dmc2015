@@ -75,7 +75,7 @@
 \pagestyle{fancy}
    \lhead{\href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}}
    \lhead{authorshort}
-   \chead{DMC 2015\ (\href{mailto:DMC@ISU}{\nolinkurl{DMC@ISU}}\ Spring 2015): }  
+   \chead{DMC 2015\ (\href{mailto:DMC@ISU}{\nolinkurl{DMC@ISU}}\ Spring 2015): FeatMat3}  
    \rhead{\firstxmark}
    \lfoot{\lastxmark}
    \cfoot{}
@@ -115,7 +115,7 @@
     \renewcommand{\arraystretch}{1.5}%
     \begin{tabular}{c}%
        \Large{DMC 2015: Data Mining Coupons}\\
-       \\
+       Feature Matrix 3\\
        Spring 2015, Iowa State University Data Mining Cup Team\\
     \end{tabular}
 \end{center}
@@ -413,6 +413,14 @@ Fix the formatting:
 
 \section{Putting the pieces together}\label{putting-the-pieces-together}
 
+We don't want any of these variables in our dataset:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bannedvars =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"batchID"}\NormalTok{, }\StringTok{"couponID"}\NormalTok{, }\StringTok{"couponID1"}\NormalTok{, }\StringTok{"couponID2"}\NormalTok{, }\StringTok{"couponID3"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
 We create our X and y using these features:
 
 \begin{Shaded}
@@ -428,7 +436,7 @@ We create our X and y using these features:
         \StringTok{"reward3"}\NormalTok{, }\StringTok{"premiumProduct1"}\NormalTok{, }\StringTok{"premiumProduct2"}\NormalTok{, }\StringTok{"premiumProduct3"}\NormalTok{)], }
         \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
 
-\NormalTok{X =}\StringTok{ }\NormalTok{X[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X) ==}\StringTok{ "orderID"}\NormalTok{))]}
+\NormalTok{X =}\StringTok{ }\NormalTok{X[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X) %in%}\StringTok{ }\NormalTok{bannedvars))]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -447,7 +455,7 @@ and do the same for classification:
     \StringTok{"reward1"}\NormalTok{, }\StringTok{"reward2"}\NormalTok{, }\StringTok{"reward3"}\NormalTok{, }\StringTok{"premiumProduct1"}\NormalTok{, }\StringTok{"premiumProduct2"}\NormalTok{, }\StringTok{"premiumProduct3"}\NormalTok{)], }
     \DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
 
-\NormalTok{X.cls =}\StringTok{ }\NormalTok{X.cls[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X.cls) ==}\StringTok{ "orderID"}\NormalTok{))]}
+\NormalTok{X.cls =}\StringTok{ }\NormalTok{X.cls[, -(}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(X.cls) %in%}\StringTok{ }\NormalTok{bannedvars))]}
 \end{Highlighting}
 \end{Shaded}
 

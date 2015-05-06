@@ -1,0 +1,80 @@
+---
+title: 
+titleshort:
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = '~/dmc2015/ian/'
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render(pathtofile)
+```
+
+I am using the following packages to create this feature matrix:
+<!--- packageLoad: R code (No Results in Document) -->
+```{r packageLoad,cache=FALSE}
+   library(ggplot2)
+   library(lubridate)
+   library(dplyr)
+   library(reshape2)
+   library(sqldf)
+```
+
+# Getting the data
+I read the raw and clean data into R using the following simple commands:
+<!--- readDat: R code (Code in Document) -->
+```{r readDat, cache=FALSE}
+   #training set ("historical data")
+   d = readRDS(file="~/dmc2015/data/clean_data/clean_simple.rds")
+```
+
+# Batch ID
+I read the batch ID file as follows:
+%-- readBatch: R code (Code in Document)
+<!--- batchIN: R code (No Results in Document) -->
+```{r batchIN,cache=FALSE}
+   #batch features in ~/dmc2015/features/feature_files/batchInfo_test.csv, batchInfo_train.csv
+   bit = readRDS("~/dmc2015/features/feature_files/batchInfo_train.rds")
+   bic = readRDS("~/dmc2015/features/feature_files/batchInfo_test.rds")
+   bi = rbind(bit,bic)
+```
+
+### Check the batch to make sure it's clean
+Check for no missing features:
+<!--- checkftt: R code (No Results in Document) -->
+```{r checkftt,cache=FALSE}
+   #check for no missing values
+   nrow(bi) - length(complete.cases(bi))
+```
+
+Fix the formatting:
+<!--- btchfromt: R code (No Results in Document) -->
+```{r btchfromt,cache=FALSE}
+   bi$couponsReceivedTime =  period_to_seconds(bi$couponsReceivedTime)/3600
+   bi$orderTimeTime =  period_to_seconds(bi$orderTimeTime)/3600
+
+   bi = list("train" = bi[which(bi$orderID <= 6053),], "class" = bi[which(bi$orderID > 6053),])
+```
+
+

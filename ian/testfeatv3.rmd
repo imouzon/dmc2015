@@ -33,6 +33,7 @@ output:
 <!--- featmat: R code (No Results in Document) -->
 ```{r featmat,cache=FALSE}
    featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v3.0.rds")
+   
 ```
 
 
