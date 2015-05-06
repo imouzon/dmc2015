@@ -28,7 +28,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render(pathtofile)
+      rmarkdown::render("train_and_validate.Rmd")
 ```
 
 I am using the following packages to create this feature matrix:
@@ -46,10 +46,12 @@ I read the raw and clean data into R using the following simple commands:
 <!--- readDat: R code (Code in Document) -->
 ```{r readDat, cache=FALSE}
    #training set ("historical data")
-   d = readRDS(file="~/dmc2015/data/clean_data/clean_simple.rds")
+   d = readRDS("~/dmc2015/data/clean_data/clean_simple.rds")
 ```
 
-# Batch ID
+## Adding Batch ID
+The data set \verb!clean_simple! does not have batch information. 
+I will have to add it in:
 I read the batch ID file as follows:
 %-- readBatch: R code (Code in Document)
 <!--- batchIN: R code (No Results in Document) -->
@@ -60,21 +62,95 @@ I read the batch ID file as follows:
    bi = rbind(bit,bic)
 ```
 
-### Check the batch to make sure it's clean
-Check for no missing features:
-<!--- checkftt: R code (No Results in Document) -->
-```{r checkftt,cache=FALSE}
-   #check for no missing values
-   nrow(bi) - length(complete.cases(bi))
-```
-
 Fix the formatting:
 <!--- btchfromt: R code (No Results in Document) -->
 ```{r btchfromt,cache=FALSE}
    bi$couponsReceivedTime =  period_to_seconds(bi$couponsReceivedTime)/3600
    bi$orderTimeTime =  period_to_seconds(bi$orderTimeTime)/3600
-
    bi = list("train" = bi[which(bi$orderID <= 6053),], "class" = bi[which(bi$orderID > 6053),])
 ```
+
+Add it to the clean data:
+<!--- : R code (No Results in Document) -->
+```{r addbatch,cache=FALSE}
+   d$train = d$train %>% left_join(bi$train,by="orderID") 
+   d$class = d$class %>% left_join(bi$class,by="orderID") 
+```
+
+# Creating Historical, Validation, and Training Sets
+## Set 1: Random Sampling on Coupons Sets
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   sample.set = d$train[,c("orderID","couponID1","couponID2","couponID3")] %>%
+      gather(couponCol,couponID,-orderID) %>%
+      arrange(orderID) %>%
+      select(orderID,couponID) %>%
+      mutate(couponID = factor(couponID))
+```
+
+I would like to use 1/3 of my data as historical information in this case.
+This means that I would like to get about 33\% of each coupons total number.
+
+That is, for $n_i$ coupons of type $i$ we want $\frac{1}{3} n_i$ coupons of 
+type $i$ in our historical pool.
+
+<!--- cpncounts: R code (No Results in Document) -->
+```{r ncounts,cache=FALSE}
+   set.seed(1999)
+   H1.orderIDs = d$train$orderID[sample(1:nrow(d$train))[1:round(nrow(d$train)/3)]]
+
+   H1 = d$train[which(d$train$orderID %in% H1.orderIDs),]
+   T1 = d$train[which(!(d$train$orderID %in% H1.orderIDs)),]
+
+   set.seed(7)
+   V1.orderIDs = T1$orderID[sample(1:nrow(T1))[1:round(nrow(T1)/3)]]
+   V1 = T1[which(T1$orderID %in% V1.orderIDs),]
+   T1 = T1[which(!(T1$orderID %in% V1.orderIDs)),]
+
+   #feature matrix
+   F1 = list("orderids" = list("h" = H1.orderIDs, "v" = V1.orderIDs), "H" = H1, "V" = V1, "T" = T1,"C" = d$class)
+```
+
+## Set 2: Random Sampling on Users
+<!--- cpncounts: R code (No Results in Document) -->
+```{r cpncounts,cache=FALSE}
+   set.seed(1979)
+   H2.userIDs = sample(unique(d$train$userID))[1:round(length(unique(d$train$userID))/3)]
+
+   H2 = d$train[which(d$train$userID %in% H2.userIDs),]
+   T2 = d$train[which(!(d$train$userID %in% H2.userIDs)),]
+
+   set.seed(17)
+   V2.userIDs = T2$userID[sample(1:nrow(T2))[1:round(nrow(T2)/3)]]
+   V2 = T2[which(T2$userID %in% V2.userIDs),]
+   T2 = T2[which(!(T2$userID %in% V2.userIDs)),]
+
+   #feature matrix
+   F2 = list("userids" = list("h" = H2.userIDs, "v" = V2.userIDs), "H" = H2, "V" = V2, "T" = T2, "C" = d$class)
+```
+
+## Set 3: Batch Number
+
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   H3 = d$train[which(d$train$batchID %in% 1:7),]
+   T3 = d$train[which(d$train$batchID == 8),]
+   V3 = d$train[which(d$train$batchID == 9),]
+   C3 = d$class   
+   F3 = list("H" = H3, "V" = V3, "T" = T3, "C" = d$class)
+```
+
+# Write out the sets
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(F1,file="~/dmc2015/data/featureMatrix/HTVset1.rds")
+   saveRDS(F2,file="~/dmc2015/data/featureMatrix/HTVset2.rds")
+   saveRDS(F3,file="~/dmc2015/data/featureMatrix/HTVset3.rds")
+```
+
+
+
+
+
 
 
