@@ -26,3 +26,8 @@ source("06_likelihood.R")
 s1$H$coup1CatLL <- compute_ll(s1$H$categoryIDs1, s1$H$coupon1Used)
 s1$H$coup2CatLL <- compute_ll(s1$H$categoryIDs2, s1$H$coupon2Used)
 s1$H$coup3CatLL <- compute_ll(s1$H$categoryIDs3, s1$H$coupon3Used)
+
+
+s1$T$coup1CatLL <- compute_ll(s1$H$brand1, 
+                              s1$H$coupon1Used,
+                              s1$T$categoryIDs1)
