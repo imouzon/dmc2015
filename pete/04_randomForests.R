@@ -1,13 +1,20 @@
 # Fit random forest to most current version of feature matrix
 
-# dataObject <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_v1.1.rds")
-# train <- dataObject$train
+# Read in data as RDS. This file includes class and training
+featureFiles <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_v3.0.rds")
+# Note that train consists of an X data frame and a Y data frame 
+train <- featureFiles$train
 
-train <- read.csv("~/GitHub/dmc2015/data/featureMatrix/train_ver1.1.csv", stringsAsFactors = T)
+# Some columns have been added in twice for some reason
+# index <- grep(".*\\.y", names(train$X))
+# names(train$X)[index]
+# train$X <- train$X[,-index]
+# index <- grep(".*\\.x", names(train$X))
+# names(train$X)[index] <- gsub(".x", "", names(train$X)[index]) 
 
 set.seed(1)
 samp <- sample(1:nrow(train), 500, replace = F)
-# How do we handle factors with more than 53 levels?
+
 d <- train[samp,-c(12, 20, 28)]
 
 library(randomForest)
