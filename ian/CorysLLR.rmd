@@ -66,6 +66,8 @@ and my working directory is set to \verb!dmc2015/ian!.
 ```
 
 # Calculating Coupon 1-Way Likelihoods
+
+## Raw Data Variables
 <!--- cpn1way: R code (No Results in Document) -->
 ```{r cpn1way,cache=FALSE}
    source("./R/stackCoupons.R")
@@ -75,12 +77,15 @@ and my working directory is set to \verb!dmc2015/ian!.
    TVC = TV$train %>% rbind(TV$validation) %>% rbind(TC$class)
    H = stackCoupons(S1$T,S1$H,nms=c("train","historical"))$historical
 
+   qplot(TVC$basePrice,binwidth=.25)
+
+   names(TVC)
+
    chk = H %>% group_by(couponID) %>% summarize(count = n(), nUsed = sum(couponUsed)) %>% arrange(-count) %>% with(table(count,nUsed)) %>% data.frame
    qplot(count,nUsed,data=chk,size=Freq)
 
    # couponID
    llr = compute_ll(as.character(H$couponID),H$couponUsed,as.character(TVC$couponID))
-   names(llr) = as.character(TVC$couponID)
    llr_couponID = data.frame("couponID" = names(llr), "llr_couponID" = llr) %>% arrange(couponID) %>% unique
 
    if(nrow(TVC) - sum(TVC$couponID %in% llr_couponID$couponID)) warning("Things aren't adding up")
@@ -88,7 +93,6 @@ and my working directory is set to \verb!dmc2015/ian!.
 
    # productGroup
    llr = compute_ll(as.character(H$productGroup),H$couponUsed,as.character(TVC$productGroup))
-   names(llr) = as.character(TVC$productGroup)
    llr_productGroup = data.frame("productGroup" = names(llr), "llr_productGroup" = llr) %>% arrange(productGroup) %>% unique %>% arrange(productGroup)
 
    if(nrow(TVC) - sum(TVC$productGroup %in% llr_productGroup$productGroup)) warning("Things aren't adding up")
@@ -96,12 +100,87 @@ and my working directory is set to \verb!dmc2015/ian!.
 
    # reward
    llr = compute_ll(as.character(H$reward),H$couponUsed,as.character(TVC$reward))
-   names(llr) = as.character(TVC$reward)
    llr_reward = data.frame("reward" = names(llr), "llr_reward" = llr) %>% arrange(reward) %>% unique %>% arrange(reward)
 
    if(nrow(TVC) - sum(TVC$reward %in% llr_reward$reward)) warning("Things aren't adding up")
    qplot(reward, llr_reward,data=llr_reward)
 
+   # brand
+   llr = compute_ll(as.character(H$brand),H$couponUsed,as.character(TVC$brand))
+   llr_brand = data.frame("brand" = names(llr), "llr_brand" = llr) %>% arrange(brand) %>% unique %>% arrange(brand)
 
+   if(nrow(TVC) - sum(TVC$brand %in% llr_brand$brand)) warning("Things aren't adding up")
+   qplot(brand, llr_brand,data=llr_brand)
+
+   # userID
+   llr = compute_ll(as.character(H$userID),H$couponUsed,as.character(TVC$userID))
+   llr_userID = data.frame("userID" = names(llr), "llr_userID" = llr) %>% arrange(userID) %>% unique %>% arrange(userID)
+
+   if(nrow(TVC) - sum(TVC$userID %in% llr_userID$userID)) warning("Things aren't adding up")
+   qplot(userID, llr_userID,data=llr_userID)
 ```
+
+## Created Variables
+<!--- chunk-label: R code (No Results in Document) -->
+```{r createvarsLLR,cache=FALSE}
+   # couponCol
+   llr = compute_ll(as.character(H$couponCol),H$couponUsed,as.character(TVC$couponCol))
+   llr_couponCol = data.frame("couponCol" = names(llr), "llr_couponCol" = llr) %>% arrange(couponCol) %>% unique %>% arrange(couponCol)
+
+   if(nrow(TVC) - sum(TVC$couponCol %in% llr_couponCol$couponCol)) warning("Things aren't adding up")
+   qplot(couponCol, llr_couponCol,data=llr_couponCol)
+
+   # couponsReceivedDoW
+   llr = compute_ll(as.character(H$couponsReceivedDoW),H$couponUsed,as.character(TVC$couponsReceivedDoW))
+   llr_couponsReceivedDoW = data.frame("couponsReceivedDoW" = names(llr), "llr_couponsReceivedDoW" = llr) %>% arrange(couponsReceivedDoW) %>% unique %>% arrange(couponsReceivedDoW)
+
+   if(nrow(TVC) - sum(TVC$couponsReceivedDoW %in% llr_couponsReceivedDoW$couponsReceivedDoW)) warning("Things aren't adding up")
+   qplot(couponsReceivedDoW, llr_couponsReceivedDoW,data=llr_couponsReceivedDoW)
+
+   # orderTimeDoW
+   llr = compute_ll(as.character(H$orderTimeDoW),H$couponUsed,as.character(TVC$orderTimeDoW))
+   llr_orderTimeDoW = data.frame("orderTimeDoW" = names(llr), "llr_orderTimeDoW" = llr) %>% arrange(orderTimeDoW) %>% unique %>% arrange(orderTimeDoW)
+
+   if(nrow(TVC) - sum(TVC$orderTimeDoW %in% llr_orderTimeDoW$orderTimeDoW)) warning("Things aren't adding up")
+   qplot(orderTimeDoW, llr_orderTimeDoW,data=llr_orderTimeDoW)
+```
+
+## By Category ID
+<!--- cats: R code (No Results in Document) -->
+```{r cats,cache=FALSE}
+   # categoryIDs as a chunk
+   llr = compute_ll(as.character(H$categoryIDs),H$couponUsed,as.character(TVC$categoryIDs))
+   llr_categoryIDs = data.frame("categoryIDs" = names(llr), "llr_categoryIDs" = llr) %>% arrange(categoryIDs) %>% unique %>% arrange(categoryIDs)
+
+   if(nrow(TVC) - sum(TVC$categoryIDs %in% llr_categoryIDs$categoryIDs)) warning("Things aren't adding up")
+   qplot(categoryIDs, llr_categoryIDs,data=llr_categoryIDs)
+
+   # categoryIDs individually
+   source("./R/splitColumn.R")
+   TVC.cat = splitColumn(TVC,"categoryIDs","orderID",splitby=":") %>% 
+      select(orderID, couponCol, categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+      gather(tmp, categoryID, -orderID, -couponCol) %>%
+      mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
+      select(orderID, couponCol, categoryEntry, categoryID) %>%
+      left_join(TVC,by=c("orderID","couponCol")) %>%
+      arrange(orderID, couponCol, categoryEntry) %>%
+      filter(!is.na(categoryID))
+
+   H.cat = splitColumn(H,"categoryIDs","orderID",splitby=":") %>% 
+      select(orderID, couponCol, categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+      gather(tmp, categoryID, -orderID, -couponCol) %>%
+      mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
+      select(orderID, couponCol, categoryEntry, categoryID) %>%
+      left_join(H,by=c("orderID","couponCol")) %>%
+      arrange(orderID, couponCol, categoryEntry) %>%
+      filter(!is.na(categoryID))
+
+   # couponCol
+   llr = compute_ll(as.character(H.cat$categoryID),H.cat$couponUsed,as.character(TVC.cat$categoryID))
+   llr_categoryID = data.frame("categoryID" = names(llr), "llr_categoryID" = llr) %>% arrange(categoryID) %>% unique %>% arrange(categoryID)
+
+   if(nrow(TVC.cat) - sum(TVC.cat$categoryID %in% llr_categoryID$categoryID)) warning("Things aren't adding up")
+   qplot(gsub("cat","",categoryID), llr_categoryID,data=llr_categoryID,xlab="categoryID")
+```
+      
 
