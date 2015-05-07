@@ -143,9 +143,9 @@ type $i$ in our historical pool.
 # Write out the sets
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   saveRDS(F1,file="~/dmc2015/data/featureMatrix/HTVset1.rds")
-   saveRDS(F2,file="~/dmc2015/data/featureMatrix/HTVset2.rds")
-   saveRDS(F3,file="~/dmc2015/data/featureMatrix/HTVset3.rds")
+   saveRDS(F1,file="../data/featureMatrix/HTVset1.rds")
+   saveRDS(F2,file="../data/featureMatrix/HTVset2.rds")
+   saveRDS(F3,file="../data/featureMatrix/HTVset3.rds")
 ```
 
 
