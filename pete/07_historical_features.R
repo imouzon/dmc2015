@@ -23,11 +23,7 @@ s3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/HTVset3.rds")
 source("06_likelihood.R")
 
 # Create likelihood features for H1 train, test, and classification
-s1$H$coup1CatLL <- compute_ll(s1$H$categoryIDs1, s1$H$coupon1Used)
-s1$H$coup2CatLL <- compute_ll(s1$H$categoryIDs2, s1$H$coupon2Used)
-s1$H$coup3CatLL <- compute_ll(s1$H$categoryIDs3, s1$H$coupon3Used)
-
-
-s1$T$coup1CatLL <- compute_ll(s1$H$brand1, 
-                              s1$H$coupon1Used,
-                              s1$T$categoryIDs1)
+d <- melt(s1$H, 
+s1$T$brand1_ll <- compute_ll(as.character(s1$H$brand1),
+                             s1$H$coupon1Used,
+                             as.character(s1$T$brand1))
