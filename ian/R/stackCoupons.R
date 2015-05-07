@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 15-04-2015
-#  Last Modified: Sun Apr 26 01:00:55 2015
+#  Last Modified: Thu May  7 15:13:53 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -12,7 +12,7 @@
 #  source('~/R/shlib/C_FORTRAN.shlib.r')
 #  .Fortran("subroutine name",as.integer(input1),as.double(input2), etc)
 
-stackCoupons = function(train,test,idcols = NULL){
+stackCoupons = function(train,test,idcols = NULL,nms=c("train","test")){
    #coupon rows have 1, 2, or 3 in column name
    #if we don't specify, all non-coupon columns are id columns
    cpn.i = lapply(1:3, function(i) which(grepl(i,names(train))))
@@ -26,8 +26,8 @@ stackCoupons = function(train,test,idcols = NULL){
    message(gsub("cpncols",paste(names(train)[unlist(cpn.i)],collapse=',\n\t'),m2))
 
    #identify observations as coming from training or test set
-   train$dsn = "train"
-   test$dsn = "test"
+   train$dsn = nms[1]
+   test$dsn = nms[2]
 
    #add that dataset identifier to the id columns
    idcols = c(idcols,which(names(train) == "dsn"))
@@ -46,6 +46,7 @@ stackCoupons = function(train,test,idcols = NULL){
    d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
             "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
             "combined" = d.stack)
+   names(d) = c(nms,"combined")
 
    return(d)
 }
