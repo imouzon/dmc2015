@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 15-04-2015
-#  Last Modified: Thu May  7 15:13:53 2015
+#  Last Modified: Thu May  7 15:22:39 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -40,11 +40,11 @@ stackCoupons = function(train,test,idcols = NULL,nms=c("train","test")){
    }
 
    d.stack = do.call("rbind", lapply(1:3, cpnisolate))
-   d.stack$dsn = factor(d.stack$dsn,levels=c("train","test"))
+   d.stack$dsn = factor(d.stack$dsn,levels=nms)
    d.stack = d.stack[with(d.stack,order(orderID,dsn)),]
 
-   d = list("train" = d.stack[which(d.stack$dsn == "train"),-which(names(d.stack) == "dsn")],
-            "test" = d.stack[which(d.stack$dsn == "test"),-which(names(d.stack) == "dsn")],
+   d = list("train" = d.stack[which(d.stack$dsn == nms[1]),-which(names(d.stack) == "dsn")],
+            "test" = d.stack[which(d.stack$dsn == nms[2]),-which(names(d.stack) == "dsn")],
             "combined" = d.stack)
    names(d) = c(nms,"combined")
 

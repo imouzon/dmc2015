@@ -72,34 +72,36 @@ and my working directory is set to \verb!dmc2015/ian!.
 
    TV = stackCoupons(S1$T,S1$V,nms=c("train","validation"))
    TC = stackCoupons(S1$T,S1$C,nms=c("train","class"))
-   TVC = TV$validation %>% rbind(TC$combined)
+   TVC = TV$train %>% rbind(TV$validation) %>% rbind(TC$class)
    H = stackCoupons(S1$T,S1$H,nms=c("train","historical"))$historical
 
-   lls = compute_ll(as.character(H$couponID),H$couponUsed,TV$train$couponUsed)
+   chk = H %>% group_by(couponID) %>% summarize(count = n(), nUsed = sum(couponUsed)) %>% arrange(-count) %>% with(table(count,nUsed)) %>% data.frame
+   qplot(count,nUsed,data=chk,size=Freq)
 
-   p = mean(H1$couponUsed)
-   denom.eps = .5
-   eps1 =  (p/(1-p))*denom.eps
-   eps1/(eps1 + denom.eps)
+   # couponID
+   llr = compute_ll(as.character(H$couponID),H$couponUsed,as.character(TVC$couponID))
+   names(llr) = as.character(TVC$couponID)
+   llr_couponID = data.frame("couponID" = names(llr), "llr_couponID" = llr) %>% arrange(couponID) %>% unique
 
-   d = data.frame("couponID" = names(lls), "llr_couponID" = lls) %>% arrange(couponID)
+   if(nrow(TVC) - sum(TVC$couponID %in% llr_couponID$couponID)) warning("Things aren't adding up")
+   qplot(as.numeric(gsub("cpn","",couponID)), llr_couponID,data=llr_couponID)
 
-   T1 = S1$T %>% merge(d,by.y="couponID",by.x="couponID1")
-   T1 = T1 %>% merge(d,by.y="couponID",by.x="couponID2")
-   T1 = T1 %>% merge(d,by.y="couponID",by.x="couponID3")
+   # productGroup
+   llr = compute_ll(as.character(H$productGroup),H$couponUsed,as.character(TVC$productGroup))
+   names(llr) = as.character(TVC$productGroup)
+   llr_productGroup = data.frame("productGroup" = names(llr), "llr_productGroup" = llr) %>% arrange(productGroup) %>% unique %>% arrange(productGroup)
 
-   %>% select("couponID1","llr_couponID")
-   %>% unique
+   if(nrow(TVC) - sum(TVC$productGroup %in% llr_productGroup$productGroup)) warning("Things aren't adding up")
+   qplot(productGroup, llr_productGroup,data=llr_productGroup)
 
-   d[which(is.na(d$llr_couponID))[1:5],]
-   length(unique(S1$T$orderID))
-    
-   head(d)
-   is.na(d$llr_couponID)
+   # reward
+   llr = compute_ll(as.character(H$reward),H$couponUsed,as.character(TVC$reward))
+   names(llr) = as.character(TVC$reward)
+   llr_reward = data.frame("reward" = names(llr), "llr_reward" = llr) %>% arrange(reward) %>% unique %>% arrange(reward)
 
-   qplot(couponID,llr_couponID,data=d)
-   
+   if(nrow(TVC) - sum(TVC$reward %in% llr_reward$reward)) warning("Things aren't adding up")
+   qplot(reward, llr_reward,data=llr_reward)
 
-   
+
 ```
 
