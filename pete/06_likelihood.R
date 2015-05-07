@@ -15,8 +15,8 @@ compute_ll <- function(x, y, targetX, epsilon1 = NULL, epsilon2 = NULL)  {
   # targetX A character vector with the same categories as x
   # Takes a categorical predictor variable, x, and a binary response
   # variable, y, and produces a vector of the estimated log-likelihood
-  # statistics for the targetX column. An epsilon > 0 is added to the numerator and denominator
-  # to prevent numerical instability.
+  # statistics for the targetX column. An epsilon > 0 is added to the numerator 
+  # and denominator to prevent numerical instability.
   # Non-matching categories will result in NA entries
   stopifnot(all(y %in% c(0,1))) # response has to be binary
   if (is.null(epsilon1) | is.null(epsilon2)) {
@@ -30,11 +30,8 @@ compute_ll <- function(x, y, targetX, epsilon1 = NULL, epsilon2 = NULL)  {
                   log((sum(x == levs & y == 1) + epsilon1) / 
                       (sum(x == levs & y == 0) + epsilon2))
                 })
-  #   res <- lls[x]
-  #   return(res)
   res <- lls[targetX]
   names(res) <- targetX
-  # Replace missing values 
   res[is.na(res)] <- log(epsilon1 / epsilon2)
   return(res)
 }
@@ -80,11 +77,14 @@ compute_ll_2w <- function(x1, x2, y, targetX1, targetX2,
                                (sum(x1 == levs_1 & x2 == levs_2 & y == 0) + epsilon2))
                          })
                 })
-  #   index <- 1:length(x1)
-  #   res <- sapply(index, FUN = function(index) lls[x1[index], x2[index]])
   index <- 1:length(targetX1)
   res <- sapply(index, FUN = function(index) {
-                  lls[targetX1[index], targetX2[index]]
+                  if (targetX1[index] %in% rownames(lls) & 
+                      targetX2[index] %in% colnames(lls)) {
+                    lls[targetX1[index], targetX2[index]]
+                  } else {
+                    NA
+                  }
                 })
   res[is.na(res)] <- log(epsilon1 / epsilon2)
   return(res)
@@ -100,3 +100,18 @@ targetX2 <- sample(c("square", "triangle"), 15, replace = T)
 data.frame(targetX1, targetX2, compute_ll_2w(x1, x2, y, targetX1, targetX2))
 # --------------------------------------------------
 
+s1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/HTVset1.rds")
+d <- data.frame(orderID = rep(s1$H$orderID, 3),
+                brand = c(as.character(s1$H$brand1), 
+                          as.character(s1$H$brand2), 
+                          as.character(s1$H$brand3)),
+                reward = c(as.character(s1$H$reward1),
+                           as.character(s1$H$reward2),
+                           as.character(s1$H$reward3)),
+                coupUsed = c(s1$H$coupon1Used, s1$H$coupon2Used, s1$H$coupon3Used),
+                stringsAsFactors = F)
+d <- d[order(d$orderID),]
+
+s1$T$brand_rew_1 <- compute_ll_2w(d$brand, d$reward, d$coupUsed,
+                                 as.character(s1$T$brand1),
+                                 as.character(s1$T$reward1))
