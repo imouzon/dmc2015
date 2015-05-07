@@ -33,6 +33,7 @@ compute_ll <- function(x, y, targetX, epsilon1 = NULL, epsilon2 = NULL)  {
   #   res <- lls[x]
   #   return(res)
   res <- lls[targetX]
+  names(res) <- targetX
   # Replace missing values 
   res[is.na(res)] <- log(epsilon1 / epsilon2)
   return(res)
