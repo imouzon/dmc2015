@@ -1,0 +1,139 @@
+---
+title: Cory's LLR Statistics
+titleshort: Cory's LLR
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: Data Mining Cup 2015 
+groupshort: DMC2015
+leader: Iowa State University Data Mining Cup Team
+leadershort: DMC2015@ISU
+semester: Spring 2015
+assignment: 
+duedate: May 6, 2015
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = '~/dmc2015/ian/'
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("~/dmc2015/ian/universal_features.rmd")
+
+   hw_format()
+```
+
+I am using the following pacakges:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+```
+and my working directory is set to \verb!dmc2015/ian!.
+
+# Pete's LLR Code
+<!--- chunk-label: R code (No Results in Document) -->
+```{r PetesFunc1,cache=FALSE}
+# Code to compute estimated log-likelihood ratios for categorical 
+# variables and binary response. The second function is to calculate the 
+# log-likelihood ratios for an interaction between two categorical variables.
+# This is based on the work by Cory Lanker.
+#
+# If you want to understand exactly what the code below is doing, I 
+# recommend running the code within the functions step-by-step using the 
+# examples that I created below each function. Let me know if you have any
+# questions. The justification for this approach is explained in Cory Lanker's
+# thesis paper.
+
+compute_ll <- function(x, y, epsilon = 0.5) {
+  # Takes a categorical predictor variable, x, and a binary response
+  # variable, y, and produces a vector of the estimated log-likelihood
+  # statistics. An epsi\on > 0 is added to the numerator and denominator
+  # to prevent numerical instability.
+  stopifnot(all(y %in% c(0,1))) # response has to be binary
+  levs <- unique(x)
+  # This will create a vector of the estimated log-likelihood ratios for
+  # each level of the explanatory variable. 
+  lls <- sapply(levs, FUN = function(levs) {
+                  log((sum(x == levs & y == 1) + epsilon) / 
+                      (sum(x == levs & y == 0) + epsilon))
+                })
+  res <- lls[x]
+  return(res)
+}
+```
+
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r PetesFunc2,cache=FALSE}
+compute_ll_2w <- function(x1, x2, y, epsilon = 0.5) {
+  # Takes 2 categorical predictor variables, x1 and x2, and a binary response
+  # variable, y, and produces a vector of the estimated log-likelihood
+  # statistics for all combinations between the levels of each predictor. 
+  # An epsilon > 0 is added to the numerator and denominator to prevent 
+  # numerical instability.
+  stopifnot(all(y %in% c(0,1))) # response has to be binary
+  levs_1 <- unique(x1)
+  levs_2 <- unique(x2)
+  # Using sapply within sapply will create a matrix. This will create a matrix 
+  # of the estimated log-likelihood ratios for each unique combination of the 
+  # levels of each explanatory variable.
+  lls <- sapply(levs_2, FUN = function(levs_2) {
+                  sapply(levs_1, FUN = function(levs_1) {
+                           log((sum(x1 == levs_1 & x2 == levs_2 & y == 1) + 0.5) / 
+                               (sum(x1 == levs_1 & x2 == levs_2 & y == 0) + 0.5))
+                         })
+                })
+  index <- 1:length(x1)
+  res <- sapply(index, FUN = function(index) lls[x1[index], x2[index]])
+  return(res)
+}
+```
+
+#Reading the data into R
+<!--- chunk-label: R code (No Results in Document) -->
+```{r readingInTheData,cache=FALSE}
+   S1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+   S2 = readRDS("~/dmc2015/data/featureMatrix/HTVset2.rds")
+   S3 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
+```
+
+# Calculating Coupon 1-Way Likelihoods
+<!--- cpn1way: R code (No Results in Document) -->
+```{r cpn1way,cache=FALSE}
+   H1 = S1$H %>% select(orderID,couponID1,couponID2,couponID3,coupon1Used,coupon2Used,coupon3Used) %>% 
+       gather(couponCol,couponUsed,-orderID,-couponID1,-couponID2,-couponID3) 
+
+   H1$couponCol = as.numeric(H1$couponCol)
+
+   H1 = H1 %>% gather(couponIDCol,couponID,-orderID,-couponCol,-couponUsed) 
+
+   H1$couponIDCol = as.numeric(H1$couponIDCol)
+
+   H1 = H1 %>% arrange(orderID,couponCol) %>% filter(couponIDCol == couponCol) %>% select(orderID,couponID,couponUsed) 
+
+   names(S1$H)
+   head(S1$H[,c(1,5,13,21,29:31)])
+   head(H1,3*6)
+```
+
