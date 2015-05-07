@@ -1,0 +1,53 @@
+---
+title: Creating Universal Features
+titleshort: CUF
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: Data Mining Cup 2015 
+groupshort: DMC2015
+leader: Iowa State University Data Mining Cup Team
+leadershort: DMC2015@ISU
+semester: Spring 2015
+assignment: 
+duedate: May 6, 2015
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = '~/dmc2015/ian/'
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("~/dmc2015/ian/universal_features.rmd")
+
+   hw_format()
+```
+
+I am using the following pacakges:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+```
+and my working directory is set to \verb!dmc2015/ian!.
+

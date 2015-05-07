@@ -1,12 +1,12 @@
 ---
-title: Feature Matrix 3
-titleshort: FeatMat3
-instructions: 
+title: 
+titleshort:
+instructions:
 author: Ian Mouzon
 authorshort: Mouzon
 contact: imouzon@iastate.edu
 grouplong: Data Mining Coupons
-groupshort: DMC 2015
+groupshort: DMC 2015:
 leader: Iowa State University Data Mining Cup Team
 leadershort: DMC@ISU
 semester: Spring 2015
@@ -28,7 +28,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("featureMatrix_v3.0.rmd")
+      rmarkdown::render("featureMatrix_v3.rmd")
 ```
 
 I am using the following packages to create this feature matrix:
@@ -107,7 +107,7 @@ We can save this raw dataset first by splitting the pieces back up:
    cls = cls[,-which(names(cls) == "dsn")]
 ```
 Then by writing the following \verb!RDS! file
-```{r bel,cache=FALSE,eval=FALSE}
+```{r chunk-label,cache=FALSE,eval=FALSE}
    saveRDS(list("train" = trn, "class" = cls),file="~/dmc2015/data/clean_data/clean_simple.rds")
 ```
 
@@ -119,103 +119,28 @@ I read the batch ID file as follows:
 <!--- batchIN: R code (No Results in Document) -->
 ```{r batchIN,cache=FALSE}
    #batch features in ~/dmc2015/features/feature_files/batchInfo_test.csv, batchInfo_train.csv
-   bit = readRDS("~/dmc2015/features/feature_files/batchInfo_train.rds")
-   bic = readRDS("~/dmc2015/features/feature_files/batchInfo_test.rds")
-   bi = rbind(bit,bic)
+   batchInfo_train = readRDS("~/dmc2015/features/feature_files/batchInfo_train.rds")
+   batchInfo_class = readRDS("~/dmc2015/features/feature_files/batchInfo_test.rds")
+   batchInfo = rbind(batchInfo_train,batchInfo_class)
 ```
 
-### Check the batch to make sure it's clean
+Check the batch to make sure it's clean:
+
+### Fix the formatting
+<!--- btchfromt: R code (No Results in Document) -->
+```{r btchfromt,cache=FALSE}
+  head(batchInfo$couponsReceivedTime)
+as.numeric(head(batchInfo$couponsReceivedTime))
+```
+
+
 Check for no missing features:
 <!--- checkftt: R code (No Results in Document) -->
 ```{r checkftt,cache=FALSE}
    #check for no missing values
-   nrow(bi) - length(complete.cases(bi))
-```
-
-Fix the formatting:
-<!--- btchfromt: R code (No Results in Document) -->
-```{r btchfromt,cache=FALSE}
-   bi$couponsReceivedTime =  period_to_seconds(bi$couponsReceivedTime)/3600
-   bi$orderTimeTime =  period_to_seconds(bi$orderTimeTime)/3600
-
-   bi = list("train" = bi[which(bi$orderID <= 6053),], "class" = bi[which(bi$orderID > 6053),])
-```
-
-## User Visit Features
-<!--- userVisits: R code (No Results in Document) -->
-```{r userVisits,cache=FALSE}
-   uv = readRDS("~/dmc2015/features/feature_files/UserVisitFeatures.rds")
-
-   #no missing values
-   length(complete.cases(uv$train)) - nrow(uv$train)
-```
-
-##Coupon Basket Stats
-<!--- couponUsed: R code (No Results in Document) -->
-```{r couponUsed,cache=FALSE}
-   cb = list("train" = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_train.rds"), "class" = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_class.rds"))
-   cbXo = list("train" = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_train_byorder.rds"), "class" = readRDS("~/dmc2015/features/feature_files/coupon_basket_stats_class_byorder.rds"))
-```
-
-##Coupon Used
-<!--- cou: R code (No Results in Document) -->
-```{r cou,cache=FALSE}
-   cu = list("train" = read.csv("~/dmc2015/features/feature_files/csv/couponUsed_train.csv"), "class" = read.csv("~/dmc2015/features/feature_files/csv/couponUsed_class.csv"))
-```
-
-##nCoup
-<!--- nCoupon: R code (No Results in Document) -->
-```{r nCoupon,cache=FALSE}
-   nc = list("train" = read.csv("~/dmc2015/features/feature_files/csv/nCoupTrain.csv"), "class" = read.csv("~/dmc2015/features/feature_files/csv/nCoupClass.csv"))
-```
-
-# Putting the pieces together
-
-We don't want any of these variables in our dataset:
-<!--- chunk-label: R code (No Results in Document) -->
-```{r chunk-label,cache=FALSE}
-  bannedvars = c("orderID", "batchID", "couponID","couponID1","couponID2","couponID3") 
+   nrow(batchInfo_class) - length(complete.cases(batchInfo_class))
+   nrow(batchInfo_train) - length(complete.cases(batchInfo_train))
 ```
 
 
-We create our X and y using these features:
-<!--- : R code (No Results in Document) -->
-```{r ,cache=FALSE}
-  X = data.frame(orderID=trn$orderID)
-  y = trn[,c("coupon1Used","coupon2Used","coupon3Used","basketValue")]
 
-  X = X %>% left_join(bi$train,by="orderID") %>%
-     left_join(uv$train,by="orderID") %>%
-     left_join(cb$train,by="orderID") %>%
-     left_join(cbXo$train,by="orderID") %>%
-     left_join(cu$train,by="orderID") %>% 
-     left_join(nc$train,by="orderID") %>%
-     left_join(trn[,c("orderID","couponsReceived", "orderTime","price1","price2","price3","basePrice1","basePrice2","basePrice3","reward1","reward2","reward3","premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
-
-  X = X[,-(which(names(X) %in% bannedvars))]
-```
-
-and do the same for classification:
-<!--- : R code (No Results in Document) -->
-```{r ,cache=FALSE}
-  X.cls = data.frame(orderID=cls$orderID)
-  y.cls = cls[,c("coupon1Used","coupon2Used","coupon3Used","basketValue")]
-
-  X.cls = X.cls %>% left_join(bi$class,by="orderID") %>%
-     left_join(uv$class,by="orderID") %>%
-     left_join(cb$class,by="orderID") %>%
-     left_join(cbXo$class,by="orderID") %>%
-     left_join(cu$class,by="orderID") %>%
-     left_join(nc$class,by="orderID") %>%
-     left_join(cls[,c("orderID","couponsReceived", "orderTime", "price1","price2","price3", "basePrice1","basePrice2","basePrice3", "reward1","reward2","reward3", "premiumProduct1","premiumProduct2","premiumProduct3")],by="orderID")
-
-  X.cls = X.cls[,-(which(names(X.cls) %in% bannedvars))]
-```
-
-#Write the feature matrix
-<!--- writeFeat: R code (No Results in Document) -->
-```{r writeFeat,cache=FALSE}
-   FeatMat3 = list("train" = list("X" = X, "y" = y), "class" = list("X" = X.cls, "y" = y.cls))
-
-   saveRDS(FeatMat3, file="~/dmc2015/data/featureMatrix/featMat_v3.0.rds")
-```
