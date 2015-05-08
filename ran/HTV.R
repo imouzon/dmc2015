@@ -54,6 +54,8 @@ usr.batch <- data %>% group_by(userID, batchID) %>% summarize(n.order = n())
 orderperweek <- usr.batch %>% group_by(userID) %>% 
   summarize(orderMaxPerWeek = max(n.order), orderMinPerWeek = min(n.order), ActiveWeek = n())
 
+# saveRDS
 usr.info <- cbind(TimeBtwnSentRec.info, TimeBtwnRecExpire.info[, -(1:2)], 
                   TimeBtwnRecOrder.info[, -(1:2)], TimeBtwnOrderExpire.info[, -(1:2)], 
                   ordertime.info[, -(1:2)], couponReceived.info[, -(1:2)], orderperweek[, -1])
+saveRDS(usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
