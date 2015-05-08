@@ -100,18 +100,19 @@ targetX2 <- sample(c("square", "triangle"), 15, replace = T)
 data.frame(targetX1, targetX2, compute_ll_2w(x1, x2, y, targetX1, targetX2))
 # --------------------------------------------------
 
-s1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/HTVset1.rds")
-d <- data.frame(orderID = rep(s1$H$orderID, 3),
-                brand = c(as.character(s1$H$brand1), 
-                          as.character(s1$H$brand2), 
-                          as.character(s1$H$brand3)),
-                reward = c(as.character(s1$H$reward1),
-                           as.character(s1$H$reward2),
-                           as.character(s1$H$reward3)),
-                coupUsed = c(s1$H$coupon1Used, s1$H$coupon2Used, s1$H$coupon3Used),
-                stringsAsFactors = F)
-d <- d[order(d$orderID),]
-
-s1$T$brand_rew_1 <- compute_ll_2w(d$brand, d$reward, d$coupUsed,
-                                 as.character(s1$T$brand1),
-                                 as.character(s1$T$reward1))
+# Demonstrate usage on real data
+# s1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/HTVset1.rds")
+# d <- data.frame(orderID = rep(s1$H$orderID, 3),
+#                 brand = c(as.character(s1$H$brand1), 
+#                           as.character(s1$H$brand2), 
+#                           as.character(s1$H$brand3)),
+#                 reward = c(as.character(s1$H$reward1),
+#                            as.character(s1$H$reward2),
+#                            as.character(s1$H$reward3)),
+#                 coupUsed = c(s1$H$coupon1Used, s1$H$coupon2Used, s1$H$coupon3Used),
+#                 stringsAsFactors = F)
+# d <- d[order(d$orderID),]
+# 
+# s1$T$brand_rew_1 <- compute_ll_2w(d$brand, d$reward, d$coupUsed,
+#                                  as.character(s1$T$brand1),
+#                                  as.character(s1$T$reward1))
