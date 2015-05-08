@@ -28,12 +28,12 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("~/dmc2015/ian/universal_features.rmd")
+      rmarkdown::render("~/dmc2015/ian/CorysLLR.rmd")
 ```
 
 I am using the following pacakges:
 <!--- # (R code (No Results in Document))-->
-```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+```{r paks, echo=TRUE, cache=TRUE, message=FALSE, tidy=FALSE, include=TRUE}
    library(ggplot2)
    library(lubridate)
    library(xtable)
@@ -46,115 +46,375 @@ I am using the following pacakges:
    library(gtools)
    library(sqldf)
    library(missForest)
+   source("~/dmc2015/ian/R/renm.R")
 ```
 and my working directory is set to \verb!dmc2015/ian!.
 
 # Pete's LLR Code
+Pete has written some wonderful functions to compute One-way and Two-Way loglikelihood estimates based on the historical data.
+I am recopying them here for preservation.
 <!--- chunk-label: R code (No Results in Document) -->
-```{r PetesFunc1,cache=FALSE}
-   source("~/dmc2015/pete/06_likelihood.R")
+```{r PetesFunc1,cache=TRUE}
+   # Code to compute estimated log-likelihood ratios for categorical 
+   # variables and binary response. The second function is to calculate the 
+   # log-likelihood ratios for an interaction between two categorical variables.
+   # This is based on the work by Cory Lanker.
+   #
+   # If you want to understand exactly what the code below is doing, I 
+   # recommend running the code within the functions step-by-step using the 
+   # examples that I created below each function. Let me know if you have any
+   # questions. The justification for this approach is explained in Cory Lanker's
+   # thesis paper.
+
+   compute_ll <- function(x, y, targetX, epsilon1 = NULL, epsilon2 = NULL)  {
+     # x A character vector
+     # y A numeric vector of 0's and 1's
+     # targetX A character vector with the same categories as x
+     # Takes a categorical predictor variable, x, and a binary response
+     # variable, y, and produces a vector of the estimated log-likelihood
+     # statistics for the targetX column. An epsilon > 0 is added to the numerator 
+     # and denominator to prevent numerical instability.
+     # Non-matching categories will result in NA entries
+     stopifnot(all(y %in% c(0,1))) # response has to be binary
+     if (is.null(epsilon1) | is.null(epsilon2)) {
+       epsilon1 = mean(y)
+       epsilon2 = 1 - epsilon1
+     }
+     levs <- unique(x)
+     # This will create a vector of the estimated log-likelihood ratios for
+     # each level of the explanatory variable. 
+     lls <- sapply(levs, FUN = function(levs) {
+                     log((sum(x == levs & y == 1) + epsilon1) / 
+                         (sum(x == levs & y == 0) + epsilon2))
+                   })
+     res <- lls[targetX]
+     names(res) <- targetX
+     res[is.na(res)] <- log(epsilon1 / epsilon2)
+     return(res)
+   }
+
+   compute_ll_2w <- function(x1, x2, y, targetX1, targetX2, 
+                             epsilon1 = NULL,
+                             epsilon2 = NULL) {
+     # x1 A character vector
+     # x2 A character vector
+     # y A numeric vector of 0's and 1's
+     # targetX1 A character vector with the same categories as x1
+     # targetX2 A character vector with the same categories as x2
+     # Takes 2 categorical predictor variables, x1 and x2, and a binary response
+     # variable, y, and produces a vector of the estimated log-likelihood
+     # statistics for all combinations between the levels of each predictor for
+     # targetX1 and targetX2.
+     # An epsilon > 0 is added to the numerator and denominator to prevent 
+     # numerical instability.
+     # Non-matching categories will result in NA entries
+     stopifnot(all(y %in% c(0,1))) # response has to be binary
+     if (is.null(epsilon1) | is.null(epsilon2)) {
+       epsilon1 = mean(y)
+       epsilon2 = 1 - epsilon1
+     }
+     levs_1 <- unique(x1)
+     levs_2 <- unique(x2)
+     # Using sapply within sapply will create a matrix. This will create a matrix 
+     # of the estimated log-likelihood ratios for each unique combination of the 
+     # levels of each explanatory variable.
+     lls <- sapply(levs_2, FUN = function(levs_2) {
+                     sapply(levs_1, FUN = function(levs_1) {
+                              log((sum(x1 == levs_1 & x2 == levs_2 & y == 1) + epsilon1) / 
+                                  (sum(x1 == levs_1 & x2 == levs_2 & y == 0) + epsilon2))
+                            })
+                   })
+     index <- 1:length(targetX1)
+     res <- sapply(index, FUN = function(index) {
+                     if (targetX1[index] %in% rownames(lls) & 
+                         targetX2[index] %in% colnames(lls)) {
+                       lls[targetX1[index], targetX2[index]]
+                     } else {
+                       NA
+                     }
+                   })
+     res[is.na(res)] <- log(epsilon1 / epsilon2)
+     return(res)
+   }
 ```
 
 #Reading the data into R
 <!--- chunk-label: R code (No Results in Document) -->
-```{r readingInTheData,cache=FALSE}
+```{r readingInTheData,cache=TRUE}
    #clean data
    d = readRDS("~/dmc2015/data/clean_data/clean_simple.rds")
    S1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
    S2 = readRDS("~/dmc2015/data/featureMatrix/HTVset2.rds")
    S3 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
 ```
-
-# Calculating Coupon 1-Way Likelihoods
-
-## Raw Data Variables
+and we need to manipulate the variables so that we have couponID in the key and
+the order status as the primary response.
 <!--- cpn1way: R code (No Results in Document) -->
-```{r cpn1way,cache=FALSE}
+```{r cpn1way,cache=TRUE}
    source("./R/stackCoupons.R")
 
    TV = stackCoupons(S1$T,S1$V,nms=c("train","validation"))
    TC = stackCoupons(S1$T,S1$C,nms=c("train","class"))
-   TVC = TV$train %>% rbind(TV$validation) %>% rbind(TC$class)
-   H = stackCoupons(S1$T,S1$H,nms=c("train","historical"))$historical
 
-   qplot(TVC$basePrice,binwidth=.25)
+   trn = TV$combined %>% filter(dsn == "train")
+   val = TV$combined %>% filter(dsn == "validation")
+   cls = TC$combined %>% filter(dsn == "class")
 
-   names(TVC)
+   TVC = trn %>% rbind(val) %>% rbind(cls)
 
-   chk = H %>% group_by(couponID) %>% summarize(count = n(), nUsed = sum(couponUsed)) %>% arrange(-count) %>% with(table(count,nUsed)) %>% data.frame
-   qplot(count,nUsed,data=chk,size=Freq)
+   H = stackCoupons(S1$T,S1$H,nms=c("train","historical"))$combined %>%
+      filter(dsn == "historical")
+```
+Occasionally, there are issues with factor conversion. 
+To avoid this, I am converting the following values to characters:
+<!--- fact2char: R code (No Results in Document) -->
+```{r fact2charTV,cache=TRUE}
+   TVC$userID = as.character(TVC$userID)
 
+   TVC$couponID = as.character(TVC$couponID)
+      TVC$categoryIDs = as.character(TVC$categoryIDs)
+      TVC$reward = as.character(TVC$reward)
+      TVC$brand = as.character(TVC$brand)
+      TVC$productGroup = as.character(TVC$productGroup)
+      TVC$premiumProduct = as.character(TVC$premiumProduct)
+      TVC$couponCol = as.character(TVC$couponCol)
+```
+And we do the same for the historical data
+<!--- fact2char: R code (No Results in Document) -->
+```{r fact2char,cache=TRUE}
+   H$userID = as.character(H$userID)
+
+   H$couponID = as.character(H$couponID)
+      H$categoryIDs = as.character(H$categoryIDs)
+      H$reward = as.character(H$reward)
+      H$brand = as.character(H$brand)
+      H$productGroup = as.character(H$productGroup)
+      H$premiumProduct = as.character(H$premiumProduct)
+      H$couponCol = as.character(H$couponCol)
+```
+
+   
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE, include=FALSE}
+   #chk = H %>% group_by(couponID) %>% summarize(count = n(), nUsed = sum(couponUsed)) %>% arrange(-count) %>% with(table(count,nUsed)) %>% data.frame
+   #qplot(count,nUsed,data=chk,size=Freq)
+```
+   
+
+# Calculating Coupon 1-Way Likelihoods
+
+## Raw Data Variables
+*userID*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
+   # userID
+   llr = compute_ll(as.character(H$userID),H$couponUsed,as.character(TVC$userID))
+   llr_userID = data.frame("userID" = names(llr), "llr_userID" = llr) %>% arrange(userID) %>% unique
+
+   #plot the results
+   if(nrow(TVC) - sum(TVC$userID %in% llr_userID$userID)) warning("Things aren't adding up")
+   qplot(as.numeric(gsub("user","",userID)), llr_userID,data=llr_userID)
+
+   #Isolate the features
+   llr_userID_long = TVC %>% 
+      left_join(llr_userID,by="userID") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_userID) 
+
+   trn = llr_userID_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_userID) 
+   val = llr_userID_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_userID) 
+   cls = llr_userID_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_userID) 
+
+   llr_userID_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userID_long,"../features/feature_files/llr_userID_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_userID_wide = TVC %>% left_join(llr_userID,by="userID") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_userID) %>% 
+      spread(couponCol,llr_userID) %>% 
+      renm(c("orderID","dsn", "llr_userID1", "llr_userID2", "llr_userID3")) 
+
+   trn = llr_userID_wide %>% filter(dsn == "train") %>% select(orderID,llr_userID1,llr_userID2,llr_userID3) 
+   val = llr_userID_wide %>% filter(dsn == "validation") %>% select(orderID,llr_userID1,llr_userID2,llr_userID3) 
+   cls = llr_userID_wide %>% filter(dsn == "class") %>% select(orderID,llr_userID1,llr_userID2,llr_userID3) 
+
+   llr_userID_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userID_wide,"../features/feature_files/llr_userID_wide_set1.rds")
+```
+
+
+*couponID*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
    # couponID
    llr = compute_ll(as.character(H$couponID),H$couponUsed,as.character(TVC$couponID))
    llr_couponID = data.frame("couponID" = names(llr), "llr_couponID" = llr) %>% arrange(couponID) %>% unique
 
+   #plot the results
    if(nrow(TVC) - sum(TVC$couponID %in% llr_couponID$couponID)) warning("Things aren't adding up")
    qplot(as.numeric(gsub("cpn","",couponID)), llr_couponID,data=llr_couponID)
 
-   # productGroup
-   llr = compute_ll(as.character(H$productGroup),H$couponUsed,as.character(TVC$productGroup))
-   llr_productGroup = data.frame("productGroup" = names(llr), "llr_productGroup" = llr) %>% arrange(productGroup) %>% unique %>% arrange(productGroup)
+   #Isolate the features
+   llr_couponID_long = TVC %>% 
+      left_join(llr_couponID,by="couponID") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_couponID) 
 
-   if(nrow(TVC) - sum(TVC$productGroup %in% llr_productGroup$productGroup)) warning("Things aren't adding up")
-   qplot(productGroup, llr_productGroup,data=llr_productGroup)
+   trn = llr_couponID_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_couponID) 
+   val = llr_couponID_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_couponID) 
+   cls = llr_couponID_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_couponID) 
 
+   llr_couponID_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponID_long,"../features/feature_files/llr_couponID_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_couponID_wide = TVC %>% left_join(llr_couponID,by="couponID") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_couponID) %>% 
+      spread(couponCol,llr_couponID) %>% 
+      renm(c("orderID","dsn", "llr_couponID1", "llr_couponID2", "llr_couponID3")) 
+
+   trn = llr_couponID_wide %>% filter(dsn == "train") %>% select(orderID,llr_couponID1,llr_couponID2,llr_couponID3) 
+   val = llr_couponID_wide %>% filter(dsn == "validation") %>% select(orderID,llr_couponID1,llr_couponID2,llr_couponID3) 
+   cls = llr_couponID_wide %>% filter(dsn == "class") %>% select(orderID,llr_couponID1,llr_couponID2,llr_couponID3) 
+
+   llr_couponID_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponID_wide,"../features/feature_files/llr_couponID_wide_set1.rds")
+```
+
+*reward*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
    # reward
    llr = compute_ll(as.character(H$reward),H$couponUsed,as.character(TVC$reward))
-   llr_reward = data.frame("reward" = names(llr), "llr_reward" = llr) %>% arrange(reward) %>% unique %>% arrange(reward)
+   llr_reward = data.frame("reward" = names(llr), "llr_reward" = llr) %>% arrange(reward) %>% unique
 
+   #plot the results
    if(nrow(TVC) - sum(TVC$reward %in% llr_reward$reward)) warning("Things aren't adding up")
    qplot(reward, llr_reward,data=llr_reward)
 
+   #Isolate the features
+   llr_reward_long = TVC %>% 
+      left_join(llr_reward,by="reward") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_reward) 
+
+   trn = llr_reward_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_reward) 
+   val = llr_reward_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_reward) 
+   cls = llr_reward_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_reward) 
+
+   llr_reward_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_reward_long,"../features/feature_files/llr_reward_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_reward_wide = TVC %>% left_join(llr_reward,by="reward") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_reward) %>% 
+      spread(couponCol,llr_reward) %>% 
+      renm(c("orderID","dsn", "llr_reward1", "llr_reward2", "llr_reward3")) 
+
+   trn = llr_reward_wide %>% filter(dsn == "train") %>% select(orderID,llr_reward1,llr_reward2,llr_reward3) 
+   val = llr_reward_wide %>% filter(dsn == "validation") %>% select(orderID,llr_reward1,llr_reward2,llr_reward3) 
+   cls = llr_reward_wide %>% filter(dsn == "class") %>% select(orderID,llr_reward1,llr_reward2,llr_reward3) 
+
+   llr_reward_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_reward_wide,"../features/feature_files/llr_reward_wide_set1.rds")
+```
+
+*brand*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
    # brand
    llr = compute_ll(as.character(H$brand),H$couponUsed,as.character(TVC$brand))
-   llr_brand = data.frame("brand" = names(llr), "llr_brand" = llr) %>% arrange(brand) %>% unique %>% arrange(brand)
+   llr_brand = data.frame("brand" = names(llr), "llr_brand" = llr) %>% arrange(brand) %>% unique
 
+   #plot the results
    if(nrow(TVC) - sum(TVC$brand %in% llr_brand$brand)) warning("Things aren't adding up")
-   qplot(brand, llr_brand,data=llr_brand)
+   qplot(as.numeric(gsub("brand","",brand)), llr_brand,data=llr_brand)
 
-   # userID
-   llr = compute_ll(as.character(H$userID),H$couponUsed,as.character(TVC$userID))
-   llr_userID = data.frame("userID" = names(llr), "llr_userID" = llr) %>% arrange(userID) %>% unique %>% arrange(userID)
+   #Isolate the features
+   llr_brand_long = TVC %>% 
+      left_join(llr_brand,by="brand") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_brand) 
 
-   if(nrow(TVC) - sum(TVC$userID %in% llr_userID$userID)) warning("Things aren't adding up")
-   qplot(userID, llr_userID,data=llr_userID)
+   trn = llr_brand_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_brand) 
+   val = llr_brand_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_brand) 
+   cls = llr_brand_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_brand) 
+
+   llr_brand_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brand_long,"../features/feature_files/llr_brand_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_brand_wide = TVC %>% left_join(llr_brand,by="brand") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_brand) %>% 
+      spread(couponCol,llr_brand) %>% 
+      renm(c("orderID","dsn", "llr_brand1", "llr_brand2", "llr_brand3")) 
+
+   trn = llr_brand_wide %>% filter(dsn == "train") %>% select(orderID,llr_brand1,llr_brand2,llr_brand3) 
+   val = llr_brand_wide %>% filter(dsn == "validation") %>% select(orderID,llr_brand1,llr_brand2,llr_brand3) 
+   cls = llr_brand_wide %>% filter(dsn == "class") %>% select(orderID,llr_brand1,llr_brand2,llr_brand3) 
+
+   llr_brand_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brand_wide,"../features/feature_files/llr_brand_wide_set1.rds")
 ```
 
-## Created Variables
+*categoryIDs (aggregated)*
 <!--- chunk-label: R code (No Results in Document) -->
-```{r createvarsLLR,cache=FALSE}
-   # couponCol
-   llr = compute_ll(as.character(H$couponCol),H$couponUsed,as.character(TVC$couponCol))
-   llr_couponCol = data.frame("couponCol" = names(llr), "llr_couponCol" = llr) %>% arrange(couponCol) %>% unique %>% arrange(couponCol)
+```{r cache=TRUE}
+   # categoryIDs
+   llr = compute_ll(as.character(H$categoryIDs),H$couponUsed,as.character(TVC$categoryIDs))
+   llr_categoryIDs = data.frame("categoryIDs" = names(llr), "llr_categoryIDs" = llr) %>% arrange(categoryIDs) %>% unique
 
-   if(nrow(TVC) - sum(TVC$couponCol %in% llr_couponCol$couponCol)) warning("Things aren't adding up")
-   qplot(couponCol, llr_couponCol,data=llr_couponCol)
+   #plot the results
+   if(nrow(TVC) - sum(TVC$categoryIDs %in% llr_categoryIDs$categoryIDs)) warning("Things aren't adding up")
+   qplot(as.numeric(gsub("cat","",categoryIDs)), llr_categoryIDs,data=llr_categoryIDs)
 
-   # couponsReceivedDoW
-   llr = compute_ll(as.character(H$couponsReceivedDoW),H$couponUsed,as.character(TVC$couponsReceivedDoW))
-   llr_couponsReceivedDoW = data.frame("couponsReceivedDoW" = names(llr), "llr_couponsReceivedDoW" = llr) %>% arrange(couponsReceivedDoW) %>% unique %>% arrange(couponsReceivedDoW)
+   #Isolate the features
+   llr_categoryIDs_long = TVC %>% 
+      left_join(llr_categoryIDs,by="categoryIDs") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_categoryIDs) 
 
-   if(nrow(TVC) - sum(TVC$couponsReceivedDoW %in% llr_couponsReceivedDoW$couponsReceivedDoW)) warning("Things aren't adding up")
-   qplot(couponsReceivedDoW, llr_couponsReceivedDoW,data=llr_couponsReceivedDoW)
+   trn = llr_categoryIDs_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_categoryIDs) 
+   val = llr_categoryIDs_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_categoryIDs) 
+   cls = llr_categoryIDs_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_categoryIDs) 
 
-   # orderTimeDoW
-   llr = compute_ll(as.character(H$orderTimeDoW),H$couponUsed,as.character(TVC$orderTimeDoW))
-   llr_orderTimeDoW = data.frame("orderTimeDoW" = names(llr), "llr_orderTimeDoW" = llr) %>% arrange(orderTimeDoW) %>% unique %>% arrange(orderTimeDoW)
+   llr_categoryIDs_long = list("T" = trn, "V" = val, "C" = cls) 
 
-   if(nrow(TVC) - sum(TVC$orderTimeDoW %in% llr_orderTimeDoW$orderTimeDoW)) warning("Things aren't adding up")
-   qplot(orderTimeDoW, llr_orderTimeDoW,data=llr_orderTimeDoW)
+   saveRDS(llr_categoryIDs_long,"../features/feature_files/llr_categoryIDs_agg_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_categoryIDs_wide = TVC %>% left_join(llr_categoryIDs,by="categoryIDs") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_categoryIDs) %>% 
+      spread(couponCol,llr_categoryIDs) %>% 
+      renm(c("orderID","dsn", "llr_categoryIDs1", "llr_categoryIDs2", "llr_categoryIDs3")) 
+
+   trn = llr_categoryIDs_wide %>% filter(dsn == "train") %>% select(orderID,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3) 
+   val = llr_categoryIDs_wide %>% filter(dsn == "validation") %>% select(orderID,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3) 
+   cls = llr_categoryIDs_wide %>% filter(dsn == "class") %>% select(orderID,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3) 
+
+   llr_categoryIDs_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_categoryIDs_wide,"../features/feature_files/llr_categoryIDs_agg_wide_set1.rds")
 ```
 
-## By Category ID
-<!--- cats: R code (No Results in Document) -->
-```{r cats,cache=FALSE}
-   # categoryIDs as a chunk
-   llr = compute_ll(as.character(H$categoryIDs),H$couponUsed,as.character(TVC$categoryIDs))
-   llr_categoryIDs = data.frame("categoryIDs" = names(llr), "llr_categoryIDs" = llr) %>% arrange(categoryIDs) %>% unique %>% arrange(categoryIDs)
+*categoryIDs (individually)*
 
-   if(nrow(TVC) - sum(TVC$categoryIDs %in% llr_categoryIDs$categoryIDs)) warning("Things aren't adding up")
-   qplot(categoryIDs, llr_categoryIDs,data=llr_categoryIDs)
-
+We may need to compute statistics with respect to each category apart from the aggregated one:
+<!--- R code (No Results in Document) -->
+```{r cache=TRUE}
    # categoryIDs individually
    source("./R/splitColumn.R")
    TVC.cat = splitColumn(TVC,"categoryIDs","orderID",splitby=":") %>% 
@@ -174,13 +434,1613 @@ and my working directory is set to \verb!dmc2015/ian!.
       left_join(H,by=c("orderID","couponCol")) %>%
       arrange(orderID, couponCol, categoryEntry) %>%
       filter(!is.na(categoryID))
+```
 
-   # couponCol
+<!--- R code (No Results in Document) -->
+```{r cache=TRUE}
+   # categoryID 
    llr = compute_ll(as.character(H.cat$categoryID),H.cat$couponUsed,as.character(TVC.cat$categoryID))
    llr_categoryID = data.frame("categoryID" = names(llr), "llr_categoryID" = llr) %>% arrange(categoryID) %>% unique %>% arrange(categoryID)
 
+   #plot the results
    if(nrow(TVC.cat) - sum(TVC.cat$categoryID %in% llr_categoryID$categoryID)) warning("Things aren't adding up")
    qplot(gsub("cat","",categoryID), llr_categoryID,data=llr_categoryID,xlab="categoryID")
+
+   #Isolate the features (long, long)
+   llr_categoryID_long_long = TVC.cat %>% 
+      left_join(llr_categoryID,by="categoryID") %>% 
+      arrange(orderID,couponCol,categoryEntry) %>% 
+      select(orderID,couponCol,categoryEntry,dsn,llr_categoryID) 
+
+   trn = llr_categoryID_long_long %>% filter(dsn == "train") %>% select(orderID,couponCol,categoryEntry,llr_categoryID) 
+   val = llr_categoryID_long_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,categoryEntry,llr_categoryID) 
+   cls = llr_categoryID_long_long %>% filter(dsn == "class") %>% select(orderID,couponCol,categoryEntry,llr_categoryID) 
+
+   llr_categoryIDs_long_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_categoryIDs_long_long,"../features/feature_files/llr_categoryIDs_ind_long_long_set1.rds")
+
+   #Isolate the features (long)
+   llr_categoryID_long = TVC.cat %>% 
+         left_join(llr_categoryID,by="categoryID") %>% 
+         arrange(orderID,couponCol,categoryEntry) %>% 
+         select(orderID,couponCol,categoryEntry,dsn,llr_categoryID) %>%
+         spread(categoryEntry,llr_categoryID) %>%
+         arrange(orderID,couponCol) %>% 
+         renm(c("orderID","couponCol","dsn","llr_categoryIDs1", "llr_categoryIDs2", "llr_categoryIDs3", "llr_categoryIDs4", "llr_categoryIDs5")) 
+
+   trn = llr_categoryID_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3,llr_categoryIDs4,llr_categoryIDs5)
+   val = llr_categoryID_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3,llr_categoryIDs4,llr_categoryIDs5)
+   cls = llr_categoryID_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_categoryIDs1,llr_categoryIDs2,llr_categoryIDs3,llr_categoryIDs4,llr_categoryIDs5)
+
+   llr_categoryIDs_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_categoryIDs_long,"../features/feature_files/llr_categoryIDs_ind_long_set1.rds")
+
+   #Isolate the features (wide)
+   llr_categoryID_wide = TVC.cat %>% 
+         left_join(llr_categoryID,by="categoryID") %>% 
+         arrange(orderID,couponCol,categoryEntry) %>% 
+         mutate(entryid = paste0("llr_cpnCol",couponCol,"_catEntry",categoryEntry)) %>%
+         select(orderID,dsn,entryid,llr_categoryID) %>%
+         spread(entryid,llr_categoryID) %>%
+         arrange(orderID,dsn)
+
+   trn = llr_categoryID_wide %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_categoryID_wide %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_categoryID_wide %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_categoryIDs_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_categoryIDs_wide,"../features/feature_files/llr_categoryIDs_ind_wide_set1.rds")
+
 ```
+
+## Created Variables
+
+*couponCol*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
+   # couponCol
+   llr = compute_ll(as.character(H$couponCol),H$couponUsed,as.character(TVC$couponCol))
+   llr_couponCol = data.frame("couponCol" = names(llr), "llr_couponCol" = llr) %>% arrange(couponCol) %>% unique
+   llr_couponCol$couponCol = as.character(llr_couponCol$couponCol)
+
+   #plot the results
+   if(nrow(TVC) - sum(TVC$couponCol %in% llr_couponCol$couponCol)) warning("Things aren't adding up")
+   qplot(as.numeric(gsub("cpn","",couponCol)), llr_couponCol,data=llr_couponCol)
+
+   #Isolate the features
+   llr_couponCol_long = 
+   TVC %>% 
+      left_join(llr_couponCol,by="couponCol") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_couponCol)
+
+   trn = llr_couponCol_long %>% filter(dsn == "train") %>% select(orderID,couponCol,llr_couponCol) 
+   val = llr_couponCol_long %>% filter(dsn == "validation") %>% select(orderID,couponCol,llr_couponCol) 
+   cls = llr_couponCol_long %>% filter(dsn == "class") %>% select(orderID,couponCol,llr_couponCol) 
+
+   llr_couponCol_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponCol_long,"../features/feature_files/llr_couponCol_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_couponCol_wide = TVC %>% left_join(llr_couponCol,by="couponCol") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_couponCol) %>% 
+      spread(couponCol,llr_couponCol) %>% 
+      renm(c("orderID","dsn", "llr_couponCol1", "llr_couponCol2", "llr_couponCol3")) 
+
+   trn = llr_couponCol_wide %>% filter(dsn == "train") %>% select(orderID,llr_couponCol1,llr_couponCol2,llr_couponCol3) 
+   val = llr_couponCol_wide %>% filter(dsn == "validation") %>% select(orderID,llr_couponCol1,llr_couponCol2,llr_couponCol3) 
+   cls = llr_couponCol_wide %>% filter(dsn == "class") %>% select(orderID,llr_couponCol1,llr_couponCol2,llr_couponCol3) 
+
+   llr_couponCol_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponCol_wide,"../features/feature_files/llr_couponCol_wide.rds")
+```
+
+*couponsReceivedDoW*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
+   # couponsReceivedDoW
+   llr = compute_ll(as.character(H$couponsReceivedDoW),H$couponUsed,as.character(TVC$couponsReceivedDoW))
+   llr_couponsReceivedDoW = data.frame("couponsReceivedDoW" = names(llr), "llr_couponsReceivedDoW" = llr) %>% arrange(couponsReceivedDoW) %>% unique
+
+   #plot the results
+   if(nrow(TVC) - sum(TVC$couponsReceivedDoW %in% llr_couponsReceivedDoW$couponsReceivedDoW)) warning("Things aren't adding up")
+   qplot(couponsReceivedDoW, llr_couponsReceivedDoW,data=llr_couponsReceivedDoW)
+
+   #Isolate the features
+   llr_couponsReceivedDoW_long = TVC %>% 
+      left_join(llr_couponsReceivedDoW,by="couponsReceivedDoW") %>% 
+      arrange(orderID,couponsReceivedDoW) %>% 
+      select(orderID,couponsReceivedDoW,dsn,llr_couponsReceivedDoW) 
+
+   trn = llr_couponsReceivedDoW_long %>% filter(dsn == "train") %>% select(orderID,couponsReceivedDoW,llr_couponsReceivedDoW) 
+   val = llr_couponsReceivedDoW_long %>% filter(dsn == "validation") %>% select(orderID,couponsReceivedDoW,llr_couponsReceivedDoW) 
+   cls = llr_couponsReceivedDoW_long %>% filter(dsn == "class") %>% select(orderID,couponsReceivedDoW,llr_couponsReceivedDoW) 
+
+   llr_couponsReceivedDoW_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponsReceivedDoW_long,"../features/feature_files/llr_couponsReceivedDoW_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_couponsReceivedDoW_wide = 
+   TVC %>% left_join(llr_couponsReceivedDoW,by="couponsReceivedDoW") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_couponsReceivedDoW) %>% 
+      spread(couponCol,llr_couponsReceivedDoW) %>% 
+      renm(c("orderID","dsn", "llr_couponsReceivedDoW1", "llr_couponsReceivedDoW2", "llr_couponsReceivedDoW3")) 
+
+   trn = llr_couponsReceivedDoW_wide %>% filter(dsn == "train") %>% select(orderID,llr_couponsReceivedDoW1,llr_couponsReceivedDoW2,llr_couponsReceivedDoW3) 
+   val = llr_couponsReceivedDoW_wide %>% filter(dsn == "validation") %>% select(orderID,llr_couponsReceivedDoW1,llr_couponsReceivedDoW2,llr_couponsReceivedDoW3) 
+   cls = llr_couponsReceivedDoW_wide %>% filter(dsn == "class") %>% select(orderID,llr_couponsReceivedDoW1,llr_couponsReceivedDoW2,llr_couponsReceivedDoW3) 
+
+   llr_couponsReceivedDoW_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_couponsReceivedDoW_wide,"../features/feature_files/llr_couponsReceivedDoW_wide.rds")
+```
+
+*orderTimeDoW*
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=TRUE}
+   # orderTimeDoW
+   llr = compute_ll(as.character(H$orderTimeDoW),H$couponUsed,as.character(TVC$orderTimeDoW))
+   llr_orderTimeDoW = data.frame("orderTimeDoW" = names(llr), "llr_orderTimeDoW" = llr) %>% arrange(orderTimeDoW) %>% unique
+
+   #plot the results
+   if(nrow(TVC) - sum(TVC$orderTimeDoW %in% llr_orderTimeDoW$orderTimeDoW)) warning("Things aren't adding up")
+   qplot(orderTimeDoW, llr_orderTimeDoW,data=llr_orderTimeDoW)
+
+   #Isolate the features
+   llr_orderTimeDoW_long = TVC %>% 
+      left_join(llr_orderTimeDoW,by="orderTimeDoW") %>% 
+      arrange(orderID,orderTimeDoW) %>% 
+      select(orderID,orderTimeDoW,dsn,llr_orderTimeDoW) 
+
+   trn = llr_orderTimeDoW_long %>% filter(dsn == "train") %>% select(orderID,orderTimeDoW,llr_orderTimeDoW) 
+   val = llr_orderTimeDoW_long %>% filter(dsn == "validation") %>% select(orderID,orderTimeDoW,llr_orderTimeDoW) 
+   cls = llr_orderTimeDoW_long %>% filter(dsn == "class") %>% select(orderID,orderTimeDoW,llr_orderTimeDoW) 
+
+   llr_orderTimeDoW_long = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_orderTimeDoW_long,"../features/feature_files/llr_orderTimeDoW_long_set1.rds")
+
+   #save the results to RDS in WIDE format
+   llr_orderTimeDoW_wide = TVC %>% left_join(llr_orderTimeDoW,by="orderTimeDoW") %>% 
+      arrange(orderID,couponCol) %>% 
+      select(orderID,couponCol,dsn,llr_orderTimeDoW) %>% 
+      spread(couponCol,llr_orderTimeDoW) %>% 
+      renm(c("orderID","dsn", "llr_orderTimeDoW1", "llr_orderTimeDoW2", "llr_orderTimeDoW3")) 
+
+   trn = llr_orderTimeDoW_wide %>% filter(dsn == "train") %>% select(orderID,llr_orderTimeDoW1,llr_orderTimeDoW2,llr_orderTimeDoW3) 
+   val = llr_orderTimeDoW_wide %>% filter(dsn == "validation") %>% select(orderID,llr_orderTimeDoW1,llr_orderTimeDoW2,llr_orderTimeDoW3) 
+   cls = llr_orderTimeDoW_wide %>% filter(dsn == "class") %>% select(orderID,llr_orderTimeDoW1,llr_orderTimeDoW2,llr_orderTimeDoW3) 
+
+   llr_orderTimeDoW_wide = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_orderTimeDoW_wide,"../features/feature_files/llr_orderTimeDoW_wide.rds")
+```
+
       
+# Calculating Coupon 2-Way Likelihoods
+
+We have a sligthly more complicated task on this one:
+<!--- two-way-choices: R code (No Results in Document) -->
+```{r two-way-choices,cache=TRUE}
+   names(TVC)[-c(1,2,4,5,6,7,11,12,16,17:22,24:25,31)]
+names(TVC)
+```
+
+## userID and 
+*couponsReceivedDoW* (as `llr_userXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$userID), as.character(TVC$couponsReceivedDoW))
+  llr_userXrecDoW = data.frame("userID" = TVC$userID, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_userXrecDoW" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXrecDoW,aes(x=userID, y=couponsReceivedDoW, size = llr_userXrecDoW),alpha=.1) + geom_point()
+  qplot(userID,llr_userXrecDoW,data=llr_userXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_userXrecDoW, by=c("userID","couponsReceivedDoW")) %>%
+     select(orderID,userID,dsn,couponsReceivedDoW,llr_userXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_userXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXrecDoW = TVC %>% 
+     left_join(llr_userXrecDoW, by=c("userID","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_userXrecDoW)
+
+   trn = llr_userXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXrecDoW,"../features/feature_files/llr_userXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_userXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$userID), as.character(TVC$couponsReceivedFriSat))
+  llr_userXrecFS = data.frame("userID" = TVC$userID, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_userXrecFS" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXrecFS,aes(x=userID, y=couponsReceivedFriSat, size = llr_userXrecFS),alpha=.1) + geom_point()
+  qplot(userID,llr_userXrecFS,data=llr_userXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_userXrecFS, by=c("userID","couponsReceivedFriSat")) %>%
+     select(orderID,userID,dsn,couponsReceivedFriSat,llr_userXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_userXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXrecFS = TVC %>% 
+     left_join(llr_userXrecFS, by=c("userID","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_userXrecFS)
+
+   trn = llr_userXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXrecFS,"../features/feature_files/llr_userXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_userXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$userID), as.character(TVC$couponsReceivedWeekend))
+  llr_userXrecWknd = data.frame("userID" = TVC$userID, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_userXrecWknd" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXrecWknd,aes(x=userID, y=couponsReceivedWeekend, size = llr_userXrecWknd),alpha=.1) + geom_point()
+  qplot(userID,llr_userXrecWknd,data=llr_userXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_userXrecWknd, by=c("userID","couponsReceivedWeekend")) %>%
+     select(orderID,userID,dsn,couponsReceivedWeekend,llr_userXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_userXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXrecWknd = TVC %>% 
+     left_join(llr_userXrecWknd, by=c("userID","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_userXrecWknd)
+
+   trn = llr_userXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXrecWknd,"../features/feature_files/llr_userXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_userXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$userID), as.character(TVC$orderTimeDoW))
+  llr_userXordDoW = data.frame("userID" = TVC$userID, "orderTimeDoW" = TVC$orderTimeDoW, "llr_userXordDoW" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXordDoW,aes(x=userID, y=orderTimeDoW, size = llr_userXordDoW),alpha=.1) + geom_point()
+  qplot(userID,llr_userXordDoW,data=llr_userXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_userXordDoW, by=c("userID","orderTimeDoW")) %>%
+     select(orderID,userID,dsn,orderTimeDoW,llr_userXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_userXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXordDoW = TVC %>% 
+     left_join(llr_userXordDoW, by=c("userID","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_userXordDoW)
+
+   trn = llr_userXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXordDoW,"../features/feature_files/llr_userXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_userXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$userID), as.character(TVC$orderTimeFriSat))
+  llr_userXordFS = data.frame("userID" = TVC$userID, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_userXordFS" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXordFS,aes(x=userID, y=orderTimeFriSat, size = llr_userXordFS),alpha=.1) + geom_point()
+  qplot(userID,llr_userXordFS,data=llr_userXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_userXordFS, by=c("userID","orderTimeFriSat")) %>%
+     select(orderID,userID,dsn,orderTimeFriSat,llr_userXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_userXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXordFS = TVC %>% 
+     left_join(llr_userXordFS, by=c("userID","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_userXordFS)
+
+   trn = llr_userXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXordFS,"../features/feature_files/llr_userXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_userXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$userID), as.character(TVC$orderTimeWeekend))
+  llr_userXordWknd = data.frame("userID" = TVC$userID, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_userXordWknd" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXordWknd,aes(x=userID, y=orderTimeWeekend, size = llr_userXordWknd),alpha=.1) + geom_point()
+  qplot(userID,llr_userXordWknd,data=llr_userXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_userXordWknd, by=c("userID","orderTimeWeekend")) %>%
+     select(orderID,userID,dsn,orderTimeWeekend,llr_userXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_userXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXordWknd = TVC %>% 
+     left_join(llr_userXordWknd, by=c("userID","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_userXordWknd)
+
+   trn = llr_userXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXordWknd,"../features/feature_files/llr_userXordWknd.rds")
+```
+
+*reward* (as `llr_userXrwrd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # reward 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$reward), H$couponUsed, as.character(TVC$userID), as.character(TVC$reward))
+  llr_userXrwrd = data.frame("userID" = TVC$userID, "reward" = TVC$reward, "llr_userXrwrd" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXrwrd,aes(x=userID, y=reward, size = llr_userXrwrd),alpha=.1) + geom_point()
+  qplot(userID,llr_userXrwrd,data=llr_userXrwrd, geom='line', group=reward, facets = reward ~ .)
+
+  TVC %>% left_join(llr_userXrwrd, by=c("userID","reward")) %>%
+     select(orderID,userID,dsn,reward,llr_userXrwrd,couponUsed) %>%
+     ggplot(aes(x=reward,y=llr_userXrwrd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXrwrd = TVC %>% 
+     left_join(llr_userXrwrd, by=c("userID","reward")) %>%
+     select(orderID,dsn,llr_userXrwrd)
+
+   trn = llr_userXrwrd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXrwrd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXrwrd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXrwrd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXrwrd,"../features/feature_files/llr_userXrwrd.rds")
+```
+
+*premiumProduct* (as `llr_userXluxury`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # premiumProduct 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$premiumProduct), H$couponUsed, as.character(TVC$userID), as.character(TVC$premiumProduct))
+  llr_userXluxury = data.frame("userID" = TVC$userID, "premiumProduct" = TVC$premiumProduct, "llr_userXluxury" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXluxury,aes(x=userID, y=premiumProduct, size = llr_userXluxury),alpha=.1) + geom_point()
+  qplot(userID,llr_userXluxury,data=llr_userXluxury, geom='line', group=premiumProduct, facets = premiumProduct ~ .)
+
+  TVC %>% left_join(llr_userXluxury, by=c("userID","premiumProduct")) %>%
+     select(orderID,userID,dsn,premiumProduct,llr_userXluxury,couponUsed) %>%
+     ggplot(aes(x=premiumProduct,y=llr_userXluxury,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXluxury = TVC %>% 
+     left_join(llr_userXluxury, by=c("userID","premiumProduct")) %>%
+     select(orderID,dsn,llr_userXluxury)
+
+   trn = llr_userXluxury %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXluxury %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXluxury %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXluxury = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXluxury,"../features/feature_files/llr_userXluxury.rds")
+```
+
+*brand* (as `llr_userXbrnd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # brand 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$brand), H$couponUsed, as.character(TVC$userID), as.character(TVC$brand))
+  llr_userXbrnd = data.frame("userID" = TVC$userID, "brand" = TVC$brand, "llr_userXbrnd" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXbrnd,aes(x=userID, y=brand, size = llr_userXbrnd),alpha=.1) + geom_point()
+  qplot(userID,llr_userXbrnd,data=llr_userXbrnd, geom='line', group=brand, facets = brand ~ .)
+
+  TVC %>% left_join(llr_userXbrnd, by=c("userID","brand")) %>%
+     select(orderID,userID,dsn,brand,llr_userXbrnd,couponUsed) %>%
+     ggplot(aes(x=brand,y=llr_userXbrnd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXbrnd = TVC %>% 
+     left_join(llr_userXbrnd, by=c("userID","brand")) %>%
+     select(orderID,dsn,llr_userXbrnd)
+
+   trn = llr_userXbrnd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXbrnd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXbrnd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXbrnd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXbrnd,"../features/feature_files/llr_userXbrnd.rds")
+```
+
+*productGroup* (as `llr_userXprod`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # productGroup 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$productGroup), H$couponUsed, as.character(TVC$userID), as.character(TVC$productGroup))
+  llr_userXprod = data.frame("userID" = TVC$userID, "productGroup" = TVC$productGroup, "llr_userXprod" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXprod,aes(x=userID, y=productGroup, size = llr_userXprod),alpha=.1) + geom_point()
+  qplot(userID,llr_userXprod,data=llr_userXprod, geom='line', group=productGroup, facets = productGroup ~ .)
+
+  TVC %>% left_join(llr_userXprod, by=c("userID","productGroup")) %>%
+     select(orderID,userID,dsn,productGroup,llr_userXprod,couponUsed) %>%
+     ggplot(aes(x=productGroup,y=llr_userXprod,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXprod = TVC %>% 
+     left_join(llr_userXprod, by=c("userID","productGroup")) %>%
+     select(orderID,dsn,llr_userXprod)
+
+   trn = llr_userXprod %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXprod %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXprod %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXprod = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXprod,"../features/feature_files/llr_userXprod.rds")
+```
+
+*couponCol* (as `llr_userXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$userID), as.character(H$couponCol), H$couponUsed, as.character(TVC$userID), as.character(TVC$couponCol))
+  llr_userXcpncol = data.frame("userID" = TVC$userID, "couponCol" = TVC$couponCol, "llr_userXcpncol" = llr) %>% arrange(userID)
+  
+  ggplot(data=llr_userXcpncol,aes(x=userID, y=couponCol, size = llr_userXcpncol),alpha=.1) + geom_point()
+  qplot(userID,llr_userXcpncol,data=llr_userXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_userXcpncol, by=c("userID","couponCol")) %>%
+     select(orderID,userID,dsn,couponCol,llr_userXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_userXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_userXcpncol = TVC %>% 
+     left_join(llr_userXcpncol, by=c("userID","couponCol")) %>%
+     select(orderID,dsn,llr_userXcpncol)
+
+   trn = llr_userXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_userXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_userXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_userXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_userXcpncol,"../features/feature_files/llr_userXcpncol.rds")
+```
+
+## reward and 
+*couponsReceivedDoW* (as `llr_rewardXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$reward), as.character(TVC$couponsReceivedDoW))
+  llr_rewardXrecDoW = data.frame("reward" = TVC$reward, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_rewardXrecDoW" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXrecDoW,aes(x=reward, y=couponsReceivedDoW, size = llr_rewardXrecDoW),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXrecDoW,data=llr_rewardXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_rewardXrecDoW, by=c("reward","couponsReceivedDoW")) %>%
+     select(orderID,reward,dsn,couponsReceivedDoW,llr_rewardXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_rewardXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXrecDoW = TVC %>% 
+     left_join(llr_rewardXrecDoW, by=c("reward","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_rewardXrecDoW)
+
+   trn = llr_rewardXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXrecDoW,"../features/feature_files/llr_rewardXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_rewardXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$reward), as.character(TVC$couponsReceivedFriSat))
+  llr_rewardXrecFS = data.frame("reward" = TVC$reward, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_rewardXrecFS" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXrecFS,aes(x=reward, y=couponsReceivedFriSat, size = llr_rewardXrecFS),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXrecFS,data=llr_rewardXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_rewardXrecFS, by=c("reward","couponsReceivedFriSat")) %>%
+     select(orderID,reward,dsn,couponsReceivedFriSat,llr_rewardXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_rewardXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXrecFS = TVC %>% 
+     left_join(llr_rewardXrecFS, by=c("reward","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_rewardXrecFS)
+
+   trn = llr_rewardXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXrecFS,"../features/feature_files/llr_rewardXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_rewardXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$reward), as.character(TVC$couponsReceivedWeekend))
+  llr_rewardXrecWknd = data.frame("reward" = TVC$reward, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_rewardXrecWknd" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXrecWknd,aes(x=reward, y=couponsReceivedWeekend, size = llr_rewardXrecWknd),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXrecWknd,data=llr_rewardXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_rewardXrecWknd, by=c("reward","couponsReceivedWeekend")) %>%
+     select(orderID,reward,dsn,couponsReceivedWeekend,llr_rewardXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_rewardXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXrecWknd = TVC %>% 
+     left_join(llr_rewardXrecWknd, by=c("reward","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_rewardXrecWknd)
+
+   trn = llr_rewardXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXrecWknd,"../features/feature_files/llr_rewardXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_rewardXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$reward), as.character(TVC$orderTimeDoW))
+  llr_rewardXordDoW = data.frame("reward" = TVC$reward, "orderTimeDoW" = TVC$orderTimeDoW, "llr_rewardXordDoW" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXordDoW,aes(x=reward, y=orderTimeDoW, size = llr_rewardXordDoW),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXordDoW,data=llr_rewardXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_rewardXordDoW, by=c("reward","orderTimeDoW")) %>%
+     select(orderID,reward,dsn,orderTimeDoW,llr_rewardXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_rewardXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXordDoW = TVC %>% 
+     left_join(llr_rewardXordDoW, by=c("reward","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_rewardXordDoW)
+
+   trn = llr_rewardXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXordDoW,"../features/feature_files/llr_rewardXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_rewardXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$reward), as.character(TVC$orderTimeFriSat))
+  llr_rewardXordFS = data.frame("reward" = TVC$reward, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_rewardXordFS" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXordFS,aes(x=reward, y=orderTimeFriSat, size = llr_rewardXordFS),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXordFS,data=llr_rewardXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_rewardXordFS, by=c("reward","orderTimeFriSat")) %>%
+     select(orderID,reward,dsn,orderTimeFriSat,llr_rewardXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_rewardXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXordFS = TVC %>% 
+     left_join(llr_rewardXordFS, by=c("reward","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_rewardXordFS)
+
+   trn = llr_rewardXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXordFS,"../features/feature_files/llr_rewardXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_rewardXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$reward), as.character(TVC$orderTimeWeekend))
+  llr_rewardXordWknd = data.frame("reward" = TVC$reward, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_rewardXordWknd" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXordWknd,aes(x=reward, y=orderTimeWeekend, size = llr_rewardXordWknd),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXordWknd,data=llr_rewardXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_rewardXordWknd, by=c("reward","orderTimeWeekend")) %>%
+     select(orderID,reward,dsn,orderTimeWeekend,llr_rewardXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_rewardXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXordWknd = TVC %>% 
+     left_join(llr_rewardXordWknd, by=c("reward","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_rewardXordWknd)
+
+   trn = llr_rewardXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXordWknd,"../features/feature_files/llr_rewardXordWknd.rds")
+```
+
+*premiumProduct* (as `llr_rewardXluxury`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # premiumProduct 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$premiumProduct), H$couponUsed, as.character(TVC$reward), as.character(TVC$premiumProduct))
+  llr_rewardXluxury = data.frame("reward" = TVC$reward, "premiumProduct" = TVC$premiumProduct, "llr_rewardXluxury" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXluxury,aes(x=reward, y=premiumProduct, size = llr_rewardXluxury),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXluxury,data=llr_rewardXluxury, geom='line', group=premiumProduct, facets = premiumProduct ~ .)
+
+  TVC %>% left_join(llr_rewardXluxury, by=c("reward","premiumProduct")) %>%
+     select(orderID,reward,dsn,premiumProduct,llr_rewardXluxury,couponUsed) %>%
+     ggplot(aes(x=premiumProduct,y=llr_rewardXluxury,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXluxury = TVC %>% 
+     left_join(llr_rewardXluxury, by=c("reward","premiumProduct")) %>%
+     select(orderID,dsn,llr_rewardXluxury)
+
+   trn = llr_rewardXluxury %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXluxury %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXluxury %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXluxury = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXluxury,"../features/feature_files/llr_rewardXluxury.rds")
+```
+
+*brand* (as `llr_rewardXbrnd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # brand 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$brand), H$couponUsed, as.character(TVC$reward), as.character(TVC$brand))
+  llr_rewardXbrnd = data.frame("reward" = TVC$reward, "brand" = TVC$brand, "llr_rewardXbrnd" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXbrnd,aes(x=reward, y=brand, size = llr_rewardXbrnd),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXbrnd,data=llr_rewardXbrnd, geom='line', group=brand, facets = brand ~ .)
+
+  TVC %>% left_join(llr_rewardXbrnd, by=c("reward","brand")) %>%
+     select(orderID,reward,dsn,brand,llr_rewardXbrnd,couponUsed) %>%
+     ggplot(aes(x=brand,y=llr_rewardXbrnd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXbrnd = TVC %>% 
+     left_join(llr_rewardXbrnd, by=c("reward","brand")) %>%
+     select(orderID,dsn,llr_rewardXbrnd)
+
+   trn = llr_rewardXbrnd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXbrnd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXbrnd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXbrnd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXbrnd,"../features/feature_files/llr_rewardXbrnd.rds")
+```
+
+*productGroup* (as `llr_rewardXprod`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # productGroup 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$productGroup), H$couponUsed, as.character(TVC$reward), as.character(TVC$productGroup))
+  llr_rewardXprod = data.frame("reward" = TVC$reward, "productGroup" = TVC$productGroup, "llr_rewardXprod" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXprod,aes(x=reward, y=productGroup, size = llr_rewardXprod),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXprod,data=llr_rewardXprod, geom='line', group=productGroup, facets = productGroup ~ .)
+
+  TVC %>% left_join(llr_rewardXprod, by=c("reward","productGroup")) %>%
+     select(orderID,reward,dsn,productGroup,llr_rewardXprod,couponUsed) %>%
+     ggplot(aes(x=productGroup,y=llr_rewardXprod,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXprod = TVC %>% 
+     left_join(llr_rewardXprod, by=c("reward","productGroup")) %>%
+     select(orderID,dsn,llr_rewardXprod)
+
+   trn = llr_rewardXprod %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXprod %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXprod %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXprod = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXprod,"../features/feature_files/llr_rewardXprod.rds")
+```
+
+*couponCol* (as `llr_rewardXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$reward), as.character(H$couponCol), H$couponUsed, as.character(TVC$reward), as.character(TVC$couponCol))
+  llr_rewardXcpncol = data.frame("reward" = TVC$reward, "couponCol" = TVC$couponCol, "llr_rewardXcpncol" = llr) %>% arrange(reward)
+  
+  ggplot(data=llr_rewardXcpncol,aes(x=reward, y=couponCol, size = llr_rewardXcpncol),alpha=.1) + geom_point()
+  qplot(reward,llr_rewardXcpncol,data=llr_rewardXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_rewardXcpncol, by=c("reward","couponCol")) %>%
+     select(orderID,reward,dsn,couponCol,llr_rewardXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_rewardXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_rewardXcpncol = TVC %>% 
+     left_join(llr_rewardXcpncol, by=c("reward","couponCol")) %>%
+     select(orderID,dsn,llr_rewardXcpncol)
+
+   trn = llr_rewardXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_rewardXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_rewardXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_rewardXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_rewardXcpncol,"../features/feature_files/llr_rewardXcpncol.rds")
+```
+
+## premiumProduct and 
+*couponsReceivedDoW* (as `llr_luxuryXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$couponsReceivedDoW))
+  llr_luxuryXrecDoW = data.frame("premiumProduct" = TVC$premiumProduct, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_luxuryXrecDoW" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXrecDoW,aes(x=premiumProduct, y=couponsReceivedDoW, size = llr_luxuryXrecDoW),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXrecDoW,data=llr_luxuryXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_luxuryXrecDoW, by=c("premiumProduct","couponsReceivedDoW")) %>%
+     select(orderID,premiumProduct,dsn,couponsReceivedDoW,llr_luxuryXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_luxuryXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXrecDoW = TVC %>% 
+     left_join(llr_luxuryXrecDoW, by=c("premiumProduct","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_luxuryXrecDoW)
+
+   trn = llr_luxuryXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXrecDoW,"../features/feature_files/llr_luxuryXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_luxuryXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$couponsReceivedFriSat))
+  llr_luxuryXrecFS = data.frame("premiumProduct" = TVC$premiumProduct, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_luxuryXrecFS" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXrecFS,aes(x=premiumProduct, y=couponsReceivedFriSat, size = llr_luxuryXrecFS),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXrecFS,data=llr_luxuryXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_luxuryXrecFS, by=c("premiumProduct","couponsReceivedFriSat")) %>%
+     select(orderID,premiumProduct,dsn,couponsReceivedFriSat,llr_luxuryXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_luxuryXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXrecFS = TVC %>% 
+     left_join(llr_luxuryXrecFS, by=c("premiumProduct","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_luxuryXrecFS)
+
+   trn = llr_luxuryXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXrecFS,"../features/feature_files/llr_luxuryXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_luxuryXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$couponsReceivedWeekend))
+  llr_luxuryXrecWknd = data.frame("premiumProduct" = TVC$premiumProduct, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_luxuryXrecWknd" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXrecWknd,aes(x=premiumProduct, y=couponsReceivedWeekend, size = llr_luxuryXrecWknd),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXrecWknd,data=llr_luxuryXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_luxuryXrecWknd, by=c("premiumProduct","couponsReceivedWeekend")) %>%
+     select(orderID,premiumProduct,dsn,couponsReceivedWeekend,llr_luxuryXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_luxuryXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXrecWknd = TVC %>% 
+     left_join(llr_luxuryXrecWknd, by=c("premiumProduct","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_luxuryXrecWknd)
+
+   trn = llr_luxuryXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXrecWknd,"../features/feature_files/llr_luxuryXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_luxuryXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$orderTimeDoW))
+  llr_luxuryXordDoW = data.frame("premiumProduct" = TVC$premiumProduct, "orderTimeDoW" = TVC$orderTimeDoW, "llr_luxuryXordDoW" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXordDoW,aes(x=premiumProduct, y=orderTimeDoW, size = llr_luxuryXordDoW),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXordDoW,data=llr_luxuryXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_luxuryXordDoW, by=c("premiumProduct","orderTimeDoW")) %>%
+     select(orderID,premiumProduct,dsn,orderTimeDoW,llr_luxuryXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_luxuryXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXordDoW = TVC %>% 
+     left_join(llr_luxuryXordDoW, by=c("premiumProduct","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_luxuryXordDoW)
+
+   trn = llr_luxuryXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXordDoW,"../features/feature_files/llr_luxuryXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_luxuryXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$orderTimeFriSat))
+  llr_luxuryXordFS = data.frame("premiumProduct" = TVC$premiumProduct, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_luxuryXordFS" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXordFS,aes(x=premiumProduct, y=orderTimeFriSat, size = llr_luxuryXordFS),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXordFS,data=llr_luxuryXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_luxuryXordFS, by=c("premiumProduct","orderTimeFriSat")) %>%
+     select(orderID,premiumProduct,dsn,orderTimeFriSat,llr_luxuryXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_luxuryXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXordFS = TVC %>% 
+     left_join(llr_luxuryXordFS, by=c("premiumProduct","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_luxuryXordFS)
+
+   trn = llr_luxuryXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXordFS,"../features/feature_files/llr_luxuryXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_luxuryXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$orderTimeWeekend))
+  llr_luxuryXordWknd = data.frame("premiumProduct" = TVC$premiumProduct, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_luxuryXordWknd" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXordWknd,aes(x=premiumProduct, y=orderTimeWeekend, size = llr_luxuryXordWknd),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXordWknd,data=llr_luxuryXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_luxuryXordWknd, by=c("premiumProduct","orderTimeWeekend")) %>%
+     select(orderID,premiumProduct,dsn,orderTimeWeekend,llr_luxuryXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_luxuryXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXordWknd = TVC %>% 
+     left_join(llr_luxuryXordWknd, by=c("premiumProduct","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_luxuryXordWknd)
+
+   trn = llr_luxuryXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXordWknd,"../features/feature_files/llr_luxuryXordWknd.rds")
+```
+
+*brand* (as `llr_luxuryXbrnd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # brand 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$brand), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$brand))
+  llr_luxuryXbrnd = data.frame("premiumProduct" = TVC$premiumProduct, "brand" = TVC$brand, "llr_luxuryXbrnd" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXbrnd,aes(x=premiumProduct, y=brand, size = llr_luxuryXbrnd),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXbrnd,data=llr_luxuryXbrnd, geom='line', group=brand, facets = brand ~ .)
+
+  TVC %>% left_join(llr_luxuryXbrnd, by=c("premiumProduct","brand")) %>%
+     select(orderID,premiumProduct,dsn,brand,llr_luxuryXbrnd,couponUsed) %>%
+     ggplot(aes(x=brand,y=llr_luxuryXbrnd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXbrnd = TVC %>% 
+     left_join(llr_luxuryXbrnd, by=c("premiumProduct","brand")) %>%
+     select(orderID,dsn,llr_luxuryXbrnd)
+
+   trn = llr_luxuryXbrnd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXbrnd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXbrnd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXbrnd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXbrnd,"../features/feature_files/llr_luxuryXbrnd.rds")
+```
+
+*productGroup* (as `llr_luxuryXprod`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # productGroup 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$productGroup), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$productGroup))
+  llr_luxuryXprod = data.frame("premiumProduct" = TVC$premiumProduct, "productGroup" = TVC$productGroup, "llr_luxuryXprod" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXprod,aes(x=premiumProduct, y=productGroup, size = llr_luxuryXprod),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXprod,data=llr_luxuryXprod, geom='line', group=productGroup, facets = productGroup ~ .)
+
+  TVC %>% left_join(llr_luxuryXprod, by=c("premiumProduct","productGroup")) %>%
+     select(orderID,premiumProduct,dsn,productGroup,llr_luxuryXprod,couponUsed) %>%
+     ggplot(aes(x=productGroup,y=llr_luxuryXprod,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXprod = TVC %>% 
+     left_join(llr_luxuryXprod, by=c("premiumProduct","productGroup")) %>%
+     select(orderID,dsn,llr_luxuryXprod)
+
+   trn = llr_luxuryXprod %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXprod %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXprod %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXprod = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXprod,"../features/feature_files/llr_luxuryXprod.rds")
+```
+
+*couponCol* (as `llr_luxuryXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$premiumProduct), as.character(H$couponCol), H$couponUsed, as.character(TVC$premiumProduct), as.character(TVC$couponCol))
+  llr_luxuryXcpncol = data.frame("premiumProduct" = TVC$premiumProduct, "couponCol" = TVC$couponCol, "llr_luxuryXcpncol" = llr) %>% arrange(premiumProduct)
+  
+  ggplot(data=llr_luxuryXcpncol,aes(x=premiumProduct, y=couponCol, size = llr_luxuryXcpncol),alpha=.1) + geom_point()
+  qplot(premiumProduct,llr_luxuryXcpncol,data=llr_luxuryXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_luxuryXcpncol, by=c("premiumProduct","couponCol")) %>%
+     select(orderID,premiumProduct,dsn,couponCol,llr_luxuryXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_luxuryXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_luxuryXcpncol = TVC %>% 
+     left_join(llr_luxuryXcpncol, by=c("premiumProduct","couponCol")) %>%
+     select(orderID,dsn,llr_luxuryXcpncol)
+
+   trn = llr_luxuryXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_luxuryXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_luxuryXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_luxuryXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_luxuryXcpncol,"../features/feature_files/llr_luxuryXcpncol.rds")
+```
+
+## brand and 
+*couponsReceivedDoW* (as `llr_brandXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$brand), as.character(TVC$couponsReceivedDoW))
+  llr_brandXrecDoW = data.frame("brand" = TVC$brand, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_brandXrecDoW" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXrecDoW,aes(x=brand, y=couponsReceivedDoW, size = llr_brandXrecDoW),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXrecDoW,data=llr_brandXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_brandXrecDoW, by=c("brand","couponsReceivedDoW")) %>%
+     select(orderID,brand,dsn,couponsReceivedDoW,llr_brandXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_brandXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXrecDoW = TVC %>% 
+     left_join(llr_brandXrecDoW, by=c("brand","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_brandXrecDoW)
+
+   trn = llr_brandXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXrecDoW,"../features/feature_files/llr_brandXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_brandXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$brand), as.character(TVC$couponsReceivedFriSat))
+  llr_brandXrecFS = data.frame("brand" = TVC$brand, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_brandXrecFS" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXrecFS,aes(x=brand, y=couponsReceivedFriSat, size = llr_brandXrecFS),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXrecFS,data=llr_brandXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_brandXrecFS, by=c("brand","couponsReceivedFriSat")) %>%
+     select(orderID,brand,dsn,couponsReceivedFriSat,llr_brandXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_brandXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXrecFS = TVC %>% 
+     left_join(llr_brandXrecFS, by=c("brand","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_brandXrecFS)
+
+   trn = llr_brandXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXrecFS,"../features/feature_files/llr_brandXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_brandXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$brand), as.character(TVC$couponsReceivedWeekend))
+  llr_brandXrecWknd = data.frame("brand" = TVC$brand, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_brandXrecWknd" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXrecWknd,aes(x=brand, y=couponsReceivedWeekend, size = llr_brandXrecWknd),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXrecWknd,data=llr_brandXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_brandXrecWknd, by=c("brand","couponsReceivedWeekend")) %>%
+     select(orderID,brand,dsn,couponsReceivedWeekend,llr_brandXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_brandXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXrecWknd = TVC %>% 
+     left_join(llr_brandXrecWknd, by=c("brand","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_brandXrecWknd)
+
+   trn = llr_brandXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXrecWknd,"../features/feature_files/llr_brandXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_brandXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$brand), as.character(TVC$orderTimeDoW))
+  llr_brandXordDoW = data.frame("brand" = TVC$brand, "orderTimeDoW" = TVC$orderTimeDoW, "llr_brandXordDoW" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXordDoW,aes(x=brand, y=orderTimeDoW, size = llr_brandXordDoW),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXordDoW,data=llr_brandXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_brandXordDoW, by=c("brand","orderTimeDoW")) %>%
+     select(orderID,brand,dsn,orderTimeDoW,llr_brandXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_brandXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXordDoW = TVC %>% 
+     left_join(llr_brandXordDoW, by=c("brand","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_brandXordDoW)
+
+   trn = llr_brandXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXordDoW,"../features/feature_files/llr_brandXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_brandXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$brand), as.character(TVC$orderTimeFriSat))
+  llr_brandXordFS = data.frame("brand" = TVC$brand, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_brandXordFS" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXordFS,aes(x=brand, y=orderTimeFriSat, size = llr_brandXordFS),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXordFS,data=llr_brandXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_brandXordFS, by=c("brand","orderTimeFriSat")) %>%
+     select(orderID,brand,dsn,orderTimeFriSat,llr_brandXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_brandXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXordFS = TVC %>% 
+     left_join(llr_brandXordFS, by=c("brand","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_brandXordFS)
+
+   trn = llr_brandXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXordFS,"../features/feature_files/llr_brandXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_brandXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$brand), as.character(TVC$orderTimeWeekend))
+  llr_brandXordWknd = data.frame("brand" = TVC$brand, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_brandXordWknd" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXordWknd,aes(x=brand, y=orderTimeWeekend, size = llr_brandXordWknd),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXordWknd,data=llr_brandXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_brandXordWknd, by=c("brand","orderTimeWeekend")) %>%
+     select(orderID,brand,dsn,orderTimeWeekend,llr_brandXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_brandXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXordWknd = TVC %>% 
+     left_join(llr_brandXordWknd, by=c("brand","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_brandXordWknd)
+
+   trn = llr_brandXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXordWknd,"../features/feature_files/llr_brandXordWknd.rds")
+```
+
+*productGroup* (as `llr_brandXprod`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # productGroup 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$productGroup), H$couponUsed, as.character(TVC$brand), as.character(TVC$productGroup))
+  llr_brandXprod = data.frame("brand" = TVC$brand, "productGroup" = TVC$productGroup, "llr_brandXprod" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXprod,aes(x=brand, y=productGroup, size = llr_brandXprod),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXprod,data=llr_brandXprod, geom='line', group=productGroup, facets = productGroup ~ .)
+
+  TVC %>% left_join(llr_brandXprod, by=c("brand","productGroup")) %>%
+     select(orderID,brand,dsn,productGroup,llr_brandXprod,couponUsed) %>%
+     ggplot(aes(x=productGroup,y=llr_brandXprod,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXprod = TVC %>% 
+     left_join(llr_brandXprod, by=c("brand","productGroup")) %>%
+     select(orderID,dsn,llr_brandXprod)
+
+   trn = llr_brandXprod %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXprod %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXprod %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXprod = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXprod,"../features/feature_files/llr_brandXprod.rds")
+```
+
+*couponCol* (as `llr_brandXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$brand), as.character(H$couponCol), H$couponUsed, as.character(TVC$brand), as.character(TVC$couponCol))
+  llr_brandXcpncol = data.frame("brand" = TVC$brand, "couponCol" = TVC$couponCol, "llr_brandXcpncol" = llr) %>% arrange(brand)
+  
+  ggplot(data=llr_brandXcpncol,aes(x=brand, y=couponCol, size = llr_brandXcpncol),alpha=.1) + geom_point()
+  qplot(brand,llr_brandXcpncol,data=llr_brandXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_brandXcpncol, by=c("brand","couponCol")) %>%
+     select(orderID,brand,dsn,couponCol,llr_brandXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_brandXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_brandXcpncol = TVC %>% 
+     left_join(llr_brandXcpncol, by=c("brand","couponCol")) %>%
+     select(orderID,dsn,llr_brandXcpncol)
+
+   trn = llr_brandXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_brandXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_brandXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_brandXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_brandXcpncol,"../features/feature_files/llr_brandXcpncol.rds")
+```
+
+## productGroup and 
+*couponsReceivedDoW* (as `llr_prodXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$couponsReceivedDoW))
+  llr_prodXrecDoW = data.frame("productGroup" = TVC$productGroup, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_prodXrecDoW" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXrecDoW,aes(x=productGroup, y=couponsReceivedDoW, size = llr_prodXrecDoW),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXrecDoW,data=llr_prodXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_prodXrecDoW, by=c("productGroup","couponsReceivedDoW")) %>%
+     select(orderID,productGroup,dsn,couponsReceivedDoW,llr_prodXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_prodXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXrecDoW = TVC %>% 
+     left_join(llr_prodXrecDoW, by=c("productGroup","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_prodXrecDoW)
+
+   trn = llr_prodXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXrecDoW,"../features/feature_files/llr_prodXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_prodXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$couponsReceivedFriSat))
+  llr_prodXrecFS = data.frame("productGroup" = TVC$productGroup, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_prodXrecFS" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXrecFS,aes(x=productGroup, y=couponsReceivedFriSat, size = llr_prodXrecFS),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXrecFS,data=llr_prodXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_prodXrecFS, by=c("productGroup","couponsReceivedFriSat")) %>%
+     select(orderID,productGroup,dsn,couponsReceivedFriSat,llr_prodXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_prodXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXrecFS = TVC %>% 
+     left_join(llr_prodXrecFS, by=c("productGroup","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_prodXrecFS)
+
+   trn = llr_prodXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXrecFS,"../features/feature_files/llr_prodXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_prodXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$couponsReceivedWeekend))
+  llr_prodXrecWknd = data.frame("productGroup" = TVC$productGroup, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_prodXrecWknd" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXrecWknd,aes(x=productGroup, y=couponsReceivedWeekend, size = llr_prodXrecWknd),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXrecWknd,data=llr_prodXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_prodXrecWknd, by=c("productGroup","couponsReceivedWeekend")) %>%
+     select(orderID,productGroup,dsn,couponsReceivedWeekend,llr_prodXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_prodXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXrecWknd = TVC %>% 
+     left_join(llr_prodXrecWknd, by=c("productGroup","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_prodXrecWknd)
+
+   trn = llr_prodXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXrecWknd,"../features/feature_files/llr_prodXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_prodXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$orderTimeDoW))
+  llr_prodXordDoW = data.frame("productGroup" = TVC$productGroup, "orderTimeDoW" = TVC$orderTimeDoW, "llr_prodXordDoW" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXordDoW,aes(x=productGroup, y=orderTimeDoW, size = llr_prodXordDoW),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXordDoW,data=llr_prodXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_prodXordDoW, by=c("productGroup","orderTimeDoW")) %>%
+     select(orderID,productGroup,dsn,orderTimeDoW,llr_prodXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_prodXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXordDoW = TVC %>% 
+     left_join(llr_prodXordDoW, by=c("productGroup","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_prodXordDoW)
+
+   trn = llr_prodXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXordDoW,"../features/feature_files/llr_prodXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_prodXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$orderTimeFriSat))
+  llr_prodXordFS = data.frame("productGroup" = TVC$productGroup, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_prodXordFS" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXordFS,aes(x=productGroup, y=orderTimeFriSat, size = llr_prodXordFS),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXordFS,data=llr_prodXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_prodXordFS, by=c("productGroup","orderTimeFriSat")) %>%
+     select(orderID,productGroup,dsn,orderTimeFriSat,llr_prodXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_prodXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXordFS = TVC %>% 
+     left_join(llr_prodXordFS, by=c("productGroup","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_prodXordFS)
+
+   trn = llr_prodXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXordFS,"../features/feature_files/llr_prodXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_prodXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$orderTimeWeekend))
+  llr_prodXordWknd = data.frame("productGroup" = TVC$productGroup, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_prodXordWknd" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXordWknd,aes(x=productGroup, y=orderTimeWeekend, size = llr_prodXordWknd),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXordWknd,data=llr_prodXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_prodXordWknd, by=c("productGroup","orderTimeWeekend")) %>%
+     select(orderID,productGroup,dsn,orderTimeWeekend,llr_prodXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_prodXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXordWknd = TVC %>% 
+     left_join(llr_prodXordWknd, by=c("productGroup","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_prodXordWknd)
+
+   trn = llr_prodXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXordWknd,"../features/feature_files/llr_prodXordWknd.rds")
+```
+
+*couponCol* (as `llr_prodXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$productGroup), as.character(H$couponCol), H$couponUsed, as.character(TVC$productGroup), as.character(TVC$couponCol))
+  llr_prodXcpncol = data.frame("productGroup" = TVC$productGroup, "couponCol" = TVC$couponCol, "llr_prodXcpncol" = llr) %>% arrange(productGroup)
+  
+  ggplot(data=llr_prodXcpncol,aes(x=productGroup, y=couponCol, size = llr_prodXcpncol),alpha=.1) + geom_point()
+  qplot(productGroup,llr_prodXcpncol,data=llr_prodXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_prodXcpncol, by=c("productGroup","couponCol")) %>%
+     select(orderID,productGroup,dsn,couponCol,llr_prodXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_prodXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_prodXcpncol = TVC %>% 
+     left_join(llr_prodXcpncol, by=c("productGroup","couponCol")) %>%
+     select(orderID,dsn,llr_prodXcpncol)
+
+   trn = llr_prodXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_prodXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_prodXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_prodXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_prodXcpncol,"../features/feature_files/llr_prodXcpncol.rds")
+```
+
+## couponID and 
+*couponsReceivedDoW* (as `llr_cpnXrecDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedDoW 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$couponID), as.character(TVC$couponsReceivedDoW))
+  llr_cpnXrecDoW = data.frame("couponID" = TVC$couponID, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_cpnXrecDoW" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXrecDoW,aes(x=couponID, y=couponsReceivedDoW, size = llr_cpnXrecDoW),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXrecDoW,data=llr_cpnXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
+
+  TVC %>% left_join(llr_cpnXrecDoW, by=c("couponID","couponsReceivedDoW")) %>%
+     select(orderID,couponID,dsn,couponsReceivedDoW,llr_cpnXrecDoW,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedDoW,y=llr_cpnXrecDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXrecDoW = TVC %>% 
+     left_join(llr_cpnXrecDoW, by=c("couponID","couponsReceivedDoW")) %>%
+     select(orderID,dsn,llr_cpnXrecDoW)
+
+   trn = llr_cpnXrecDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXrecDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXrecDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXrecDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXrecDoW,"../features/feature_files/llr_cpnXrecDoW.rds")
+```
+
+*couponsReceivedFriSat* (as `llr_cpnXrecFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedFriSat 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$couponsReceivedFriSat), H$couponUsed, as.character(TVC$couponID), as.character(TVC$couponsReceivedFriSat))
+  llr_cpnXrecFS = data.frame("couponID" = TVC$couponID, "couponsReceivedFriSat" = TVC$couponsReceivedFriSat, "llr_cpnXrecFS" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXrecFS,aes(x=couponID, y=couponsReceivedFriSat, size = llr_cpnXrecFS),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXrecFS,data=llr_cpnXrecFS, geom='line', group=couponsReceivedFriSat, facets = couponsReceivedFriSat ~ .)
+
+  TVC %>% left_join(llr_cpnXrecFS, by=c("couponID","couponsReceivedFriSat")) %>%
+     select(orderID,couponID,dsn,couponsReceivedFriSat,llr_cpnXrecFS,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedFriSat,y=llr_cpnXrecFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXrecFS = TVC %>% 
+     left_join(llr_cpnXrecFS, by=c("couponID","couponsReceivedFriSat")) %>%
+     select(orderID,dsn,llr_cpnXrecFS)
+
+   trn = llr_cpnXrecFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXrecFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXrecFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXrecFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXrecFS,"../features/feature_files/llr_cpnXrecFS.rds")
+```
+
+*couponsReceivedWeekend* (as `llr_cpnXrecWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponsReceivedWeekend 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$couponsReceivedWeekend), H$couponUsed, as.character(TVC$couponID), as.character(TVC$couponsReceivedWeekend))
+  llr_cpnXrecWknd = data.frame("couponID" = TVC$couponID, "couponsReceivedWeekend" = TVC$couponsReceivedWeekend, "llr_cpnXrecWknd" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXrecWknd,aes(x=couponID, y=couponsReceivedWeekend, size = llr_cpnXrecWknd),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXrecWknd,data=llr_cpnXrecWknd, geom='line', group=couponsReceivedWeekend, facets = couponsReceivedWeekend ~ .)
+
+  TVC %>% left_join(llr_cpnXrecWknd, by=c("couponID","couponsReceivedWeekend")) %>%
+     select(orderID,couponID,dsn,couponsReceivedWeekend,llr_cpnXrecWknd,couponUsed) %>%
+     ggplot(aes(x=couponsReceivedWeekend,y=llr_cpnXrecWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXrecWknd = TVC %>% 
+     left_join(llr_cpnXrecWknd, by=c("couponID","couponsReceivedWeekend")) %>%
+     select(orderID,dsn,llr_cpnXrecWknd)
+
+   trn = llr_cpnXrecWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXrecWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXrecWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXrecWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXrecWknd,"../features/feature_files/llr_cpnXrecWknd.rds")
+```
+
+*orderTimeDoW* (as `llr_cpnXordDoW`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeDoW 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$orderTimeDoW), H$couponUsed, as.character(TVC$couponID), as.character(TVC$orderTimeDoW))
+  llr_cpnXordDoW = data.frame("couponID" = TVC$couponID, "orderTimeDoW" = TVC$orderTimeDoW, "llr_cpnXordDoW" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXordDoW,aes(x=couponID, y=orderTimeDoW, size = llr_cpnXordDoW),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXordDoW,data=llr_cpnXordDoW, geom='line', group=orderTimeDoW, facets = orderTimeDoW ~ .)
+
+  TVC %>% left_join(llr_cpnXordDoW, by=c("couponID","orderTimeDoW")) %>%
+     select(orderID,couponID,dsn,orderTimeDoW,llr_cpnXordDoW,couponUsed) %>%
+     ggplot(aes(x=orderTimeDoW,y=llr_cpnXordDoW,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXordDoW = TVC %>% 
+     left_join(llr_cpnXordDoW, by=c("couponID","orderTimeDoW")) %>%
+     select(orderID,dsn,llr_cpnXordDoW)
+
+   trn = llr_cpnXordDoW %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXordDoW %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXordDoW %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXordDoW = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXordDoW,"../features/feature_files/llr_cpnXordDoW.rds")
+```
+
+*orderTimeFriSat* (as `llr_cpnXordFS`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeFriSat 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$orderTimeFriSat), H$couponUsed, as.character(TVC$couponID), as.character(TVC$orderTimeFriSat))
+  llr_cpnXordFS = data.frame("couponID" = TVC$couponID, "orderTimeFriSat" = TVC$orderTimeFriSat, "llr_cpnXordFS" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXordFS,aes(x=couponID, y=orderTimeFriSat, size = llr_cpnXordFS),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXordFS,data=llr_cpnXordFS, geom='line', group=orderTimeFriSat, facets = orderTimeFriSat ~ .)
+
+  TVC %>% left_join(llr_cpnXordFS, by=c("couponID","orderTimeFriSat")) %>%
+     select(orderID,couponID,dsn,orderTimeFriSat,llr_cpnXordFS,couponUsed) %>%
+     ggplot(aes(x=orderTimeFriSat,y=llr_cpnXordFS,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXordFS = TVC %>% 
+     left_join(llr_cpnXordFS, by=c("couponID","orderTimeFriSat")) %>%
+     select(orderID,dsn,llr_cpnXordFS)
+
+   trn = llr_cpnXordFS %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXordFS %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXordFS %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXordFS = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXordFS,"../features/feature_files/llr_cpnXordFS.rds")
+```
+
+*orderTimeWeekend* (as `llr_cpnXordWknd`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # orderTimeWeekend 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$orderTimeWeekend), H$couponUsed, as.character(TVC$couponID), as.character(TVC$orderTimeWeekend))
+  llr_cpnXordWknd = data.frame("couponID" = TVC$couponID, "orderTimeWeekend" = TVC$orderTimeWeekend, "llr_cpnXordWknd" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXordWknd,aes(x=couponID, y=orderTimeWeekend, size = llr_cpnXordWknd),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXordWknd,data=llr_cpnXordWknd, geom='line', group=orderTimeWeekend, facets = orderTimeWeekend ~ .)
+
+  TVC %>% left_join(llr_cpnXordWknd, by=c("couponID","orderTimeWeekend")) %>%
+     select(orderID,couponID,dsn,orderTimeWeekend,llr_cpnXordWknd,couponUsed) %>%
+     ggplot(aes(x=orderTimeWeekend,y=llr_cpnXordWknd,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXordWknd = TVC %>% 
+     left_join(llr_cpnXordWknd, by=c("couponID","orderTimeWeekend")) %>%
+     select(orderID,dsn,llr_cpnXordWknd)
+
+   trn = llr_cpnXordWknd %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXordWknd %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXordWknd %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXordWknd = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXordWknd,"../features/feature_files/llr_cpnXordWknd.rds")
+```
+
+*couponCol* (as `llr_cpnXcpncol`)
+<!--- userid2ways: R code (No Results in Document) -->
+```{r cache=TRUE}
+  # couponCol 
+  llr = compute_ll_2w(as.character(H$couponID), as.character(H$couponCol), H$couponUsed, as.character(TVC$couponID), as.character(TVC$couponCol))
+  llr_cpnXcpncol = data.frame("couponID" = TVC$couponID, "couponCol" = TVC$couponCol, "llr_cpnXcpncol" = llr) %>% arrange(couponID)
+  
+  ggplot(data=llr_cpnXcpncol,aes(x=couponID, y=couponCol, size = llr_cpnXcpncol),alpha=.1) + geom_point()
+  qplot(couponID,llr_cpnXcpncol,data=llr_cpnXcpncol, geom='line', group=couponCol, facets = couponCol ~ .)
+
+  TVC %>% left_join(llr_cpnXcpncol, by=c("couponID","couponCol")) %>%
+     select(orderID,couponID,dsn,couponCol,llr_cpnXcpncol,couponUsed) %>%
+     ggplot(aes(x=couponCol,y=llr_cpnXcpncol,fill=factor(couponUsed),color=dsn))+geom_boxplot()+facet_grid(dsn~.)
+
+  llr_cpnXcpncol = TVC %>% 
+     left_join(llr_cpnXcpncol, by=c("couponID","couponCol")) %>%
+     select(orderID,dsn,llr_cpnXcpncol)
+
+   trn = llr_cpnXcpncol %>% filter(dsn == "train") %>% select(-dsn)
+   val = llr_cpnXcpncol %>% filter(dsn == "validation") %>% select(-dsn)
+   cls = llr_cpnXcpncol %>% filter(dsn == "class") %>% select(-dsn)
+
+   llr_cpnXcpncol = list("T" = trn, "V" = val, "C" = cls) 
+
+   saveRDS(llr_cpnXcpncol,"../features/feature_files/llr_cpnXcpncol.rds")
+```
 

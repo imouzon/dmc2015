@@ -1,7 +1,7 @@
 ---
-title: Homework 2
-titleshort: HW 2
-instructions: Submit all code; show all methods
+title: Category IDs
+titleshort: Gathering General Features
+instructions: 
 author: Ian Mouzon
 authorshort: Mouzon
 contact: imouzon@iastate.edu
@@ -51,7 +51,7 @@ and my working directory is set to \verb!dmc2015/ian!.
 I am working from the current feature matrix:
 <!---  readFeatMat: R code (Code in Document) -->
 ```{r readFeatMat, echo=TRUE, cache=FALSE, tidy=FALSE, include = TRUE}
-   featMat = readRDS("~/dmc2015/data/featureMatrix/featMat_v2.0.rds")
+   featMat = readRDS("~/dmc2015/data/featureMatrix/old/featMat_v2.0.rds")
    trn = featMat$train
    cls = featMat$class
 
@@ -235,45 +235,45 @@ We can repeat what we did above for all 2-3-4-5 way combinations of these catego
       data.frame
 
    #There are some missing values in this use frequenct matrix (this is to be expected) I can impute the values using missForest
-   impute.missing1000 = missForest(catCombFreq[,6:ncol(catCombFreq)],
-                                   maxiter=10, ntree = 1000, verbose =TRUE, mtry = 5, replace = TRUE)
+   impute.missing1000 = missForest(catCombFreq[,6:ncol(catCombFreq)], maxiter=10, ntree = 1000, verbose =TRUE, mtry = 5, replace = TRUE)
 
    catCombFreq = catCombFreq[,1:5] %>% cbind(impute.missing1000$ximp)
 ```
 We now have two valuable tools: \verb!catFreq! and \verb!catCombFreq!
-<!---
+I will save these to a my written directory folder:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(catCombFreq,'./written_data/catCombFreq.rds')
+   saveRDS(catFreq,'./written_data/catFreq.rds')
+```
+
+
+<!--- 
 ```{r corrplot,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-#   names(cntsXcat)
-#   Xtest = data.frame(matrix(c(1,rep(0,30)),1,31))
-#   names(Xtest) = names(catmat)[6:36]
-#   extend.columns(Xtest, dcnts)
-#   catFreq
-#
-#   pcorrmat = cor(catmat[,6:36])
-#
-#   #get counts of times any two catIDs are seen together
-#   countMat = matrix(0,3*31,32)
-#   for(i in 1:3){
-#      for(j in 1:31){ 
-#         for (k in (j+1):31){ 
-#            row.j = (i-1)*31 + j
-#            countMat[row.j,k] = sum(catmat[which(catmat[,32] == i),j]*catmat[which(catmat[,32] == i),k]) 
-#         } 
-#         countMat[row.j,32] = i
-#      }
-#   }
-#
-#   countData = as.data.frame(countMat)
-#   names(countData) = c(paste0("cat",1:31),'couponCol')
-#   countData$cols = rep(names(countData)[1:31],3)
-#
-#   countData = countData %>% 
-#      gather(catID2,prop,-cols,-couponCol) %>%  
-#      arrange(cols,catID2) %>% 
-#      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
-#      unique %>% 
-#      spread(couponCol,nTotal) %>%
-#      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
+
+   #get counts of times any two catIDs are seen together
+   countMat = matrix(0,3*31,32)
+   for(i in 1:3){
+      for(j in 1:31){ 
+         for (k in (j+1):31){ 
+            row.j = (i-1)*31 + j
+            countMat[row.j,k] = sum(catmat[which(catmat[,32] == i),j]*catmat[which(catmat[,32] == i),k]) 
+         } 
+         countMat[row.j,32] = i
+      }
+   }
+
+   countData = as.data.frame(countMat)
+   names(countData) = c(paste0("cat",1:31),'couponCol')
+   countData$cols = rep(names(countData)[1:31],3)
+
+   countData = countData %>% 
+      gather(catID2,prop,-cols,-couponCol) %>%  
+      arrange(cols,catID2) %>% 
+      renm(c("couponCol","catID1","catID2","nTotal")) %>% 
+      unique %>% 
+      spread(couponCol,nTotal) %>%
+      renm(c("catID1","catID2","nTotalCol1","nTotalCol2","nTotalCol3"))
 ```
 We now have a matrix identifying correlation between two categories and the number of times they occur.
 

@@ -1,0 +1,56 @@
+---
+title: Category IDs and Coupon/Brand/Product Distance
+titleshort: Gathering General Features
+instructions: 
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: Machine Learning
+groupshort: STAT 602
+leader: Dr. Stephen Vardeman
+leadershort: Vardeman
+semester: Spring 2014
+assignment: Problem 1 - 5
+duedate: Monday May 4, 2015
+output:
+  usefulR::hw_format
+---
+<!--- # (R code (No Results in Document))-->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   # devtools::install_github("imouzon/usefulR")
+   library(usefulR)
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #set up file locations
+   source("./R/renm.R")
+
+   if(FALSE)
+      rmarkdown::render("~/dmc2015/ian/catID_features.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+```
+and my working directory is set to \verb!dmc2015/ian!.
+
+# Distance and Categories
+
+This is based in part on a paper I read.
+
+The idea is that we can talk about different kinds of similiarities in different observations based on various 
+ways of matching up their categorical variable values.
+

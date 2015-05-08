@@ -1,0 +1,285 @@
+% For LaTeX-Box: root = 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name:
+%  Purpose:
+%
+%  Creation Date: 04-05-2015
+%  Last Modified: Thu May  7 09:43:22 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% example yaml
+% ---
+% title: Homework 2
+% titleshort: HW 2
+% instructions: Submit all code; show all methods
+% author: Ian Mouzon
+% authorshort: Mouzon
+% contact: imouzon@iastate.edu
+% grouplong: Machine Learning
+% groupshort: STAT 602
+% leader: Dr. Stephen Vardeman
+% leadershort: Vardeman
+% semester: Spring 2014
+% assignment: Problem 1 - 5
+% duedate: Monday May 4, 2015
+% output:
+%   usefulR::hw_template:
+% ---
+
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+%\usepackage[Ian Mouzon,]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+%%
+\pagestyle{fancy}
+   \lhead{\href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}}
+   \lhead{authorshort}
+   \chead{\ (\ ): }  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+
+\begin{document}
+
+%make title:
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{: }\\
+       \\
+       , \\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+    Name& Ian Mouzon\\
+    email& \href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}\\
+    Instructions& \\
+    Assignment& \\
+    Due Date&  \\
+    \hline
+ \end{tabular*}
+\end{center}
+
+I am using the following packages to create this feature matrix:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(lubridate)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\KeywordTok{library}\NormalTok{(reshape2)}
+\KeywordTok{library}\NormalTok{(sqldf)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Getting the data}\label{getting-the-data}
+
+I read the raw and clean data into R using the following simple
+commands:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# training set ('historical data')}
+\NormalTok{d =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/data/clean_data/clean_simple.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Adding Batch ID}\label{adding-batch-id}
+
+The data set \verb!clean_simple! does not have batch information. I will
+have to add it in: I read the batch ID file as follows: \%-- readBatch:
+R code (Code in Document)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# batch features in ~/dmc2015/features/feature_files/batchInfo_test.csv,}
+\CommentTok{# batchInfo_train.csv}
+\NormalTok{bit =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/batchInfo_train.rds"}\NormalTok{)}
+\NormalTok{bic =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/features/feature_files/batchInfo_test.rds"}\NormalTok{)}
+\NormalTok{bi =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(bit, bic)}
+\end{Highlighting}
+\end{Shaded}
+
+Fix the formatting:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bi$couponsReceivedTime =}\StringTok{ }\KeywordTok{period_to_seconds}\NormalTok{(bi$couponsReceivedTime)/}\DecValTok{3600}
+\NormalTok{bi$orderTimeTime =}\StringTok{ }\KeywordTok{period_to_seconds}\NormalTok{(bi$orderTimeTime)/}\DecValTok{3600}
+\NormalTok{bi =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \NormalTok{bi[}\KeywordTok{which}\NormalTok{(bi$orderID <=}\StringTok{ }\DecValTok{6053}\NormalTok{), ], }\DataTypeTok{class =} \NormalTok{bi[}\KeywordTok{which}\NormalTok{(bi$orderID >}\StringTok{ }
+\StringTok{    }\DecValTok{6053}\NormalTok{), ])}
+\end{Highlighting}
+\end{Shaded}
+
+Add it to the clean data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d$train =}\StringTok{ }\NormalTok{d$train %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(bi$train, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
+\NormalTok{d$class =}\StringTok{ }\NormalTok{d$class %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(bi$class, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Creating Historical, Validation, and Training
+Sets}\label{creating-historical-validation-and-training-sets}
+
+\subsection{Set 1: Random Sampling on Coupons
+Sets}\label{set-1-random-sampling-on-coupons-sets}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sample.set =}\StringTok{ }\NormalTok{d$train[, }\KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponID1"}\NormalTok{, }\StringTok{"couponID2"}\NormalTok{, }\StringTok{"couponID3"}\NormalTok{)] %>%}\StringTok{ }
+\StringTok{    }\KeywordTok{gather}\NormalTok{(couponCol, couponID, -orderID) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID) %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, }
+    \NormalTok{couponID) %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{couponID =} \KeywordTok{factor}\NormalTok{(couponID))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: attributes are not identical across measure variables; they will
+## be dropped
+\end{verbatim}
+
+I would like to use 1/3 of my data as historical information in this
+case. This means that I would like to get about 33\% of each coupons
+total number.
+
+That is, for \(n_i\) coupons of type \(i\) we want \(\frac{1}{3} n_i\)
+coupons of type \(i\) in our historical pool.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1999}\NormalTok{)}
+\NormalTok{H1.orderIDs =}\StringTok{ }\NormalTok{d$train$orderID[}\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(d$train))[}\DecValTok{1}\NormalTok{:}\KeywordTok{round}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(d$train)/}\DecValTok{3}\NormalTok{)]]}
+
+\NormalTok{H1 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(d$train$orderID %in%}\StringTok{ }\NormalTok{H1.orderIDs), ]}
+\NormalTok{T1 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(!(d$train$orderID %in%}\StringTok{ }\NormalTok{H1.orderIDs)), ]}
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{7}\NormalTok{)}
+\NormalTok{V1.orderIDs =}\StringTok{ }\NormalTok{T1$orderID[}\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(T1))[}\DecValTok{1}\NormalTok{:}\KeywordTok{round}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(T1)/}\DecValTok{3}\NormalTok{)]]}
+\NormalTok{V1 =}\StringTok{ }\NormalTok{T1[}\KeywordTok{which}\NormalTok{(T1$orderID %in%}\StringTok{ }\NormalTok{V1.orderIDs), ]}
+\NormalTok{T1 =}\StringTok{ }\NormalTok{T1[}\KeywordTok{which}\NormalTok{(!(T1$orderID %in%}\StringTok{ }\NormalTok{V1.orderIDs)), ]}
+
+\CommentTok{# feature matrix}
+\NormalTok{F1 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{orderids =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{h =} \NormalTok{H1.orderIDs, }\DataTypeTok{v =} \NormalTok{V1.orderIDs), }\DataTypeTok{H =} \NormalTok{H1, }\DataTypeTok{V =} \NormalTok{V1, }
+    \DataTypeTok{T =} \NormalTok{T1, }\DataTypeTok{C =} \NormalTok{d$class)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Set 2: Random Sampling on
+Users}\label{set-2-random-sampling-on-users}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1979}\NormalTok{)}
+\NormalTok{H2.userIDs =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{unique}\NormalTok{(d$train$userID))[}\DecValTok{1}\NormalTok{:}\KeywordTok{round}\NormalTok{(}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(d$train$userID))/}\DecValTok{3}\NormalTok{)]}
+
+\NormalTok{H2 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(d$train$userID %in%}\StringTok{ }\NormalTok{H2.userIDs), ]}
+\NormalTok{T2 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(!(d$train$userID %in%}\StringTok{ }\NormalTok{H2.userIDs)), ]}
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{17}\NormalTok{)}
+\NormalTok{V2.userIDs =}\StringTok{ }\NormalTok{T2$userID[}\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(T2))[}\DecValTok{1}\NormalTok{:}\KeywordTok{round}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(T2)/}\DecValTok{3}\NormalTok{)]]}
+\NormalTok{V2 =}\StringTok{ }\NormalTok{T2[}\KeywordTok{which}\NormalTok{(T2$userID %in%}\StringTok{ }\NormalTok{V2.userIDs), ]}
+\NormalTok{T2 =}\StringTok{ }\NormalTok{T2[}\KeywordTok{which}\NormalTok{(!(T2$userID %in%}\StringTok{ }\NormalTok{V2.userIDs)), ]}
+
+\CommentTok{# feature matrix}
+\NormalTok{F2 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{userids =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{h =} \NormalTok{H2.userIDs, }\DataTypeTok{v =} \NormalTok{V2.userIDs), }\DataTypeTok{H =} \NormalTok{H2, }\DataTypeTok{V =} \NormalTok{V2, }\DataTypeTok{T =} \NormalTok{T2, }
+    \DataTypeTok{C =} \NormalTok{d$class)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Set 3: Batch Number}\label{set-3-batch-number}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{H3 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(d$train$batchID %in%}\StringTok{ }\DecValTok{1}\NormalTok{:}\DecValTok{7}\NormalTok{), ]}
+\NormalTok{T3 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(d$train$batchID ==}\StringTok{ }\DecValTok{8}\NormalTok{), ]}
+\NormalTok{V3 =}\StringTok{ }\NormalTok{d$train[}\KeywordTok{which}\NormalTok{(d$train$batchID ==}\StringTok{ }\DecValTok{9}\NormalTok{), ]}
+\NormalTok{C3 =}\StringTok{ }\NormalTok{d$class}
+\NormalTok{F3 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{H =} \NormalTok{H3, }\DataTypeTok{V =} \NormalTok{V3, }\DataTypeTok{T =} \NormalTok{T3, }\DataTypeTok{C =} \NormalTok{d$class)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Write out the sets}\label{write-out-the-sets}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{saveRDS}\NormalTok{(F1, }\DataTypeTok{file =} \StringTok{"../data/featureMatrix/HTVset1.rds"}\NormalTok{)}
+\KeywordTok{saveRDS}\NormalTok{(F2, }\DataTypeTok{file =} \StringTok{"../data/featureMatrix/HTVset2.rds"}\NormalTok{)}
+\KeywordTok{saveRDS}\NormalTok{(F3, }\DataTypeTok{file =} \StringTok{"../data/featureMatrix/HTVset3.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}
