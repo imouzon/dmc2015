@@ -1,0 +1,100 @@
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[imouzon,none]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+\pagestyle{fancy}
+         \lhead{\href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}}
+            \lhead{imouzon}
+      \chead{\href{mailto:DMC@ISU}{\nolinkurl{DMC@ISU}}\ (,\ Spring 2015): CatSims}  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+
+% header includes
+
+\begin{document}
+
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{\href{mailto:DMC@ISU}{\nolinkurl{DMC@ISU}}: Iowa State University's 2015 Data Mining Cup Team}\\
+       Categorical Similarity Measures\\
+       Spring 2015,  \\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+     Name& Ian Mouzon\\
+     email& \href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}\\
+    
+    
+     Due Date&  May 8, 2015\\
+    \hline
+ \end{tabular*}
+\end{center}
+
+\section{Categorical Similarity}\label{categorical-similarity}
+
+Oh My Gosh - did you know that you can compare categorical variables to
+each other? You can create kind of like a distance on them.
+
+One simple example based on the Jaccard Measure:
+
+Let \(\mathbf{u}\) and \(\mathbf{v}\) be two multidimensional
+categorical variables taking values in
+\(A = \{a_1, a_2, \ldots, a_n\}\). Then we can think of these as subsets
+of the the set \(A\) in which case we can describe a similarity between
+the coupons using \[
+   J(\mathbf{u}, \mathbf{v}) = \dfrac{| \mathbf{u} \cap \mathbf{v} |}{ \mathbf{u} \cup \mathbf{v}}
+\] .
+
+\end{document}

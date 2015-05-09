@@ -4,14 +4,14 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Thu Apr 23 18:48:37 2015
+%  Last Modified: Fri May  8 17:52:34 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
 <<set-parent, echo=FALSE, message=FALSE, cache=FALSE, include = TRUE>>=
    #set up knitr
-   #devtools::install_github('imouzon/usefulR')
-   library(usefulR)
+   # devtools::install_github('imouzon/usefulR')
+   require(usefulR)
 
    working.dir = "/Users/user/dmc2015/ian/"
    setwd(working.dir)
@@ -48,7 +48,7 @@ I am now reading the feature matrix:
 %-- readDat: R code (Code in Document)
 <<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
    #training set ("historical data")
-   featMat = readRDS("../data/featureMatrix/featMat_v0.0.rds")
+   featMat = readRDS("../data/featureMatrix/old/featMat_v0.0.rds")
    trn = featMat$train
    cls = featMat$class
 
@@ -88,12 +88,6 @@ Exploring customer behavior with respect to coupons:
    randomID = sample(d.stack$combined$userID)[1]
    GuillermosGame(randomID)
    GuillermosGame(randomID,TRUE)
-   res$plots.show
-   names(res)
-      
-
-
-   
 @
 
 \subsection{Basic Questions About Coupons}

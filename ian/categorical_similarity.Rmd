@@ -1,0 +1,56 @@
+---
+title: Categorical Similarity Measures
+titleshort: CatSims
+author: Ian Mouzon
+authorshort: imouzon
+contact: imouzon@iastate.edu
+grouplong: Iowa State University's 2015 Data Mining Cup Team
+groupshort: DMC@ISU
+leader:  
+leadershort: 
+semester: Spring 2015
+assignment: 
+duedate: May 8, 2015
+output:
+  usefulR::hw_format:
+  keep_tex: true
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "~/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("./categorical_similarity.Rmd")
+```
+
+# Categorical Similarity
+Oh My Gosh - did you know that you can compare categorical variables to each other?
+You can create kind of like a distance on them.
+
+One simple example based on the Jaccard Measure:
+
+Let $\mathbf{u}$ and $\mathbf{v}$ be two multidimensional categorical variables
+taking values in $A = \{a_1, a_2, \ldots, a_n\}$. Then we can think of these
+as subsets of the the set $A$ in which case we can describe a similarity
+between the coupons using
+$$
+   J(\mathbf{u}, \mathbf{v}) = \dfrac{| \mathbf{u} \cap \mathbf{v} |}{ \mathbf{u} \cup \mathbf{v}}
+$$
+In this document I am calculating some of these features for the categorical variables \verb!categoryIDs!.
+
+# Reading the Data
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   d = readRDS("../data/clean_data/.DS_Store
+   
+```
+
