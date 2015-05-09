@@ -6,16 +6,10 @@
 library(lubridate)
 library(dplyr)
 
-tr = read.csv("../../data/clean_data/train_simple_name.csv")
-te = read.csv("../../data/clean_data/test_simple_name.csv")
-
-#combine:
-tr$dataset = "train"
-te$dataset = "test"
-dataset = rbind(tr,te)
+dataset = readRDS("../../data/clean_data/universalCleanData.rds")
 dataset$orderTime = ymd_hms(dataset$orderTime)
 dataset$couponsReceived = ymd_hms(dataset$couponsReceived)
-dataset_new = dataset[,c(1:4,33)]
+dataset_new = dataset[,c(1:4, 33, 43)]
 
 #this function will be helpful later
 #aka I can't get anonymouse functions to work inside mutate
@@ -48,6 +42,9 @@ dataset_new = dataset_new %>%
          avgTime_order = mean(hour(orderTime))
          )
 
-#break it back into training/test again
-tr_new = dataset_new %>% filter(dataset == "train") %>% select(-dataset)
-te_new = dataset_new %>% filter(dataset == "test") %>% select(-dataset)
+dataset_new = dataset_new %>% 
+	group_by(userID, batchID) %>%
+	mutate(batch_visits = n(),
+		   batch_visitOrder = rank(orderTime)
+		   )
+
