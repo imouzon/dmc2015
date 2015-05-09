@@ -30,6 +30,23 @@ output:
    if(FALSE) 
       rmarkdown::render("./categorical_similarity.Rmd")
 ```
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+```
+and my working directory is set to \verb!dmc2015/ian!.
 
 # Categorical Similarity
 Oh My Gosh - did you know that you can compare categorical variables to each other?
@@ -46,11 +63,59 @@ $$
 $$
 In this document I am calculating some of these features for the categorical variables \verb!categoryIDs!.
 
-# Reading the Data
+# Getting Tranthe Data and Manipulations 
 I am using our new clean data - so should you
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r chunk-label,cache=FALSE}
-   d = readRDS("../data/clean_data/.DS_Store
-   
+   d = readRDS("../data/clean_data/universalCleanData.rds")
 ```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("./r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49))
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("./r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+   dmcs = dmc[,c(1,23,32:37)] %>% 
+      mutate(couponNum = as.numeric(gsub("cpn","",couponID))) %>% 
+      arrange(orderID,couponID)
+```
+Consider the unique coupon IDs and create a matrix with the columns 0 to 1 for whether or
+not the coupon has the given category:
+
+<!--- newmats: R code (No Results in Document) -->
+```{r newmats,cache=FALSE}
+   dmcsu = unique(dmcs[,c(9,4:8)]) %>% arrange(couponNum)
+   
+   dmcsuc = matrix(NA,nrow=nrow(dmcsu),ncol=31)
+   for(i in 1:nrow(dmcsuc)) dmcsuc[i,] = 1*(paste0('cat',1:31) %in% dmcsu[i,2:6])
+
+   dmcsuck = dmcsuc %*% t(dmcsuc)
+   dmcsuck[1:5,1:5]
+
+
+   N = nrow(dmcsuc)*(nrow(dmcsuc) - 1)/2
+   dmcsucd = data.frame('cpn1' = rep(NA,N),'cpn2'=rep(NA,N),jaccard=rep(NA,N))
+
+   for(i in 1:(nrow(dmcsucd)-1)){
+      for(j in (i+1):nrow(dmcsucd)){
+         cpni = which(dmcsuc[,1] == paste0("cpn",i))
+         cpnj = which(dmcsuc[,1] == paste0("cpn",j))
+
+         dmcsucd[(31*(i-1) + j),] = c(paste0("cpn",i),paste0("cpn",j), sum(dmcsuc[cpni,2:32]*dmcsuc[cpnj,2:32]))
+      }
+   }
+```
+
+sapply(1:
+
+
+
+
 

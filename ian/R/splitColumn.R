@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 29-04-2015
-#  Last Modified: Thu May  7 16:40:23 2015
+#  Last Modified: Fri May  8 20:33:22 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -13,7 +13,7 @@
 #  .Fortran("subroutine name",as.integer(input1),as.double(input2), etc)
 #
 
-splitColumn = function(dsn,varn,orderby,splitby=",") {
+splitColumn = function(dsn,varn,orderby,splitby=","){
    res_d = dsn[,c(orderby,varn)] %>% 
       mutate(parts = strsplit(dsn[,varn],splitby)) %>%
       group_by_(varn) %>%
@@ -28,4 +28,3 @@ splitColumn = function(dsn,varn,orderby,splitby=",") {
    res_d = res_d[,-(ncol(dsn) + 1)]
    return(res_d)
 }
-
