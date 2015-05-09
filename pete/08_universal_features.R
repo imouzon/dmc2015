@@ -7,9 +7,8 @@
 #
 # ============================================================================
 
-old <- readRDS("~/GitHub/dmc2015/data/featureMatrix/old/featMat_v2.0.rds")
-d <- rbind(old$train, old$class)
+train <- read.csv("~/GitHub/dmc2015/features/feature_files/csv/nCoupTrain.csv")
+class <- read.csv("~/GitHub/dmc2015/features/feature_files/csv/nCoupClass.csv")
+d <- rbind(train, class)
 
-universal <- d %>% select(c(1, 369:395))
-
-saveRDS(universal, "~/GitHub/dmc2015/features/feature_files/universal/peteCoupFreq.rds")
+saveRDS(d, "~/GitHub/dmc2015/features/feature_files/universal/peteCoupFreq.rds")
