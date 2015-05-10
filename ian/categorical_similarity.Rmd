@@ -45,6 +45,7 @@ I am using the following packages:
    library(gtools)
    library(sqldf)
    library(missForest)
+   source("./R/renm.R")
 ```
 and my working directory is set to \verb!dmc2015/ian!.
 
@@ -85,36 +86,199 @@ I and can split the columns of product group using:
    dmcs = dmc[,c(1,23,32:37)] %>% 
       mutate(couponNum = as.numeric(gsub("cpn","",couponID))) %>% 
       arrange(orderID,couponID)
+
+   #the number of coupons
+   ncpns = length(unique(dmc$couponID))
 ```
 Consider the unique coupon IDs and create a matrix with the columns 0 to 1 for whether or
 not the coupon has the given category:
-
 <!--- newmats: R code (No Results in Document) -->
 ```{r newmats,cache=FALSE}
-   dmcsu = unique(dmcs[,c(9,4:8)]) %>% arrange(couponNum)
-   
+   dmcsu = unique(dmcs[,c(2,9,4:8)]) %>% arrange(couponNum)
+
    dmcsuc = matrix(NA,nrow=nrow(dmcsu),ncol=31)
    for(i in 1:nrow(dmcsuc)) dmcsuc[i,] = 1*(paste0('cat',1:31) %in% dmcsu[i,2:6])
 
-   dmcsuck = dmcsuc %*% t(dmcsuc)
-   dmcsuck[1:5,1:5]
+   catIndMat = dmcsu[,"couponID"] %>% cbind(data.frame(dmcsuc))
+   names(catIndMat) = c("couponID",paste0("cat",1:31))
+```
+and save the jaccard matrix from this:
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=TRUE}
+   #these are the jaccard similarities
+   jaccard_func = function(cpn1,cpn2) sum(cpn1 * cpn2)/sum(as.numeric(cpn1 + cpn2 > 0))
 
-
-   N = nrow(dmcsuc)*(nrow(dmcsuc) - 1)/2
-   dmcsucd = data.frame('cpn1' = rep(NA,N),'cpn2'=rep(NA,N),jaccard=rep(NA,N))
-
-   for(i in 1:(nrow(dmcsucd)-1)){
-      for(j in (i+1):nrow(dmcsucd)){
-         cpni = which(dmcsuc[,1] == paste0("cpn",i))
-         cpnj = which(dmcsuc[,1] == paste0("cpn",j))
-
-         dmcsucd[(31*(i-1) + j),] = c(paste0("cpn",i),paste0("cpn",j), sum(dmcsuc[cpni,2:32]*dmcsuc[cpnj,2:32]))
-      }
-   }
+   dmcsuck = matrix(0,ncpns,ncpns)
+   for(i in 1:ncpns) for(j in i:ncpns) dmcsuck[i,j] = jaccard_func(dmcsuc[i,],dmcsuc[j,])
 ```
 
-sapply(1:
+# Jaccard Similarity Used To Describe Order
+We can use these jaccard similaritys to describe our orders. Consider, for example,
+the mean Jaccard similarity:
 
+<!--- chunk-label: R code (No Results in Document) -->
+```{r usejaccard, cache=FALSE}
+   dmcsucks = d %>% arrange(orderID) %>% select(couponID1,couponID2,couponID3)
+ 
+   JaccardSummary= function(i){
+      x = as.numeric(dmcsucks[i,])
+      rows = combn(x,2)[1,]
+      cols = combn(x,2)[2,]
+      sapply(1:3,function(j) dmcsuck[rows[j],cols[j]])
+   }
+
+   jac.d = d %>% select(orderID) %>% 
+      cbind(t(sapply(1:nrow(dmcsucks), function(i) JaccardSummary(i)))) %>%
+      data.frame %>%
+      renm(c("orderID","jaccard12","jaccard13","jaccard23"))
+
+   head(jac.d)
+```
+
+# Term Frequency, Document Frequency
+
+We can also consider comparing the coupons like a set of documents, using \verb!tf-idf!:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   #parameters
+   N = ncpns
+   nt = colSums(dmcsuc)
+
+   #term frequency
+   ##raw frequency
+   ftd = dmcsuc
+
+   ##log normalization
+   lnormM = log(2)*dmcsuc
+
+   #document frequency
+   ##inverse frequency
+   ivf = log(N/nt)
+
+   ##inverse frequency smooth
+   lnorm = log(1 + N/nt)
+
+   ##inverse frequency max
+   invmax = log(1 + max(nt)/nt)
+
+   ##probabilistic inverse frequency
+   pif = log((N - nt)/nt)
+
+   ftd_lnorm = matrix(sapply(1:N, function(i) ftd[i,]*lnorm),nrow=N,byrow=TRUE)
+   ftd_ivf = matrix(sapply(1:N, function(i) ftd[i,]*ivf),nrow=N,byrow=TRUE)
+   ftd_invmax = matrix(sapply(1:N, function(i) ftd[i,]*invmax),nrow=N,byrow=TRUE)
+   ftd_pif = matrix(sapply(1:N, function(i) ftd[i,]*pif),nrow=N,byrow=TRUE)
+
+   lnorm_lnorm = matrix(sapply(1:N, function(i) lnormM[i,]*lnorm),nrow=N,byrow=TRUE)
+   lnorm_ivf = matrix(sapply(1:N, function(i) lnormM[i,]*ivf),nrow=N,byrow=TRUE)
+   lnorm_invmax = matrix(sapply(1:N, function(i) lnormM[i,]*invmax),nrow=N,byrow=TRUE)
+   lnorm_pif = matrix(sapply(1:N, function(i) lnormM[i,]*pif),nrow=N,byrow=TRUE)
+```
+
+# Cosine Similarity
+And we can get the cosine similiarty matrix:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   self_multiply = function(X) X %*% t(X)
+
+   cosine_similarity = function(sim_mat){
+      (sim_mat %*% t(sim_mat)) / (sim_mat %*% t(sim_mat) %>% sqrt %>% diag %>% matrix(ncol=1) %>% self_multiply)
+   }
+
+   sim_ftd_lnorm = cosine_similarity(ftd_lnorm)
+   sim_ftd_ivf = cosine_similarity(ftd_ivf)
+   sim_ftd_invmax = cosine_similarity(ftd_invmax)
+   sim_ftd_pif = cosine_similarity(ftd_pif)
+
+   sim_lnorm_lnorm = cosine_similarity(lnorm_lnorm)
+   sim_lnorm_ivf = cosine_similarity(lnorm_ivf)
+   sim_lnorm_invmax = cosine_similarity(lnorm_invmax)
+   sim_lnorm_pif = cosine_similarity(lnorm_pif)
+```
+which we can calculate as follows:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dmcsucks = d %>% arrange(orderID) %>% select(couponID1,couponID2,couponID3)
+ 
+   CosSimSummary= function(i,sim_mat){
+      x = as.numeric(dmcsucks[i,])
+      rows = combn(x,2)[1,]
+      cols = combn(x,2)[2,]
+      sapply(1:3,function(j) sim_mat[rows[j],cols[j]])
+   }
+
+   #sim_ftd_lnorm
+   cos.d1 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_ftd_lnorm)))) %>% data.frame %>% renm(c("orderID", "sim_ftd_lnorm_cosSim12", "sim_ftd_lnorm_cosSim13", "sim_ftd_lnorm_cos.sim23"))
+
+   #sim_ftd_ivf
+   cos.d2 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_ftd_ivf)))) %>% data.frame %>% renm(c("orderID", "sim_ftd_ivf_cosSim12", "sim_ftd_ivf_cosSim13", "sim_ftd_ivf_cos.sim23"))
+
+   #sim_ftd_infmax
+   cos.d3 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_ftd_invmax)))) %>% data.frame %>% renm(c("orderID", "sim_ftd_invmax_cosSim12", "sim_ftd_invmax_cosSim13", "sim_ftd_invmax_cos.sim23"))
+
+   #sim_lnorm_pif
+   cos.d4 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_pif)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_pif_cosSim12", "sim_lnorm_pif_cosSim13", "sim_lnorm_pif_cos.sim23"))
+
+   #sim_lnorm_lnorm
+   cos.d5 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_lnorm)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_lnorm_cosSim12", "sim_lnorm_lnorm_cosSim13", "sim_lnorm_lnorm_cos.sim23"))
+
+   #sim_lnorm_ivf
+   cos.d6 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_ivf)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_ivf_cosSim12", "sim_lnorm_ivf_cosSim13", "sim_lnorm_ivf_cos.sim23"))
+
+   #sim_lnorm_infmax
+   cos.d7 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_invmax)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_invmax_cosSim12", "sim_lnorm_invmax_cosSim13", "sim_lnorm_invmax_cos.sim23"))
+
+   #sim_lnorm_pif
+   cos.d8 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_pif)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_pif_cosSim12", "sim_lnorm_pif_cosSim13", "sim_lnorm_pif_cos.sim23"))
+```
+
+
+#Results
+Consider the chances that coupons were used when the coupons had more similarity. 
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   #Jaccard
+   simFeatures = function(sim_mat){
+      d_A = dm %>%
+          select(orderID,couponID,couponCol,couponUsed) %>%
+          renm(c("orderID","couponIDA","couponColA","couponUsedA")) %>%
+          left_join(sim_mat,by="orderID") %>%
+          gather(sim_meas,value,-orderID,-couponIDA,-couponColA,-couponUsedA) %>%
+          arrange(orderID,couponColA) %>%
+          filter((grepl("12",sim_meas) & couponColA == 1) | (grepl("13",sim_meas) & couponColA == 1) | (grepl("23",sim_meas) & couponColA == 2))
+
+      d_B = dm %>%
+          select(orderID,couponID,couponCol,couponUsed) %>%
+          renm(c("orderID","couponIDB","couponColB","couponUsedB")) %>%
+          left_join(sim_mat,by="orderID") %>%
+          gather(sim_meas,value,-orderID,-couponIDB,-couponColB,-couponUsedB) %>%
+          arrange(orderID,couponColB) %>%
+          filter((grepl("23",sim_meas) & couponColB == 3) | (grepl("13",sim_meas) & couponColB == 3) | (grepl("12",sim_meas) & couponColB == 2))
+
+      d_AB = d_A %>% left_join(d_B,by=c("orderID","sim_meas","value")) %>% mutate(nUsed = factor(couponUsedA + couponUsedB))
+
+      ggplot(data=d_AB,aes(x=value,color=factor(nUsed))) + geom_density()
+
+      p = d_AB %>% filter(!is.na(couponUsedA)) %>% 
+         mutate(usedColA = paste0("coupon",couponColA,"Used=",couponUsedA)) %>%
+         mutate(usedColB = paste0("coupon",couponColB,"Used=",couponUsedB)) %>%
+         mutate(usedA = paste0("couponAUsed=",couponUsedA)) %>%
+         mutate(usedB = paste0("couponBUsed=",couponUsedB)) %>%
+         mutate(fill = paste0("cpn",couponColA,"Xcpn",couponColB)) %>%
+         mutate(nUsed = factor(couponUsedA + couponUsedB)) %>%
+         mutate(similarity= value) 
+
+      p %>% ggplot(aes(fill=usedA,x=similarity,alpha=.2)) + facet_grid(usedB~.) + geom_density() %>% print
+
+      p %>% ggplot(aes(fill=interaction(usedA,usedB),x=fill,y=log(similarity),alpha=.2)) + geom_boxplot() %>% print
+   }
+   
+```
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=8,fig.height=5,out.width='.8\\linewidth',out.height='.5\\linewidth'}
+
+   
+```
 
 
 
