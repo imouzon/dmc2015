@@ -111,8 +111,12 @@ same.val.orders %>%
 ## "De-coupon" the dataset where we say that any values below some cutoff
 ## are the "true values" of (product + coupon).
 cutoff2 <- 200
-true.vals <- coupon.tdf %>%
-  filter(upper.bound < cutoff2)
+
+## We are pretending like (product + coupon) values above the
+## prespecified cutoff are just the mean of the values below that cutoff.
+true.vals <- coupon.tdf
+coupon.tdf$upper.bound[coupon.tdf$upper.bound > cutoff2] <-
+  mean(coupon.tdf$upper.bound[coupon.tdf$upper.bound <= cutoff2])
 trn3 <- trn # Just so I don't screw up the original dataset.
 
 trn3.nrows <- dim(trn3)[1]
@@ -138,8 +142,7 @@ for (i in 1:trn3.nrows) {
 sum(trn3$basketValue < 0)
 ## Nope!
 
-## Let's pretend like the coupons with upper bounds > 200 don't exist for now.
-## With this assumption, we are justified in killing off all the coupon columns
+## We are now justified in killing off all the coupon columns
 ## in trn3 and trying to model basket value with the remaining variables.
 ## This is analogous to modeling a stationary time series after removing trend
 ## and seasonal components.
@@ -151,3 +154,10 @@ trn3 <- trn3 %>%
 trn3$timespan <- trn3$orderTime - trn3$couponsReceived
 trn3 <- trn3 %>%
   select(-orderTime, -couponsReceived)
+
+
+countem <- trn %>%
+  group_by(userID) %>%
+  summarize(count = n()) %>%
+  ggvis(x = ~count) %>%
+  layer_histograms()
