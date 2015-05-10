@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.1.24)  8 MAY 2015 19:22
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.1.24)  9 MAY 2015 19:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**categorical_similarity.tex
-(./categorical_similarity.tex
+**/Users/user/dmc2015/ian/categorical_similarity.tex
+(/Users/user/dmc2015/ian/categorical_similarity.tex
 LaTeX2e <2014/05/01>
 Babel <3.9k> and hyphenation patterns for 21 languages loaded.
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/base/report.cls
@@ -1297,16 +1297,6 @@ File: tikzlibrarybackgrounds.code.tex 2013/07/18 v3.0.0 (rcs-revision 1.3)
 (/Users/user/Library/texmf/tex/latex/formatHW.sty
 Package: formatHW 2014/12/15 HW page and title format Package
 
-
-! LaTeX Error: Unknown option `IanMouzon' for package `formatHW'.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.223 \ProcessOptions\relax
-                           
-? 
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2014/03/04 1.5c listings language file
 )
@@ -1493,8 +1483,7 @@ File: tikzlibraryplotmarks.code.tex 2008/01/09 v3.0.0 (rcs-revision 1.1)
 (/usr/local/texlive/2014basic/texmf-dist/tex/generic/pgf/libraries/pgflibrarypl
 otmarks.code.tex
 File: pgflibraryplotmarks.code.tex 2013/07/20 v3.0.0 (rcs-revision 1.13)
-)))
-No file categorical_similarity.aux.
+))) (./categorical_similarity.aux)
 \openout1 = `categorical_similarity.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 60.
@@ -1512,6 +1501,7 @@ LaTeX Font Info:    ... okay on input line 60.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 60.
 LaTeX Font Info:    ... okay on input line 60.
 LaTeX Font Info:    Try loading font information for T1+lmr on input line 60.
+
 (/usr/local/texlive/2014basic/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
@@ -1552,6 +1542,7 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 60.
 LaTeX Info: Redefining \pageref on input line 60.
 LaTeX Info: Redefining \nameref on input line 60.
+ (./categorical_similarity.out) (./categorical_similarity.out)
 \@outlinefile=\write4
 \openout4 = `categorical_similarity.out'.
 
@@ -1669,60 +1660,46 @@ Underfull \hbox (badness 10000) in alignment at lines 74--82
  []
 
 
-Package lastpage Warning: Rerun to get the references right on input line 87.
-
-
 AED: lastpage setting LastPage
-
-LaTeX Warning: Reference `LastPage' on page 1 undefined on input line 87.
-
+Package atenddvi Info: Last page = 1.
 [1
 
 {/usr/local/texlive/2014basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 87.
-Package atveryend Info: Executing hook `AfterLastShipout' on input line 87.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 100.
+Package atveryend Info: Executing hook `AfterLastShipout' on input line 100.
 
-(./categorical_similarity.aux
+(./categorical_similarity.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 100.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 100.
+Package rerunfilecheck Info: File `categorical_similarity.out' has not changed.
 
-Package atenddvi Warning: Rerun LaTeX, last page not yet found.
-
-)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 87.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 87.
-
-
-Package rerunfilecheck Warning: File `categorical_similarity.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `categorical_similarity.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  FFA88085B31CFC4D937D402C0E28FE62;59.
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
+(rerunfilecheck)             Checksum: FFA88085B31CFC4D937D402C0E28FE62;59.
  ) 
 Here is how much of TeX's memory you used:
- 38186 strings out of 494522
- 873464 string characters out of 6167205
- 1055618 words of memory out of 5000000
- 40778 multiletter control sequences out of 15000+600000
- 43441 words of font info for 52 fonts, out of 8000000 for 9000
+ 38200 strings out of 494522
+ 873767 string characters out of 6167205
+ 1056621 words of memory out of 5000000
+ 40782 multiletter control sequences out of 15000+600000
+ 52262 words of font info for 55 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 55i,9n,77p,10434b,723s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</usr/l
-ocal/texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/
-texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texliv
-e/2014basic/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2014
-basic/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2014basic
-/texmf-dist/fonts/type1/public/lm/lmtt12.pfb>
-Output written on categorical_similarity.pdf (1 page, 113933 bytes).
+ 55i,9n,77p,10458b,723s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/u
+sr/local/texlive/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/
+texlive/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texli
+ve/2014basic/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</usr/local/texlive/2014ba
+sic/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local/texlive/2014basic/t
+exmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2014basic/texmf-
+dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2014basic/texmf-dist/
+fonts/type1/public/lm/lmmi7.pfb></usr/local/texlive/2014basic/texmf-dist/fonts/
+type1/public/lm/lmr10.pfb></usr/local/texlive/2014basic/texmf-dist/fonts/type1/
+public/lm/lmr12.pfb></usr/local/texlive/2014basic/texmf-dist/fonts/type1/public
+/lm/lmr7.pfb></usr/local/texlive/2014basic/texmf-dist/fonts/type1/public/lm/lms
+y10.pfb></usr/local/texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmtt10.p
+fb></usr/local/texlive/2014basic/texmf-dist/fonts/type1/public/lm/lmtt12.pfb>
+Output written on categorical_similarity.pdf (1 page, 163115 bytes).
 PDF statistics:
- 40 PDF objects out of 1000 (max. 8388607)
- 31 compressed objects within 1 object stream
+ 69 PDF objects out of 1000 (max. 8388607)
+ 55 compressed objects within 1 object stream
  3 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -6,8 +6,8 @@ authorshort: imouzon
 contact: imouzon@iastate.edu
 grouplong: Iowa State University's 2015 Data Mining Cup Team
 groupshort: DMC@ISU
-leader:  
-leadershort: 
+leader: One Week Left 
+leadershort: One Week Left
 semester: Spring 2015
 assignment: 
 duedate: May 8, 2015
@@ -67,7 +67,7 @@ In this document I am calculating some of these features for the categorical var
 # Getting Tranthe Data and Manipulations 
 I am using our new clean data - so should you
 <!--- chunk-label: R code (No Results in Document) -->
-```{r chunk-label,cache=FALSE}
+```{r cache=FALSE}
    d = readRDS("../data/clean_data/universalCleanData.rds")
 ```
 
@@ -104,7 +104,7 @@ not the coupon has the given category:
 ```
 and save the jaccard matrix from this:
 <!--- chunk-label: R code (No Results in Document) -->
-```{r chunk-label,cache=TRUE}
+```{r cache=TRUE}
    #these are the jaccard similarities
    jaccard_func = function(cpn1,cpn2) sum(cpn1 * cpn2)/sum(as.numeric(cpn1 + cpn2 > 0))
 
@@ -217,7 +217,7 @@ which we can calculate as follows:
    cos.d3 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_ftd_invmax)))) %>% data.frame %>% renm(c("orderID", "sim_ftd_invmax_cosSim12", "sim_ftd_invmax_cosSim13", "sim_ftd_invmax_cos.sim23"))
 
    #sim_lnorm_pif
-   cos.d4 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_pif)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_pif_cosSim12", "sim_lnorm_pif_cosSim13", "sim_lnorm_pif_cos.sim23"))
+   cos.d4 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_ftd_pif)))) %>% data.frame %>% renm(c("orderID", "sim_ftd_pif_cosSim12", "sim_ftd_pif_cosSim13", "sim_ftd_pif_cos.sim23"))
 
    #sim_lnorm_lnorm
    cos.d5 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_lnorm)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_lnorm_cosSim12", "sim_lnorm_lnorm_cosSim13", "sim_lnorm_lnorm_cos.sim23"))
@@ -232,12 +232,10 @@ which we can calculate as follows:
    cos.d8 = d %>% select(orderID) %>% cbind(t(sapply(1:nrow(dmcsucks), function(i) CosSimSummary(i,sim_lnorm_pif)))) %>% data.frame %>% renm(c("orderID", "sim_lnorm_pif_cosSim12", "sim_lnorm_pif_cosSim13", "sim_lnorm_pif_cos.sim23"))
 ```
 
-
 #Results
 Consider the chances that coupons were used when the coupons had more similarity. 
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   #Jaccard
    simFeatures = function(sim_mat){
       d_A = dm %>%
           select(orderID,couponID,couponCol,couponUsed) %>%
@@ -268,18 +266,160 @@ Consider the chances that coupons were used when the coupons had more similarity
          mutate(nUsed = factor(couponUsedA + couponUsedB)) %>%
          mutate(similarity= value) 
 
-      p %>% ggplot(aes(fill=usedA,x=similarity,alpha=.2)) + facet_grid(usedB~.) + geom_density() %>% print
+      p1 = p %>% ggplot(aes(fill=usedA,x=similarity,alpha=.2)) + facet_grid(usedB~.,scales="free_y") + geom_density()
 
-      p %>% ggplot(aes(fill=interaction(usedA,usedB),x=fill,y=log(similarity),alpha=.2)) + geom_boxplot() %>% print
+      p2 = p %>% ggplot(aes(fill=interaction(usedA,usedB),x=fill,y=log(similarity),alpha=.2)) + geom_boxplot()
+      
+      return(list(p1 = p1, p2 = p2))
    }
-   
 ```
+
+## Jaccard Measure
 <!--- chunk-label: R code (No Results in Document) -->
-```{r fig.width=8,fig.height=5,out.width='.8\\linewidth',out.height='.5\\linewidth'}
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   #figures
+   figures = simFeatures(jac.d)
 
-   
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(jac.d,file="../features/feature_files/universal/jaccard_similarity.rds")
 ```
 
+## tf-idf using ftd and lnorm
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d1
 
+   #figures
+   figures = simFeatures(sim_mat)
 
+   #print
+   print(figures$p1)
+   print(figures$p2)
 
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/ftd_lnorm_similarity.rds")
+```
+
+## tf-idf using ftd and ivf
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d2
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/ftd_ivf_similarity.rds")
+```
+
+## tf-idf using ftd and invmax
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d3
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/ftd_invmax_similarity.rds")
+```
+
+## tf-idf using ftd and pif
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d4
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/ftd_pif_similarity.rds")
+```
+
+## tf-idf using lnorm and lnorm
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d5
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/lnorm_lnorm_similarity.rds")
+```
+
+## tf-idf using lnorm and ivf
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d6
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/lnorm_ivf_similarity.rds")
+```
+
+## tf-idf using lnorm and invmax
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d7
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/lnorm_invmax_similarity.rds")
+```
+
+## tf-idf using lnorm and pif
+<!--- chunk-label: R code (No Results in Document) -->
+```{r fig.width=9,fig.height=5,out.width='.9\\linewidth',out.height='.5\\linewidth'}
+   # similarity matrix
+   sim_mat = cos.d8
+
+   #figures
+   figures = simFeatures(sim_mat)
+
+   #print
+   print(figures$p1)
+   print(figures$p2)
+
+   #save
+   saveRDS(sim_mat,file="../features/feature_files/universal/lnorm_pif_similarity.rds")
+```
