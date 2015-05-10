@@ -1,0 +1,76 @@
+---
+title: Exploring basePrice and Price
+titleshort: basePrice/Price
+instructions:
+author: Chen Hua, Ian Mouzon
+authorshort: Hua/Mouzon
+contact: chua@iastate.edu, imouzon@iastate.edu
+grouplong: Iowa State University's 2015 Data Mining Cup Team
+groupshort: DMC@ISU
+leader: One Week Left 
+leadershort: One Week Left
+semester: Spring 2015
+assignment: 
+duedate: May 8, 2015
+output:
+  usefulR::hw_format:
+  keep_tex: true
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "~/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("./categorical_similarity.Rmd")
+```
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+   source("./R/renm.R")
+```
+and our working directory is set to \verb!dmc2015/ian!.
+
+# price and basePrice - What Can We Do With Them???
+
+# Getting Tranthe Data and Manipulations 
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   d = readRDS("../data/clean_data/universalCleanData.rds")
+```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("./r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49))
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("./r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+```
+
+
