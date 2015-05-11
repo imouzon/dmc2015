@@ -164,17 +164,8 @@ C1 = cbind(orderID = C$orderID, tmp3$ximp)
 C1[C1 < 1e-4] = 0
 
 ##put it into a list named train and class
-features = list("train" = tr, "class" = cl)
+features = list(T=T1, V=V1, C=C1)
 
 ##save it as an RDS file
-saveRDS(features,file="./feautres/feature_files/myFeatures.rds")
+saveRDS(features,file="./feature/couponUsed.rds")
 
-
-
-ucd = readRDS("../data/clean_data/universalCleanData.rds")
-peteCoupFre = readRDS("../features/feature_files/universal/peteCoupFreq.rds")
-
-train = read.csv("./data/mc2015_train_simple.csv",
-    stringsAsFactors=FALSE, header=TRUE)
-class = read.csv("./data/mc2015_test_simple.csv",
-    stringsAsFactors=FALSE, header=TRUE)
