@@ -1,0 +1,174 @@
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[imouzon,none]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+\pagestyle{fancy}
+         \lhead{\href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}}
+            \lhead{imouzon}
+      \chead{Data Mining Cup\ (FMC,\ Spring 2015): price/basePrice}  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+% header includes
+
+\begin{document}
+
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{Data Mining Cup: Iowa State University Team}\\
+       basePrice Over price\\
+       Spring 2015, Feature Matrix Creation \\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+     Name& Ian Mouzon\\
+     email& \href{mailto:imouzon@iastate.edu}{\nolinkurl{imouzon@iastate.edu}}\\
+    
+    
+    
+    \hline
+ \end{tabular*}
+\end{center}
+
+I am using the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+   \KeywordTok{library}\NormalTok{(ggplot2)}
+   \KeywordTok{library}\NormalTok{(lubridate)}
+   \KeywordTok{library}\NormalTok{(xtable)}
+   \KeywordTok{library}\NormalTok{(foreach)}
+   \KeywordTok{library}\NormalTok{(rCharts)}
+   \KeywordTok{library}\NormalTok{(magrittr)}
+   \KeywordTok{library}\NormalTok{(tidyr)}
+   \KeywordTok{library}\NormalTok{(dplyr)}
+   \KeywordTok{library}\NormalTok{(reshape2)}
+   \KeywordTok{library}\NormalTok{(gtools)}
+   \KeywordTok{library}\NormalTok{(sqldf)}
+   \KeywordTok{library}\NormalTok{(missForest)}
+   \KeywordTok{source}\NormalTok{(}\StringTok{"./R/renm.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+and our working directory is set to \verb!dmc2015/ian!.
+
+\textbf{Getting the Data and Manipulations}
+
+I am using our new clean data - so should you
+
+\begin{Shaded}
+\begin{Highlighting}[]
+   \NormalTok{d =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/data/clean_data/universalCleanData.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+I can melt the columns by coupon using the following:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{source}\NormalTok{(}\StringTok{"~/dmc2015/ian/r/stackCoupons2.R"}\NormalTok{)}
+\NormalTok{dm =}\StringTok{ }\KeywordTok{stackCoupons2}\NormalTok{(d, }\DataTypeTok{idcols =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{4}\NormalTok{, }\DecValTok{32}\NormalTok{:}\DecValTok{49}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+I and can split the columns of product group using:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{source}\NormalTok{(}\StringTok{"~/dmc2015/ian/r/splitColumn.R"}\NormalTok{)}
+\NormalTok{dmc =}\StringTok{ }\KeywordTok{splitColumn}\NormalTok{(dm, }\StringTok{"categoryIDs"}\NormalTok{, }\StringTok{"orderID"}\NormalTok{, }\DataTypeTok{splitby =} \StringTok{":"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: tcltk
+\end{verbatim}
+
+\section{A few simple statistics}\label{a-few-simple-statistics}
+
+\textbf{The ratio of price to basePrice}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ratios =}\StringTok{ }\NormalTok{dmc %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{bPr2pr_ratio =} \NormalTok{basePrice/price, }\DataTypeTok{colname1 =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"bPr2pr_ratio"}\NormalTok{, }
+    \NormalTok{couponCol), }\DataTypeTok{bPr2pr_approx_ratio =} \KeywordTok{round}\NormalTok{(bPr2pr_ratio, }\DecValTok{1}\NormalTok{), }\DataTypeTok{colname2 =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"bPr2pr_approx_ratio"}\NormalTok{, }
+    \NormalTok{couponCol)) %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, colname1, bPr2pr_ratio, colname2, bPr2pr_approx_ratio) %>%}\StringTok{ }
+\StringTok{    }\KeywordTok{arrange}\NormalTok{(orderID, colname1) %>%}\StringTok{ }\KeywordTok{spread}\NormalTok{(colname1, bPr2pr_ratio) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, }
+    \NormalTok{colname2) %>%}\StringTok{ }\KeywordTok{spread}\NormalTok{(colname2, bPr2pr_approx_ratio) %>%}\StringTok{ }\NormalTok{data.frame %>%}\StringTok{ }\KeywordTok{saveRDS}\NormalTok{(}\DataTypeTok{file =} \StringTok{"~/dmc2015/features/feature_files/universal/basePrice_price_ratio.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

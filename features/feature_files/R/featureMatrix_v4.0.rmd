@@ -1,0 +1,67 @@
+---
+title: Feature Matrix Version 4.0
+titleshort: Features (vers. 4)
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: Iowa State University's 2015 Data Mining Cup Team
+groupshort: DMC@ISU
+leader: One Week Left 
+leadershort: One Week Left
+semester: Spring 2015
+assignment: 
+duedate: May 10, 2015
+output:
+  usefulR::hw_format:
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/features/feature_files/R"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/featureMatrix_v4.0.rmd")
+```
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+   source("./R/renm.R")
+```
+and our working directory is set to \verb!dmc2015/features/feature_files/R/!.
+
+# Creating the feature matrix:
+
+## Set 1: History Composed of Randomly Sampled Rows
+
+This feature matrix will be composed of both universal features and historical features.
+The features are based on the data sets contained in \verb!~/dmc2015/data/featureMatrix/HTVset1.rds/!.
+I can read these sets into \verb!R! using:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   HTV1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds") 
+   names(HTV1)
+   names(HTV1$orderids)
+```
+In order to 
+
+

@@ -52,7 +52,7 @@ and our working directory is set to \verb!dmc2015/ian!.
 
 # price and basePrice - What Can We Do With Them???
 
-# Getting Tranthe Data and Manipulations 
+# Getting the Data and Manipulations 
 I am using our new clean data - so should you
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r cache=FALSE}
@@ -71,6 +71,257 @@ I and can split the columns of product group using:
 ```{r splitcols,cache=FALSE}
    source("./r/splitColumn.R")
    dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+```
+
+<!--- chensCod: R code (No Results in Document) -->
+```{r chensCod,cache=FALSE}
+   ########  ------  Counting number of sub-category IDs  ------  ########
+   countCat = function(dat){
+     df = as.data.frame(5 - apply(dat, 1, function(vec) sum(is.na(vec))))
+     colnames(df) = "nSubCats"
+     return(df)
+   }
+
+
+   dmc = 
+   item_choose = "brand1 prod1 cat1:cat2"
+   dmc %>% filter(item_key==item_choose) %>% select(couponID,price) %>% unique %>% mutate(
+   %>%
+      summarize(price_level=unique(price)) 
+   %>% 
+      select(price_level) 
+      %>%
+      unique
+
+
+   function(dsn,item_choose){
+      dsn %>% filter(item_key == item_choose)  
+      
+   head(dmc)
+   qplot(item_key,reward,data=dmc)
+   length(unique(dmc$couponID))
+   dmc$item_key = paste(b
+   nrow(unique(dmc[,c("brand","productGroup","categoryIDs")]))
+   ,"premiumProduct"
+   
+
+
+
+   p = readRDS("../chen/datClean2.rds")
+   p = d 
+
+
+   linegroup = d %>% mutate(linegrp = as.factor(price/basePrice))  
+   linegroup %>% group_by(linegrp) %>% summarize(freq = n()) %>% arrange(-freq)
+
+   chk = linegroup[which(linegroup$linegrp == "4.99397590361446"),]
+   chk %>% select(couponID,brand,productGroup,reward) %>% unique %>% arrange(brand,productGroup)
+
+   d[which(d$couponID %in% c("cpn2146","cpn3274","cpn339")),]
+
+   qplot(log(price),log(basePrice),color=linegrp,data=chk) + theme(legend.position="none")
+
+   levels(linegroup$linegrp)
+
+
+   qplot(log(price),log(basePrice),data=p)
+
+   qplot(as.character(price/(basePrice)^(1.1)),couponID,data=d)
+
+   qplot(price,basePrice,data=p)
+   qplot(price,log(basePrice),data=p)
+   qplot(log(price),log(basePrice),data=p)
+
+
+
+
+   p = as.data.frame(p)
+
+   iplot(log(p$price),log(p$basePrice))
+   ihist(log(p$price))
+
+   qplot(log(price),log(basePrice),color=as.factor(couponUsed),data=p)
+
+   p %>% filter(brand=="brand3") %>% ggplot(aes(x=log(price),y=log(basePrice),color=factor(couponUsed),alpha=.01)) + geom_point() + facet_grid(couponUsed~.) + theme(legend.position="bottom")
+
+   p %>% filter(brand=="brand3") %>% ggplot(aes(x=log(price),y=log(basePrice),color=factor(couponUsed),alpha=.01)) + geom_point() + theme(legend.position="bottom")
+```
+
+## Kernal Mechanics
+
+Using the kernal function: $K(\mathbf{x}, \mathbf{y}) = \left(\alpha + \langle \mathbf{x}, \mathbf{y} \rangle \right)^{\eta}$:
+<!--- kernalMechanics: R code (No Results in Document) -->
+```{r kernalMechanics,cache=FALSE}
+   Kst = function(x,y,alpha=0,eta=1){
+      alpha=0
+      eta=1
+      x = log(K.d$price)
+      y = log(K.d$basePrice)
+      K = matrix(c(x,y),nrow=length(x),byrow=FALSE)
+
+      #center
+      K = t(t(K) - colMeans(K))
+
+      #apply kernal function
+      Kmat = (alpha + K%*%t(K))^eta
+
+      return(Kmat)
+   }
+```
+We apply this kernal:
+<!--- applyKernal: R code (No Results in Document) -->
+```{r applyKernal,cache=FALSE}
+   K.d = unique(d[!(d$basePrice == 0),c(3:4)])
+
+   K01 = Kst(log(K.d$price),log(K.d$basePrice))
+   K11 = Kst(log(K.d$price),log(K.d$basePrice),alpha=1)
+   K12 = Kst(log(K.d$price),log(K.d$basePrice),alpha=1,eta=2)
+
+   plot_func = function(i,kernalmat=K01){
+      Kplot2 = K.d[i,]
+      K.plot = cbind(K.d,kernalmat[,i])
+      names(K.plot)[3] = "kernaltransform"
+      p = ggplot(data = K.plot, aes(x = log(price), y=log(basePrice), color= kernaltransform)) + 
+      geom_point() +
+      geom_point(data=Kplot2,aes(x=log(price),y=log(basePrice)),shape=3,color='orange') + 
+      geom_vline(xintercept=mean(log(K.d$price))) + 
+      geom_hline(yintercept=mean(log(K.d$basePrice)))
+      print(p)
+   }
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+plot_func(120,Kst(log(K.d$price,log(K.d$basePrice),alpha=2,eta=4)))
+   
+      dogs = function(i,type='prod'){
+         varn = paste0(type,i)
+         p = d %>% filter(brand == varn) %>% unique
+
+         p = ggplot(data=K.d,aes(x = log(price), y=log(basePrice))) + 
+             geom_point() +
+             geom_point(data=p,aes(x = log(price),y=log(basePrice)),color='red') 
+         print(p)
+      }
+      
+```
+
+   <!--- chunk-label: R code (No Results in Document) -->
+   ```{r chunk-label,cache=FALSE}
+   
+      dogs(3)
+      dogs(13)
+      sapply(1:40, function(x) print(dogs(x,"brand")))
+
+      + 
+      geom_point() +
+      geom_point(data=Kplot2,aes(x=log(price),y=log(basePrice)),shape=3,color='orange') + 
+      geom_vline(xintercept=mean(log(K.d$price))) + 
+      geom_hline(yintercept=mean(log(K.d$basePrice)))
+      print(p)
+   }
+```
+
+
+
+
+
+   
+<!--- R code (No Results in Document) -->
+```{r cache=FALSE}
+   
+
+   nlevels(as.factor(d$price))
+   nlevels(as.factor(d$basePrice))
+   nlevels(as.factor(d$reward))
+
+   mylist = c("orderID", "couponID", "price", "basePrice", "reward", "premiumProduct",
+              "brand", "productGroup", "catSub1", "catSub2","catSub3","catSub4","catSub5", "couponUsed", "basketValue")
+   mydat <- d[ , mylist]
+# saveRDS(mydat, file = "datClean2.rds")
+   mydat = readRDS("datClean2.rds")
+
+   nSubCats <- countCat(mydat[,9:13])
+   mydat = cbind(mydat, nCatSubs)
+
+
+   z1 <- mydat[mydat$nSubCats == 1 ,]
+   z2 <- mydat[mydat$nSubCats == 2 ,]
+   z3 <- mydat[mydat$nSubCats == 3 ,]
+   z4 <- mydat[mydat$nSubCats == 4 ,]
+   z5 <- mydat[mydat$nSubCats == 5 ,]
+    
+   prodInfo = unique(mydat[,c("couponID", "price", "basePrice", "reward", "brand", "productGroup",
+            "catSub1", "catSub2",	"catSub3", "catSub4",	"catSub5","nSubCats")]) %>% arrange(-nSubCats,brand,reward)
+   prodInfo.order = prodInfo[order(prodInfo$nSubCats), ]
+
+   count(prodInfo$brand)
+
+
+
+
+# 22.6% of products are premium products
+   nrow(mydat[mydat$premiumProduct == 1,])/nrow(mydat)
+   nrow(mydat[mydat$premiumProduct == 0,])
+
+   levels(as.factor(mydat[mydat$premiumProduct==1,]$reward))
+   nlevels(as.factor(mydat[mydat$premiumProduct==0,]$reward))
+
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 0,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 0.63,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 0.94,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 1.26,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 1.57,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 1.88,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 2.2,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 2.51,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 3.14,])
+   nrow(mydat[mydat$premiumProduct==1 & mydat$reward == 6.28,])
+
+   z <- mydat[mydat$premiumProduct==1 & mydat$reward == 1.26,]
+
+
+
+
+   hist(mydat[mydat$premiumProduct==1 & mydat$reward == 1.26,]$price)
+   hist(mydat[mydat$premiumProduct==1 & mydat$reward == 1.26 & mydat$basePrice > 30, ]$basePrice)
+   range(mydat[mydat$premiumProduct==1 & mydat$reward == 1.26, ]$basePrice)
+
+   hist(mydat[mydat$premiumProduct==1 & mydat$reward == 1.26 & mydat$basePrice > 10, ]$basePrice)
+
+   mydat[mydat$premiumProduct==1 & mydat$reward == 1.26 & mydat$basePrice > 10,]
+
+   nrow(mydat[mydat$basePrice == 324.17, ])
+
+   mydat[mydat$premiumProduct==1, ]$basePrice
+
+
+   mydat[mydat$premiumProduct==1 & mydat$reward == 1.26 & mydat$brand %in% "brand1", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand3", ]
+# d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand4", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand5", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand16", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand17", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand18", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand20", ]
+   d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand23", ]
+
+   brand1
+   brand3
+   brand4
+   brand5
+   brand16
+   brand17
+   brand18
+   brand20
+   brand23
+
+
+   z <- d[d$premiumProduct==1 & d$reward == 1.26 & d$brand %in% "brand4", ]
+
+
+
+      
 ```
 
 
