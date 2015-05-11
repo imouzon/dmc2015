@@ -62,6 +62,47 @@ I can read these sets into \verb!R! using:
    names(HTV1)
    names(HTV1$orderids)
 ```
-In order to 
+There are some covariates in this file that we might want to keep: For instance, \verb!price!. We can do this as follows:
+<!--- vars2keep: R code (No Results in Document) -->
+```{r vars2keep,cache=FALSE,tidy=FALSE}
+   covars2keep = c("brand1","price1","basePrice1","reward1","premiumProduct1",
+                   "brand2","price2","basePrice2","reward2","premiumProduct2",
+                   "brand3","price3","basePrice3","reward3","premiumProduct3",
+
+                   "orderTimeTime",       "orderTimeFriSat",       "orderTimeDoW",       "orderTimeWeekend",
+                   "couponsReceivedTime", "couponsReceivedFriSat", "couponsReceivedDoW", "couponsReceivedWeekend", 
+
+                   "batchID", "couponsExpire", "couponsSent", 
+
+                   "TimeBtwnSentRec", "TimeBtwnRecExpire", "TimeBtwnRecOrder", "TimeBtwnOrderExpire"
+                   )
+```
+And of course we want to keep the value we need to predict:
+<!--- : R code (No Results in Document) -->
+```{r keepresponses,cache=FALSE}
+   response_vars = c("coupon1Used","coupon2Used","coupon3Used","basketValue") 
+```
+
+The features created using this data are in the folder \verb!~/dmc2015/features/feature_files/set1/!
+In order to know what files to read, I can use the following:
+<!--- get_file_list: R code (No Results in Document) -->
+```{r get_file_list,cache=FALSE}
+   files = list.files("~/dmc2015/features/feature_files/set1/",full.names=TRUE)
+```
+
+Each file should contain a feature or set of features that can be added to the data frame by joining on \verb!orderID!. 
+I wrote the following function to make sure that this works correctly:
+
+<!--- read_files_into_R: R code (No Results in Document) -->
+```{r read_files_into_R,cache=FALSE}
+   createFeatureMatrix = function(HTV_list,keepHTVcolumns,response_columns){
+      keepHTVcolumns = covars2keep
+      if(!is.numeric(keepHTVcolumns)) keepHTVcolumns = which(names(HTV_list$T %in% keepHTVcolumns))
+      if(!is.numeric(response_columns)) keepHTVcolumns = which(names(HTV_list$T %in% keepHTVcolumns))
+
+   features = lapply(files, function(i) readRDS(i))
+```
+
+
 
 

@@ -77,3 +77,6 @@ CVclusterChoose = function(nclusters_max,N_CV=10,method="centroid",nclusters_min
 #    kclust = 2:30
 #    centroid linkage
 hclust_centroid = CVclusterChoose(20,N_CV=10,method="centroid")
+
+qplot(2:20,hclust_centroid)
+
