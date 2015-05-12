@@ -59,3 +59,28 @@ usr.info <- cbind(TimeBtwnSentRec.info, TimeBtwnRecExpire.info[, -(1:2)],
                   TimeBtwnRecOrder.info[, -(1:2)], TimeBtwnOrderExpire.info[, -(1:2)], 
                   ordertime.info[, -(1:2)], couponReceived.info[, -(1:2)], orderperweek[, -1])
 saveRDS(usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
+
+
+###################
+### coupon used ###
+###################
+
+data <- HTVset2$H
+coupon1 <- data[, c(1, 3, 5:12, 29)]
+coupon2 <- data[, c(1, 3, 13:20, 30)]
+coupon3 <- data[, c(1, 3, 21:28, 31)]
+names(coupon1) <- names(coupon2) <- names(coupon3) <-
+  c("orderID", "userID", "couponID", "price", "basePrice", "reward",
+    "premiumProduct", "brand", "productGroup", "categoryIDs", "couponUsed")  
+H2_melt <- rbind(coupon1, coupon2, coupon3)
+H2_melt <- H2_melt[order(H2_melt$orderID),]
+
+# coupon user info
+coupon.usr <- H2_melt %>% group_by(couponID, userID) %>% 
+  summarize(n.coupon = n(), used = any(couponUsed != 0), n.used = sum(couponUsed))
+coupon.usr.info <- coupon.usr %>% group_by(couponID) %>% 
+  summarize(nUserSent = n(), nUserUsed = sum(used), UsedTwice = as.numeric(any(n.used > 1)), 
+            prop = nUserUsed / nUserSent)
+
+sum(coupon.usr.info$nUserUsed) / sum(coupon.usr.info$nUserSent)  # 0.2015
+   
