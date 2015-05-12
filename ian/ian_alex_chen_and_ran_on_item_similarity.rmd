@@ -1,0 +1,118 @@
+---
+title: Coupon Similarity Cluster Categories
+titleshort: Sim Cats
+instructions:
+author: Ian Mouzon
+authorshort: imouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/ian_alex_chen_and_ran_on_item_similarity.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(ggplot2)
+   library(lubridate)
+   library(xtable)
+   library(foreach)
+   library(rCharts)
+   library(magrittr)
+   library(tidyr)
+   library(dplyr)
+   library(reshape2)
+   library(gtools)
+   library(sqldf)
+   library(missForest)
+   source("./R/renm.R")
+```
+and our working directory is set to \verb!dmc2015/ian!.
+
+**Getting the Data and Manipulations**
+
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE,tidy=FALSE}
+   d = readRDS("~/dmc2015/data/clean_data/universalCleanData.rds")
+```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE,message=FALSE}
+   source("~/dmc2015/ian/r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49))
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("~/dmc2015/ian/r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+```
+
+# Creating the Item ID
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d$item_id1 = with(d,paste(brand1,productGroup1,categoryIDs1,sep="|"))
+   d$item_id2 = with(d,paste(brand2,productGroup2,categoryIDs2,sep="|"))
+   d$item_id3 = with(d,paste(brand3,productGroup3,categoryIDs3,sep="|"))
+```
+
+## Creating order_match class
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d$order_match_class = factor("000", levels=c("111","110","101","011","000"))
+   d$order_match_class[(d$item_id1 != d$item_id2 & d$item_id2 == d$item_id3)] = "011"
+   d$order_match_class[(d$item_id1 != d$item_id2 & d$item_id1 == d$item_id3)] = "101"
+   d$order_match_class[(d$item_id1 == d$item_id2 & d$item_id1 != d$item_id3)] = "110"
+   d$order_match_class[(d$item_id1 == d$item_id2 & d$item_id1 == d$item_id3)] = "111"
+```
+
+## Save the category feature
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d %>% select(orderID, order_match_class) %>% 
+      saveRDS(file="~/dmc2015/features/feature_files/universal/order_match_class.rds")
+```
+
+#Results
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   chk = d %>% 
+      mutate(order_res_paste = paste0(coupon1Used, coupon2Used, coupon3Used), 
+             nCouponUsed = coupon1Used + coupon2Used + coupon3Used) %>% 
+      select(order_res_paste,coupon1Used,coupon2Used,coupon3Used,nCouponUsed,order_match_class) %>%
+      gather(tmp,couponUsed,-order_res_paste,-order_match_class,-nCouponUsed) %>%
+      mutate(couponCol = as.numeric(gsub("coupon","",gsub("Used","",tmp)))) %>%
+      select(-tmp) %>%
+      filter(order_res_paste != "NANANA")
+
+      summary(chk$order_match_class)
+
+   chk$couponMatch = 0
+   for(i in 1:nrow(chk)) chk$couponMatch[i] = 1*(as.numeric(unlist(strsplit(as.character(chk$order_match_class[i]),""))[chk$couponCol[i]]) == chk$couponUsed[i])
+
+   ggplot(data=chk,aes(x = order_match_class,fill = couponMatch)) + geom_bar() + facet_grid(couponCol~couponUsed)
+```

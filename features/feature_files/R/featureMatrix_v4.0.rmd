@@ -95,12 +95,44 @@ I wrote the following function to make sure that this works correctly:
 
 <!--- read_files_into_R: R code (No Results in Document) -->
 ```{r read_files_into_R,cache=FALSE}
-   createFeatureMatrix = function(HTV_list,keepHTVcolumns,response_columns){
-      keepHTVcolumns = covars2keep
-      if(!is.numeric(keepHTVcolumns)) keepHTVcolumns = which(names(HTV_list$T %in% keepHTVcolumns))
-      if(!is.numeric(response_columns)) keepHTVcolumns = which(names(HTV_list$T %in% keepHTVcolumns))
+   chk = readRDS("../set1/llr_cpnXordDoW.rds")
 
-   features = lapply(files, function(i) readRDS(i))
+head(chk$T,100)
+
+dim(chk)
+
+
+
+   keepHTVcolumns = covars2keep
+   response_cols = response_vars
+   HTV_list = HTV1
+   createFeatureMatrix = function(HTV_list,files,keepHTVcolumns,response_columns){
+      if(!is.numeric(keepHTVcolumns)) keepHTVcolumns = which(names(HTV_list$T) %in% c("orderID",keepHTVcolumns))
+      if(!is.numeric(response_cols)) response_cols = which(names(HTV_list$T) %in% keepHTVcolumns)
+
+      trn = HTV_list$T[,keepHTVcolumns]
+      val = HTV_list$V[,keepHTVcolumns]
+      cls = HTV_list$C[,keepHTVcolumns]
+
+      i = 1
+      for(i in 1:length(files)){
+         feature = readRDS(files[i])
+         if(is.list(feature)){
+            if("couponCol" %in% names(feature$T)){
+
+
+            trn = trn %>% left_join(
+                                    ,by="orderID")
+            val = val %>% left_join(feature$V,by="orderID")
+            cls = cls %>% left_join(feature$C,by="orderID")
+         }else{
+            trn = trn %>% left_join(feature$T,by="orderID")
+            val = val %>% left_join(feature$V,by="orderID")
+            cls = cls %>% left_join(feature$C,by="orderID")
+         }
+         str(feature)
+          
+      features = lapply(files, function(i) readRDS(i))
 ```
 
 
