@@ -1,5 +1,5 @@
 #------------------------------**------------------------------# 
-#  
+#
 # DMC_2015: data preparation
 # dmc2015_v_0.R
 # 
@@ -78,6 +78,7 @@ coupon.used <- ddply(coupon.tr, .(couponID), summarise,
                      brand=unique(brand), 
                      category=length(strsplit(unique(as.character(categoryIDs)),split=',')[[1]]),
                      reward=mean(reward))
+
 head(coupon.used)
 summary(as.factor(coupon.used$category))
 summary(coupon.used$used)
