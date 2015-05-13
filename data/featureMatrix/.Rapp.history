@@ -1,2 +1,7 @@
+<<<<<<< Updated upstream
 load("/Users/chenhua/Desktop/dmc2015/data/featureMatrix/featMat_v3.0.rds")
 load("/Users/chenhua/Desktop/dmc2015/data/featureMatrix/featMat_v3.0.rds")
+=======
+load("/Users/yihuali/Documents/dmc2015/data/featureMatrix/HTVset1.rds")
+load("/Users/yihuali/Documents/dmc2015/data/featureMatrix/HTVset1.rds")
+>>>>>>> Stashed changes
