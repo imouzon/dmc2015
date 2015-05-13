@@ -75,7 +75,7 @@ I can melt the columns by coupon using the following:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
    source("./r/stackCoupons2.R")
-   dm = stackCoupons2(d,idcols = c(1:4,32:49))
+   dm = stackCoupons2(d,idcols = c(1:4,32:49)) 
 ```
 
 I and can split the columns of product group using:
@@ -87,6 +87,7 @@ I and can split the columns of product group using:
       mutate(couponNum = as.numeric(gsub("cpn","",couponID))) %>% 
       arrange(orderID,couponID)
 
+   #saveRDS(list("d" = "d", "dm" = dm,"dmc" = dmc),file="./written_data/universalCleanData_wide_melt_split.rds")
    #the number of coupons
    ncpns = length(unique(dmc$couponID))
 ```

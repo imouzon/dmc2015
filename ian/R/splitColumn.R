@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 29-04-2015
-#  Last Modified: Fri May  8 20:33:22 2015
+#  Last Modified: Tue May 12 18:39:23 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -14,8 +14,9 @@
 #
 
 splitColumn = function(dsn,varn,orderby,splitby=","){
+   library(sqldf)
    res_d = dsn[,c(orderby,varn)] %>% 
-      mutate(parts = strsplit(dsn[,varn],splitby)) %>%
+      mutate(parts = strsplit(as.character(dsn[,varn]),splitby)) %>%
       group_by_(varn) %>%
       do(data.frame({
          idx = 1:length(.$parts[[1]])

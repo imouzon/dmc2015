@@ -2,8 +2,8 @@
 title: Cory's LLR Statistics
 titleshort: Cory's LLR
 instructions:
-author: Ian Mouzon
-authorshort: Mouzon
+author: Pete Walsh and Ian Mouzon
+authorshort: imouzon
 contact: imouzon@iastate.edu
 grouplong: Data Mining Cup 2015 
 groupshort: DMC2015
@@ -631,7 +631,6 @@ We have a sligthly more complicated task on this one:
 <!--- two-way-choices: R code (No Results in Document) -->
 ```{r two-way-choices,cache=TRUE}
    names(TVC)[-c(1,2,4,5,6,7,11,12,16,17:22,24:25,31)]
-names(TVC)
 ```
 
 ## userID and 
@@ -640,7 +639,7 @@ names(TVC)
 ```{r cache=TRUE}
   # couponsReceivedDoW 
   llr = compute_ll_2w(as.character(H$userID), as.character(H$couponsReceivedDoW), H$couponUsed, as.character(TVC$userID), as.character(TVC$couponsReceivedDoW))
-  llr_userXrecDoW = data.frame("userID" = TVC$userID, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_userXrecDoW" = llr) %>% arrange(userID)
+  llr_userXrecDoW = data.frame("userID" = TVC$userID, "couponsReceivedDoW" = TVC$couponsReceivedDoW, "llr_userXrecDoW" = llr) %>% arrange(userID) %>%
   
   ggplot(data=llr_userXrecDoW,aes(x=userID, y=couponsReceivedDoW, size = llr_userXrecDoW),alpha=.1) + geom_point()
   qplot(userID,llr_userXrecDoW,data=llr_userXrecDoW, geom='line', group=couponsReceivedDoW, facets = couponsReceivedDoW ~ .)
