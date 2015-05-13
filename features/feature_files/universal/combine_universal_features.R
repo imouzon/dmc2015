@@ -34,7 +34,6 @@ combine_universal_features = function(read_dir = "./individual",
 		data = data %>% full_join(files_list[[i]], by = "orderID")
 	}
 
-	saveRDS(data, file = paste(write_dir, "universalFeaturesCombined.rds", sep = "/"))
 	return(data)
 }
 

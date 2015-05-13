@@ -48,13 +48,3 @@ dataset_new = dataset_new %>%
 		   batch_visitOrder = rank(orderTime)
 		   )
 
-  #fix NaN into NA
-  dataset_new[is.nan(dataset_new$avgTime_visit), ]$avgTime_visit = NA
-
-  #remove unneeded columns
-  dataset_new = dataset_new[, c(1, 7:18)]
-
-
-
-  #write
-  saveRDS(dataset_new, "userTimeFeatures.rds")
