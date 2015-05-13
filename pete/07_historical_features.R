@@ -1,7 +1,7 @@
 # ============================================================================
 # Author: Evan P. Walsh
 # Contact: epwalsh@iastate.edu
-# Date: 05-05-2015
+# Date: May 5, 2015
 #
 # Purpose: To create features based on the historical sections of the 
 # the data set. The only features that need to be explicitly created from the 

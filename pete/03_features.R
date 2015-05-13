@@ -24,8 +24,8 @@ d <- rbind(train[, -c(29:32)], class[, -c(29:32)])
 # How many times each coupon seen across entire dataset
 # ===================================================================
 allCoups <- c(as.character(d$couponID1), 
-							as.character(d$couponID2), 
-							as.character(d$couponID3))
+              as.character(d$couponID2), 
+              as.character(d$couponID3))
 coupTab <- table(allCoups)
 d$nCoupon1 <- unname(coupTab[as.character(d$couponID1)])
 d$nCoupon2 <- unname(coupTab[as.character(d$couponID2)])
@@ -106,16 +106,16 @@ train <- read.csv("~/GitHub/dmc2015/data/featureMatrix/train_ver1.1.csv")
 d <- rbind(train[, -c(29:32)], class[, -c(29:32)])
 
 allCoups <- melt(d, id = c("orderID", "batchID"), c(5, 13, 21),
-								 variable.name = "couponCol",
-								 value.name = "couponID")
+                 variable.name = "couponCol",
+                 value.name = "couponID")
 
 batchCounts <- allCoups %>% group_by(batchID, couponID) %>%
-	summarize(counts = length(orderID))
+  summarize(counts = length(orderID))
 
 allCoups2 <- inner_join(allCoups, batchCounts)
 
 batchCountsW <- allCoups2[,-4] %>%
-	dcast(orderID + batchID ~ couponCol, value.var = "counts")
+  dcast(orderID + batchID ~ couponCol, value.var = "counts")
 
 names(batchCountsW)[3:5] <- c("nCoup1Batch", "nCoup2Batch", "nCoup3Batch")
 
@@ -128,21 +128,21 @@ nCoupClass <- cbind(nCoupClass, batchCountsW[nCoupClass$orderID, 3:5])
 # ===================================================================
 d$couponsReceived <- ymd_hms(d$couponsReceived)
 dMelt <- d %>% melt(id = c("orderID", "couponsReceived"), c(5, 13, 21),
-										variable.name = "couponCol",
-										value.name = "couponID")
+                    variable.name = "couponCol",
+                    value.name = "couponID")
 
 coupRecTimes <- dMelt %>% group_by(couponID) %>%
-	summarize(firstTime = min(couponsReceived))
+  summarize(firstTime = min(couponsReceived))
 
 dMelt <- inner_join(dMelt, coupRecTimes, by = "couponID")
 
 dMelt$firstTime <- as.character(dMelt$firstTime)
 dWide <- dMelt %>% select(c(1, 3, 5)) %>%
-	dcast(orderID ~ couponCol, value.var = "firstTime") 
+  dcast(orderID ~ couponCol, value.var = "firstTime") 
 
 names(dWide)[2:4] <- c("firstTimeCoup1Rec",
-											 "firstTimeCoup2Rec", 
-											 "firstTimeCoup3Rec")
+                       "firstTimeCoup2Rec", 
+                       "firstTimeCoup3Rec")
 
 nCoupTrain <- cbind(nCoupTrain, dWide[nCoupTrain$orderID, 2:4])
 nCoupClass <- cbind(nCoupClass, dWide[nCoupClass$orderID, 2:4])
@@ -172,10 +172,10 @@ catIDs <- sapply(d$categoryIDs, strsplit, split = ":")
 outCats <- matrix(rep(NA, 5*nrow(d)), ncol = 5)
 
 for (i in 1:nrow(d)) {
-	cats <- unlist(catIDs[[i]])
-	for (j in 1:length(cats)) {
-		outCats[i,j] <- cats[j]
-	}
+  cats <- unlist(catIDs[[i]])
+  for (j in 1:length(cats)) {
+    outCats[i,j] <- cats[j]
+  }
 }
 
 colnames(outCats) <- c("cat1", "cat2", "cat3", "cat4", "cat5")
@@ -200,15 +200,15 @@ rm(list=c("catM", "catI", "catIDs", "trainM", "classM"))
 # Brand and premium product
 # ===================================================================
 premSum <- d %>% group_by(couponID) %>%
-	summarize(n = length(premiumProduct),
-						prop = mean(premiumProduct))
+  summarize(n = length(premiumProduct),
+            prop = mean(premiumProduct))
 
 d[1:nrow(trainM),] %>% group_by(brand) %>%
-	summarize(propPrem = mean(premiumProduct),
-						bVal = mean(basketValue),
-						propUsed = mean(couponUsed)) %>%
-	ggplot(aes(x = propPrem, y = bVal)) + geom_point()
+  summarize(propPrem = mean(premiumProduct),
+            bVal = mean(basketValue),
+            propUsed = mean(couponUsed)) %>%
+  ggplot(aes(x = propPrem, y = bVal)) + geom_point()
 
 d %>% group_by(brand) %>%
-	summarize(propPrem = mean(premiumProduct),
-						count = length(premiumProduct))
+  summarize(propPrem = mean(premiumProduct),
+            count = length(premiumProduct))
