@@ -58,7 +58,10 @@ orderperweek <- usr.batch %>% group_by(userID) %>%
 usr.info <- cbind(TimeBtwnSentRec.info, TimeBtwnRecExpire.info[, -(1:2)], 
                   TimeBtwnRecOrder.info[, -(1:2)], TimeBtwnOrderExpire.info[, -(1:2)], 
                   ordertime.info[, -(1:2)], couponReceived.info[, -(1:2)], orderperweek[, -1])
-saveRDS(usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
+order.usr <- data[, c(1, 3)]
+order.usr.info <- order.usr %>% left_join(usr.info)
+order.usr.info <- order.usr.info[order(order.usr.info$orderID), ]
+saveRDS(order.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
 
 
 ###################
