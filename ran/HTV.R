@@ -83,4 +83,10 @@ coupon.usr.info <- coupon.usr %>% group_by(couponID) %>%
             prop = nUserUsed / nUserSent)
 
 sum(coupon.usr.info$nUserUsed) / sum(coupon.usr.info$nUserSent)  # 0.2015
-   
+
+library(fitdistrplus)
+alpha <- mmedist(coupon.usr.info$prop, "beta")$estimate[1]
+beta <- mmedist(coupon.usr.info$prop, "beta")$estimate[2]
+
+coupon.usr.info$prob <- (coupon.usr.info$nUserUsed + alpha) / (coupon.usr.info$nUserSent + alpha + beta)
+saveRDS(coupon.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/ran/coupon_usr_info.rds")
