@@ -23,7 +23,7 @@ batch <- batch[,c('orderID','batchID')]
 dat.full <- merge(dat.org, batch, by='orderID')
 dat <- subset(dat.full, batchID<=7)
 
-dat.set3 <- readRDS('./data/featureMatrix/HTVset3.rds')
+dat.set3 <- readRDS('./data/featureMatrix/HTVset2.rds')
 dat.H <- dat.set3$H
 dat.H1 <- dat.H[,c(1,3,5:12,29)]
 dat.H2 <- dat.H[,c(1,3,13:20,30)]
@@ -127,8 +127,15 @@ a[[2]] <- train
 a[[3]] <- valid
 a[[4]] <- class
 names(a) <- c('H','T','V','C')
-saveRDS(a, file='./yihua/HTVset3_Coupon_UniqueUser.rds')
+saveRDS(a, file='./yihua/HTVset2_Coupon_UniqueUser.rds')
 
 tmp <- readRDS(file='./yihua/HTVset3_Coupon_UniqueUser.rds')
-tmp$H
+training <- tmp$T
+test <- tmp$V
 
+library(randomForest)
+rf1 <- randomForest(as.factor(coupon1Used)~Prob1, 
+                    data=training, ntree=500)
+result <- predict(rf1, test)
+result <- as.numeric(result>0.5)
+table(test$coupon1Used, result)
