@@ -7,6 +7,10 @@
 # individual coupon predictions, basket value, and basket value using coupon 
 # predictions. Conditional RF's are implemented through the "party" package.
 #
+# Output an RDS with the model saved, predictions sorted by order ID, and 
+# validation error. Save this RDS in predicitons folder with a name like
+# 'CRF_FMatVers4.0_couponOnly.rds'
+#
 # ============================================================================
 
 

@@ -42,7 +42,7 @@ d <- d[1:nrow(train),] # only want the training portion of data
 coupIDs <- matrix(rep(NA, 5 * 31), nrow = 31)
 for (i in 1:31) {
   # number of times coupon category ID seen
-  coupIDs[i,1] <- sum(d[,14+i]) 	
+  coupIDs[i,1] <- sum(d[,14+i])   
   # proportion of times coupon used with that category id
   coupIDs[i,2] <- mean(d$couponUsed[d[,14+i] == 1])
   # mean basketValue associated with that category id
@@ -77,10 +77,10 @@ catIDs <- sapply(d$categoryIDs, strsplit, split = ":")
 outCats <- matrix(rep(NA, 5*nrow(d)), ncol = 5)
 
 for (i in 1:nrow(d)) {
-	cats <- unlist(catIDs[[i]])
-	for (j in 1:length(cats)) {
-		outCats[i,j] <- cats[j]
-	}
+  cats <- unlist(catIDs[[i]])
+  for (j in 1:length(cats)) {
+    outCats[i,j] <- cats[j]
+  }
 }
 
 colnames(outCats) <- c("cat1", "cat2", "cat3", "cat4", "cat5")
