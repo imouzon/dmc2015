@@ -80,6 +80,8 @@ llr_multiway = function(dsn,hst,comparecols){
       full_join(dsn.res_wide4,by="orderID") %>%
       full_join(dsn.res_wide5,by="orderID")
 
+   ret = list("wide" = dsn.res_wide, "long" = dsn.res_long)
+
    return(ret)
 }
    
