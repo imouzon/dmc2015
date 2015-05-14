@@ -15,7 +15,7 @@ library(fitdistrplus)
 
 setwd('/Users/yihuali/Documents/dmc2015')
 
-dat <- readRDS('./data/featureMatrix/HTVset1.rds')
+dat <- readRDS('./data/featureMatrix/HTVset3.rds')
 H <- dat$H
 T <- dat$T
 V <- dat$V
@@ -45,11 +45,15 @@ for (i in 1:N) {
   }
 }
 
-rf1 <- randomForest(x=Feature$T_melt[,c(34,36:404)], 
+
+### read and random forest ###
+Feature <- readRDS('./yihua/HTVmelt3_Combn_UniqueUser.rds')
+rf1 <- randomForest(x=Feature$T_melt[,c(34,36:ncol(Feature$T_melt))], 
                     y=as.factor(Feature$T_melt$couponUsed), 
-                    xtest=Feature$V_melt[,c(34,36:404)], 
+                    xtest=Feature$V_melt[,c(34,36:ncol(Feature$T_melt))], 
                     ytest=as.factor(Feature$V_melt$couponUsed), 
                     ntree=500, mtry=120)
+
 rf1$confusion
 rf1$test$confusion
 x <- table(as.factor(Feature$V_melt$couponUsed), rf1$test$predicted)
@@ -60,7 +64,18 @@ y = as.vector(rf1$importance)
 names(y)=rownames(rf1$importance)
 y <- sort(y, decreasing=TRUE)
 head(y,100)
-y1 <- rownames(rf1$importance)
-intersect(x,y)
 
-saveRDS(Feature, './yihua/HTVmelt1_Combn_UniqueUser.rds')
+
+y1 <- names(y[1:100])
+y2 <- names(y[1:100])
+y3 <- names(y[1:100])
+
+y <- intersect(y1,y2)
+y <- intersect(y,y3)
+
+length(grep('*nUser',y))-length(grep('*nUserUsed',y))
+length(grep('*nUserUsed',y))
+length(grep('*prob',y))
+length(grep('*Twice',y))
+
+saveRDS(Feature, './yihua/HTVmelt3_Combn_UniqueUser.rds')
