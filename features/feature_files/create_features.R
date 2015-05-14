@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 14-05-2015
-#  Last Modified: Thu May 14 12:53:52 2015
+#  Last Modified: Thu May 14 13:03:41 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -14,6 +14,7 @@
 #
 
 
+feature_root = "~/dmc2015/features/feature_files/"
 set = "set1"
 vers = "1"
 
