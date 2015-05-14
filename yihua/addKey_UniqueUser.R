@@ -72,17 +72,14 @@ addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
         key_paste1 = paste0(key_paste1,"_",key[i])
       }
     }
-    names(H_melt)[names(H_melt)=="key_paste"] <- paste0(key_paste1,"_key")
     names(H_melt)[names(H_melt)=="key_nUser"] <- paste0(key_paste1,"_nUser")
     names(H_melt)[names(H_melt)=="key_nUserUsed"] <- paste0(key_paste1,"_nUserUsed")
     names(H_melt)[names(H_melt)=="key_TwiceOrMore"] <- paste0(key_paste1,"_Twice")
     names(H_melt)[names(H_melt)=="key_prob"] <- paste0(key_paste1,"_prob")
-    names(T_melt)[names(T_melt)=="key_paste"] <- paste0(key_paste1,"_key")
     names(T_melt)[names(T_melt)=="key_nUser"] <- paste0(key_paste1,"_nUser")
     names(T_melt)[names(T_melt)=="key_nUserUsed"] <- paste0(key_paste1,"_nUserUsed")
     names(T_melt)[names(T_melt)=="key_TwiceOrMore"] <- paste0(key_paste1,"_Twice")
     names(T_melt)[names(T_melt)=="key_prob"] <- paste0(key_paste1,"_prob")
-    names(V_melt)[names(V_melt)=="key_paste"] <- paste0(key_paste1,"_key")
     names(V_melt)[names(V_melt)=="key_nUser"] <- paste0(key_paste1,"_nUser")
     names(V_melt)[names(V_melt)=="key_nUserUsed"] <- paste0(key_paste1,"_nUserUsed")
     names(V_melt)[names(V_melt)=="key_TwiceOrMore"] <- paste0(key_paste1,"_Twice")

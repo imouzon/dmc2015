@@ -93,3 +93,58 @@ beta <- mmedist(coupon.usr.info$prop, "beta")$estimate[2]
 
 coupon.usr.info$prob <- (coupon.usr.info$nUserUsed + alpha) / (coupon.usr.info$nUserSent + alpha + beta)
 saveRDS(coupon.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/ran/coupon_usr_info.rds")
+
+
+###########
+### SVM ###
+###########
+
+library(ggplot2)
+library(lsr)
+library(lubridate)
+library(dplyr)
+library(fitdistrplus)
+library(e1071)
+
+dat <- HTVset1
+H <- dat$H
+T <- dat$T
+V <- dat$V
+C <- dat$C
+H_melt <- stackCoupons2(H, idcols = c(1:4, 32:49))
+T_melt <- stackCoupons2(T, idcols = c(1:4, 32:49))
+V_melt <- stackCoupons2(V, idcols = c(1:4, 32:49))
+C_melt <- stackCoupons2(C, idcols = c(1:4, 32:49))
+
+Feature <- addFeatures_HTV(H_melt, T_melt, V_melt)
+Feature$H_melt <- Feature$H_melt[, -80]
+Feature$T_melt <- Feature$T_melt[, -80]
+Feature$V_melt <- Feature$V_melt[, -80]
+
+# delete constant feature
+keep <- which(as.numeric(apply(Feature$T_melt, 2, function(x){length(unique(as.factor(x))) > 1})) == 1)
+
+# linear kernel
+svmfit_linear <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
+                     y = as.factor(Feature$T_melt$couponUsed), 
+                     kernel = "linear")
+pred_linear_T <- predict(svmfit_linear, Feature$T_melt[, keep[c(34, 36:length(keep))]])
+table_linear_T <- table(pred_linear_T, Feature$T_melt$couponUsed)
+1 - sum(diag(table_linear_T)) / sum(table_linear_T)
+# validation error
+pred_linear <- predict(svmfit_linear, Feature$V_melt[, keep[c(34, 36:length(keep))]])
+table_linear <- table(pred_linear, Feature$V_melt$couponUsed)
+1 - sum(diag(table_linear)) / sum(table_linear)
+
+# radial kernel
+svmfit_radial <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
+                     y = as.factor(Feature$T_melt$couponUsed), 
+                     kernel = "radial")
+pred_radial_T <- predict(svmfit_radial, Feature$T_melt[, keep[c(34, 36:length(keep))]])
+table_radial_T <- table(pred_radial_T, Feature$T_melt$couponUsed)
+1 - sum(diag(table_radial_T)) / sum(table_radial_T)
+# validation error
+pred_radial <- predict(svmfit_radial, Feature$V_melt[, keep[c(34, 36:length(keep))]])
+table_radial <- table(pred_radial, Feature$V_melt$couponUsed)
+1 - sum(diag(table_radial)) / sum(table_radial)
+
