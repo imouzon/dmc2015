@@ -129,7 +129,7 @@ a[[4]] <- class
 names(a) <- c('H','T','V','C')
 saveRDS(a, file='./yihua/HTVset2_Coupon_UniqueUser.rds')
 
-tmp <- readRDS(file='./yihua/HTVset3_Coupon_UniqueUser.rds')
+tmp <- readRDS(file='./yihua/HTVset1_Coupon_UniqueUser.rds')
 training <- tmp$T
 test <- tmp$V
 
