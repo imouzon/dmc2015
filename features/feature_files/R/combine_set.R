@@ -41,7 +41,7 @@ combine_set_individual = function(set,feature_dir,type,joinby){
    }
 
    #let's write this out!
-   saveRDS(dsn, paste0(feature_root,"/",set,"/",set,"Combined_wide.rds"))
+   saveRDS(dsn, paste0(feature_root,"/",set,"/",set,"Combined_",type,".rds"))
 
    #return(dsn)
 }
