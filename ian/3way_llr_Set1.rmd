@@ -28,7 +28,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("/Users/user/dmc2015/ian/3way_llr.rmd")
+      rmarkdown::render("/Users/user/dmc2015/ian/3way_llr_Set1.rmd")
 ```
 
 I am using the following packages:
@@ -53,7 +53,7 @@ I am using the following packages:
 
 <!--- xx: R code (No Results in Document) -->
 ```{r xx,cache=FALSE}
-source("./R/llr_multiway.R")
+   source("./R/llr_multiway.R")
 ```
 
 # Getting Tranthe Data and Manipulations 

@@ -10,6 +10,7 @@ llr_multiway = function(dsn,hst,comparecols){
 
    #estimate priors
    prior.est.llr = dsn.llr %>% select(orderID,couponCol,couponUsed,compID) %>% 
+      filter(orderID %in% hst.ids) %>%
       group_by(compID) %>%
       summarize(ntimes = n(), timesUsed = sum(couponUsed), timesNotUsed = ntimes - timesUsed, propUsed = timesUsed/ntimes) %>%
       filter(ntimes != 1) 
@@ -18,21 +19,23 @@ llr_multiway = function(dsn,hst,comparecols){
       M2 = mean(prior.est.llr$propUsed^2,na.rm=T)
 
       alpha.est = M * (M - M2) / ( M2 - M*M ) 
-      beta.est = ( 1 - M) * ( M - M2 ) / (M2 - M*M)
+      beta.est = ( 1 - M ) * ( M - M2 ) / (M2 - M*M)
 
    #get posterior information
-   post.est.llr = dsn.llr %>% select(orderID,couponCol,couponUsed,compID) %>% 
+   post.est.llr = dsn.llr %>% select(orderID,couponUsed,compID) %>% 
       filter(orderID %in% hst.ids) %>%
       group_by(compID) %>%
-      mutate(ntimes = n(), 
+      summarize(ntimes = n(), 
                 timesUsed = sum(couponUsed), 
                 timesNotUsed = ntimes - timesUsed, 
                 llr_est = log((timesUsed + alpha.est)/(timesNotUsed + beta.est)),
                 llr_naive = log((timesUsed + 1)/(timesNotUsed + 1))) %>% 
-      select(orderID,couponCol,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive)
+      select(compID,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive)
 
-   dsn.res = dsn.llr %>% left_join(post.est.llr,by=c("orderID","couponCol")) %>% 
-      select(orderID,couponCol,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive)
+   dsn.res = dsn.llr %>% 
+      left_join(post.est.llr,by="compID") %>% 
+      select(orderID,couponCol,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive) %>%
+      arrange(orderID,couponCol)
 
    dsn.res$ntimes[is.na(dsn.res$ntimes)] = -1  
    dsn.res$timesUsed[is.na(dsn.res$timesUsed)] = -1 
@@ -55,6 +58,7 @@ llr_multiway = function(dsn,hst,comparecols){
    abbrv = gsub("categoryIDs4","catid4",abbrv)
    abbrv = gsub("categoryIDs5","catid5",abbrv)
    abbrv = gsub("couponID","cpn",abbrv)
+
 
    dsn.res_long = dsn.res
    names(dsn.res_long)[3:ncol(dsn.res_long)] = paste(names(dsn.res_long)[3:ncol(dsn.res_long)],abbrv,sep="_")
@@ -84,5 +88,3 @@ llr_multiway = function(dsn,hst,comparecols){
 
    return(ret)
 }
-   
-

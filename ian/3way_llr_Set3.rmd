@@ -31,21 +31,6 @@ output:
       rmarkdown::render("/Users/user/dmc2015/ian/3way_llr_Set3.rmd")
 ```
 
-<!--- # (R code (No Results in Document)) -->
-```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   #set up knitr
-   #devtools::install_github('imouzon/usefulR')
-   library(usefulR)
-
-   #set working directory
-   working.dir = "/Users/user/dmc2015/ian"
-   setwd(working.dir)
-
-   #compile the document to PDF
-   if(FALSE) 
-      rmarkdown::render("/Users/user/dmc2015/ian/3way_llr.rmd")
-```
-
 I am using the following packages:
 <!--- # (R code (No Results in Document))-->
 ```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
