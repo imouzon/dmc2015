@@ -10,7 +10,8 @@
 combine_universal_features = function(read_dir = "./individual", 
 	write_dir = "./combined",
 	universal_clean = "../../../data/clean_data/universalCleanData.rds",
-	exclude = c("basePrice_price_ratio.rds")) {
+	exclude = c("basePrice_price_ratio.rds"),
+   joinby = "orderID") {
 
 	#original dataset
 	universalCleanData = readRDS(universal_clean)
@@ -29,10 +30,16 @@ combine_universal_features = function(read_dir = "./individual",
 	}
 
 	data = universalCleanData
-	orig_cols = names(universalCleanData)
 	for(i in 1:length(files_list)) {
 		print(paste0("Merging: ", file_names[[i]]))
-		data = data %>% full_join(files_list[[i]], by = "orderID")
+      data.i = files_list[[i]]
+      data.i = data.i[, which(!(names(data.i) %in% names(data)) | names(data.i) %in% joinby)]
+		data.i = data %>% full_join(data.i, by = joinby)
+      if(nrow(data.i) > nrow(data)){
+         message("Not using ",files_list[[i]],": too many matches")
+      }else{
+         data = data.i
+      }
 	}
 
 	return(data)
