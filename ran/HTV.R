@@ -121,13 +121,30 @@ Feature$H_melt <- Feature$H_melt[, -80]
 Feature$T_melt <- Feature$T_melt[, -80]
 Feature$V_melt <- Feature$V_melt[, -80]
 
-# linear kernel
-svmfit_linear <- svm(x = Feature$T_melt[, c(34,36:411)], 
-                     y = as.factor(Feature$T_melt$couponUsed), 
-                     xtest = Feature$V_melt[, c(34,36:411)], 
-                     ytest = as.factor(Feature$V_melt$couponUsed),
-                     kernel = "radial")
+# delete constant feature
+keep <- which(as.numeric(apply(Feature$T_melt, 2, function(x){length(unique(as.factor(x))) > 1})) == 1)
 
-table(rf1$test$predicted, as.factor(Feature$V_melt$couponUsed))
-(3169+58)/(3169+58+104+704)
-varImpPlot(rf1)
+# linear kernel
+svmfit_linear <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
+                     y = as.factor(Feature$T_melt$couponUsed), 
+                     kernel = "linear")
+pred_linear_T <- predict(svmfit_linear, Feature$T_melt[, keep[c(34, 36:length(keep))]])
+table_linear_T <- table(pred_linear_T, Feature$T_melt$couponUsed)
+1 - sum(diag(table_linear_T)) / sum(table_linear_T)
+# validation error
+pred_linear <- predict(svmfit_linear, Feature$V_melt[, keep[c(34, 36:length(keep))]])
+table_linear <- table(pred_linear, Feature$V_melt$couponUsed)
+1 - sum(diag(table_linear)) / sum(table_linear)
+
+# radial kernel
+svmfit_radial <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
+                     y = as.factor(Feature$T_melt$couponUsed), 
+                     kernel = "radial")
+pred_radial_T <- predict(svmfit_radial, Feature$T_melt[, keep[c(34, 36:length(keep))]])
+table_radial_T <- table(pred_radial_T, Feature$T_melt$couponUsed)
+1 - sum(diag(table_radial_T)) / sum(table_radial_T)
+# validation error
+pred_radial <- predict(svmfit_radial, Feature$V_melt[, keep[c(34, 36:length(keep))]])
+table_radial <- table(pred_radial, Feature$V_melt$couponUsed)
+1 - sum(diag(table_radial)) / sum(table_radial)
+
