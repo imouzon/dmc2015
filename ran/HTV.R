@@ -93,3 +93,41 @@ beta <- mmedist(coupon.usr.info$prop, "beta")$estimate[2]
 
 coupon.usr.info$prob <- (coupon.usr.info$nUserUsed + alpha) / (coupon.usr.info$nUserSent + alpha + beta)
 saveRDS(coupon.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/ran/coupon_usr_info.rds")
+
+
+###########
+### SVM ###
+###########
+
+library(ggplot2)
+library(lsr)
+library(lubridate)
+library(dplyr)
+library(fitdistrplus)
+library(e1071)
+
+dat <- HTVset1
+H <- dat$H
+T <- dat$T
+V <- dat$V
+C <- dat$C
+H_melt <- stackCoupons2(H, idcols = c(1:4, 32:49))
+T_melt <- stackCoupons2(T, idcols = c(1:4, 32:49))
+V_melt <- stackCoupons2(V, idcols = c(1:4, 32:49))
+C_melt <- stackCoupons2(C, idcols = c(1:4, 32:49))
+
+Feature <- addFeatures_HTV(H_melt, T_melt, V_melt)
+Feature$H_melt <- Feature$H_melt[, -80]
+Feature$T_melt <- Feature$T_melt[, -80]
+Feature$V_melt <- Feature$V_melt[, -80]
+
+# linear kernel
+svmfit_linear <- svm(x = Feature$T_melt[, c(34,36:411)], 
+                     y = as.factor(Feature$T_melt$couponUsed), 
+                     xtest = Feature$V_melt[, c(34,36:411)], 
+                     ytest = as.factor(Feature$V_melt$couponUsed),
+                     kernel = "radial")
+
+table(rf1$test$predicted, as.factor(Feature$V_melt$couponUsed))
+(3169+58)/(3169+58+104+704)
+varImpPlot(rf1)
