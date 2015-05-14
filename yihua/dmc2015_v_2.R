@@ -15,7 +15,7 @@ library(fitdistrplus)
 
 setwd('/Users/yihuali/Documents/dmc2015')
 
-dat <- readRDS('./data/featureMatrix/HTVset3.rds')
+dat <- readRDS('./data/featureMatrix/HTVset1.rds')
 H <- dat$H
 T <- dat$T
 V <- dat$V
@@ -60,5 +60,7 @@ y = as.vector(rf1$importance)
 names(y)=rownames(rf1$importance)
 y <- sort(y, decreasing=TRUE)
 head(y,100)
+y1 <- rownames(rf1$importance)
+intersect(x,y)
 
-saveRDS(Feature, './yihua/HTVmelt3_Combn_UniqueUser.rds')
+saveRDS(Feature, './yihua/HTVmelt1_Combn_UniqueUser.rds')
