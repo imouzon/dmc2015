@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 14-05-2015
-#  Last Modified: Thu May 14 13:03:41 2015
+#  Last Modified: Thu May 14 13:19:37 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -13,6 +13,10 @@
 #  .Fortran("subroutine name",as.integer(input1),as.double(input2), etc)
 #
 
+
+cpnu = readRDS("./set1/individual/couponUsed.rds")
+
+names(cpnu)
 
 feature_root = "~/dmc2015/features/feature_files/"
 set = "set1"
