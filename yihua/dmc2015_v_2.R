@@ -27,11 +27,11 @@ C_melt <- stackCoupons2(C, idcols = c(1:4, 32:49))
 
 Feature <- addFeatures_HTV(H_melt, T_melt, V_melt)
 
-rf1 <- randomForest(x=Feature$T_melt[,c(34,36:494)], 
+rf1 <- randomForest(x=Feature$T_melt[,c(34,36:411)], 
                     y=as.factor(Feature$T_melt$couponUsed), 
-                    xtest=Feature$V_melt[,c(34,36:494)], 
+                    xtest=Feature$V_melt[,c(34,36:411)], 
                     ytest=as.factor(Feature$V_melt$couponUsed), 
-                    ntree=500, mtry=200)
+                    ntree=500, mtry=120)
 table(rf1$test$predicted, as.factor(Feature$V_melt$couponUsed))
 (3169+58)/(3169+58+104+704)
 varImpPlot(rf1)
