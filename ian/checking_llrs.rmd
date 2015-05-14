@@ -93,7 +93,7 @@ I and can split the columns of product group using:
    dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")
    dmc = dm %>% 
       left_join(dmc %>%
-            select(orderID,couponCol,categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+            select(orderID,couponCol,categoryIDs1, categoryIDs2, ca;qtegoryIDs3, categoryIDs4, categoryIDs5) %>%
             gather(tmp,categoryID,-orderID,-couponCol) %>%
             mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
             select(orderID,couponCol,categoryEntry,categoryID) %>%
@@ -120,14 +120,13 @@ We can also get the HTV set.
    features = lapply(files,function(x) readRDS(x))
    features = lapply(1:length(features),function(x) features[[x]][,c(1,2,6)])
 
-   fmt = trn[,c("orderID","couponCol")]
+   fmt = trn[,c("orderID","couponUsed","couponCol")]
    for(i in 1:length(features)) fmt = fmt %>% left_join(features[[i]],by=c("orderID","couponCol"))
-
-   fmt %>% gather(varn,val,-orderID,-couponCol) %>% ggplot(aes(orderID,val,group=varn,color=couponCol,geom="line")) + geom_line()
 
    fmv = val[,c("orderID","couponCol")]
    for(i in 1:length(features)) fmv = fmv %>% left_join(features[[i]],by=c("orderID","couponCol"))
 
+   names(fmv
    cor(fmv[,1:4])
    cor = cor(fmv[,-(1:2)])
    features[[9]][1:5,1:3]
