@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Thu May 14 22:42:43 2015
+# Last Modified: Thu May 14 23:27:55 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -23,11 +23,17 @@ library(party)
 # Historical set 1
 # ----------------------------------------------------------------------------
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
-d <- cbind(couponUsed = h1$train$y$couponUsed, h1$train$X)
+h1_t <- cbind(couponUsed = h1$train$y$couponUsed, h1$train$X)
 
-h1ct <- ctree(couponUsed~., data = d)
+# This may take a while...
+h1ct <- ctree(couponUsed~., data = h1_t)
 
+h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, h1$validation$X)
+h1_v_p <- predict(h1ct, newdata = h1_v)
 
+h1_c <- cbind(couponUsed = h1$class$y$couponUsed, h1$class$X)
+
+saveRDS(h1ct, "~/GitHub/dmc2015/predictions/..")
 
 # Historical set 2
 # ----------------------------------------------------------------------------
