@@ -138,8 +138,8 @@ table_linear <- table(pred_linear, Feature$V_melt$couponUsed)
 
 # polynomial kernel with default order 3
 svmfit_polynomial <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
-                     y = as.factor(Feature$T_melt$couponUsed), 
-                     kernel = "polynomial")
+                         y = as.factor(Feature$T_melt$couponUsed), 
+                         kernel = "polynomial")
 pred_polynomial_T <- predict(svmfit_polynomial, Feature$T_melt[, keep[c(34, 36:length(keep))]])
 table_polynomial_T <- table(pred_polynomial_T, Feature$T_melt$couponUsed)
 1 - sum(diag(table_polynomial_T)) / sum(table_polynomial_T)  # 0.1612
@@ -174,8 +174,8 @@ table_radial0.5 <- table(pred_radial0.5, Feature$V_melt$couponUsed)
 
 # radial kernel with double default gamma
 svmfit_radial2 <- svm(x = Feature$T_melt[, keep[c(34, 36:length(keep))]], 
-                        y = as.factor(Feature$T_melt$couponUsed), 
-                        kernel = "radial", gamma = svmfit_radial$gamma * 2)
+                      y = as.factor(Feature$T_melt$couponUsed), 
+                      kernel = "radial", gamma = svmfit_radial$gamma * 2)
 pred_radial2_T <- predict(svmfit_radial2, Feature$T_melt[, keep[c(34, 36:length(keep))]])
 table_radial2_T <- table(pred_radial2_T, Feature$T_melt$couponUsed)
 1 - sum(diag(table_radial2_T)) / sum(table_radial2_T)  # 0.1522
@@ -183,3 +183,66 @@ table_radial2_T <- table(pred_radial2_T, Feature$T_melt$couponUsed)
 pred_radial2 <- predict(svmfit_radial2, Feature$V_melt[, keep[c(34, 36:length(keep))]])
 table_radial2 <- table(pred_radial2, Feature$V_melt$couponUsed)
 1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.1881
+
+
+####################
+### Feature ver0 ###
+####################
+
+Feature <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
+dat_tr_x <- Feature$train$X
+col_pred <- c(which(names(dat_tr_x) %in% c("couponsReceivedTime",
+                                           "orderTimeTime",
+                                           "TimeBtwnSentRec",
+                                           "TimeBtwnRecExpire",
+                                           "TimeBtwnRecOrder",
+                                           "TimeBtwnOrderExpire",
+                                           "price",
+                                           "bPrpr_ratio",
+                                           "nCoupon")),
+              which(grepl("est",names(dat_tr_x))))
+
+# linear kernel
+svmfit_linear <- svm(x = Feature$train$X[, col_pred], 
+                     y = as.factor(Feature$train$y$couponUsed), 
+                     kernel = "linear")
+# validation error
+pred_linear <- predict(svmfit_linear, Feature$validation$X[, col_pred])
+table_linear <- table(pred_linear, Feature$validation$y$couponUsed)
+1 - sum(diag(table_linear)) / sum(table_linear)  # 0.
+
+# polynomial kernel with default order 3
+svmfit_polynomial <- svm(x = Feature$train$X[, col_pred], 
+                         y = as.factor(Feature$train$y$couponUsed), 
+                         kernel = "polynomial")
+# validation error
+pred_polynomial <- predict(svmfit_polynomial, Feature$validation$X[, col_pred])
+table_polynomial <- table(pred_polynomial, Feature$validation$y$couponUsed)
+1 - sum(diag(table_polynomial)) / sum(table_polynomial)  # 0.
+
+# radial kernel with default gamma
+svmfit_radial <- svm(x = Feature$train$X[, col_pred], 
+                     y = as.factor(Feature$train$y$couponUsed), 
+                     kernel = "radial")
+# validation error
+pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred])
+table_radial <- table(pred_radial, Feature$validation$y$couponUsed)
+1 - sum(diag(table_radial)) / sum(table_radial)  # 0.
+
+# radial kernel with half default gamma
+svmfit_radial0.5 <- svm(x = Feature$train$X[, col_pred], 
+                        y = as.factor(Feature$train$y$couponUsed), 
+                        kernel = "radial", gamma = svmfit_radial$gamma/2)
+# validation error
+pred_radial0.5 <- predict(svmfit_radial0.5, Feature$validation$X[, col_pred])
+table_radial0.5 <- table(pred_radial0.5, Feature$validation$y$couponUsed)
+1 - sum(diag(table_radial0.5)) / sum(table_radial0.5)  # 0.
+
+# radial kernel with double default gamma
+svmfit_radial2 <- svm(x = Feature$train$X[, col_pred], 
+                      y = as.factor(Feature$train$y$couponUsed), 
+                      kernel = "radial", gamma = svmfit_radial$gamma * 2)
+# validation error
+pred_radial2 <- predict(svmfit_radial2, Feature$validation$X[, col_pred])
+table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
+1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.
