@@ -251,6 +251,7 @@ table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
 cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
 cpn2 <- cpn1 + 1
 cpn3 <- cpn1 + 2
-sum(Loss_calculator(as.numeric(pred_polynomial[cpn1]) - 1, Feature$validation$y$couponUsed[cpn1],
-                as.numeric(pred_polynomial[cpn2]) - 1, Feature$validation$y$couponUsed[cpn2],
-                as.numeric(pred_polynomial[cpn3]) - 1, Feature$validation$y$couponUsed[cpn3]))
+pred <- pred_radial
+sum(Loss_calculator(as.numeric(pred[cpn1]) - 1, Feature$validation$y$couponUsed[cpn1],
+                    as.numeric(pred[cpn2]) - 1, Feature$validation$y$couponUsed[cpn2],
+                    as.numeric(pred[cpn3]) - 1, Feature$validation$y$couponUsed[cpn3]))
