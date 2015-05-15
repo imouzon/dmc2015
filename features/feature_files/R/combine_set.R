@@ -7,9 +7,8 @@ combine_set_individual = function(set,feature_dir,type,joinby){
    llr_sets = lapply(llr_filenames, readRDS)
 
    dsn = llr_sets[[1]]
-   message("Processing: LLRs")
    for(i in 2:length(llr_filenames)) {
-      if(i %in% seq(10,length(llr_filenames),10)) 
+      message("Processing: LLRs",i)
       dsn = dsn %>% left_join(llr_sets[[i]], by = joinby)
    }
 
@@ -40,6 +39,7 @@ combine_set_individual = function(set,feature_dir,type,joinby){
       }
    }
 
+   names(dsn)
    #let's write this out!
    saveRDS(dsn, paste0(feature_root,"/",set,"/",set,"Combined_",type,".rds"))
 
