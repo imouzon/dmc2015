@@ -1,0 +1,100 @@
+---
+title: Reducing the features
+titleshort: Too many features
+instructions: 
+author: Ian Mouzon
+authorshort: imouzon
+contact: imouzon@iastate.edu
+grouplong: Iowa State University's 2015 Data Mining Cup Team
+groupshort: DMC@ISU
+leader: One Week Left 
+leadershort: One Week Left
+semester: Spring 2015
+assignment: 
+duedate: May 13, 2015
+output:
+  usefulR::hw_format
+---
+
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/examining_features.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(reshape2)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+
+
+# Load feature matrix
+<!--- dgg: R code (No Results in Document) -->
+```{r dgg,cache=FALSE}
+   f1 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
+   f2 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset2_LONG_ver0.rds")
+   f3 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.rds")
+
+   d1 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.rds")
+   d2 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset2_WIDE_ver0.rds")
+   d3 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_WIDE_ver0.rds")
+
+
+```
+
+# Check the data
+<!--- chkh: R code (No Results in Document) -->
+```{r chkh,cache=FALSE}
+   Xn = f1$train$X
+
+   # remove lnorm weighted document frequency similarity measures
+   Xn = Xn[,!grepl("sim_lnorm",names(Xn))]
+```
+
+<!--- k: R code (No Results in Document) -->
+```{r k,cache=FALSE}
+   Xn[,grepl("llr",names(Xn)) & !grepl("naive",names(Xn))] %>% cor %>% melt %>%
+      ggplot(aes(x=Var1,y=Var2,fill=value),color="white") + geom_tile() + scale_fill_gradient2(midpoint=0, low="white", mid="red", high="white" )
+```
+
+<!--- rf: R code (No Results in Document) -->
+```{r rf,cache=FALSE}
+   Xrf = Xn[,c(1:14, grep("sim_", names(Xn)))]
+   rf_cpn = randomForest(Xrf, y=f1$train$y$couponUsed,  ntree=1000, mtry=10, replace=TRUE, keep.forest = TRUE, maxnodes = 100)
+
+   rf_bval = randomForest(Xrf, y=f1$train$y$basketValue,  ntree=1000, mtry=10, replace=TRUE, keep.forest = TRUE, maxnodes = 100)
+
+   print(rf_cpn)
+   qplot(as.factor(f1$train$y$couponUsed),rf_cpn$predicted,geom='boxplot')
+   predict(rf_cpn,newdata=Xn[,1:14])
+
+   print(rfmod)
+   varImpPlot(rfmod)
+   keepercols = names(Xn[,17:20])
+   dropercols = names(Xn[,c(13:16,21:30)])
+```
+
+

@@ -1,0 +1,146 @@
+---
+title: Creating Feature Matrix Version 0.1
+titleshort: Feature Matrix v. 0.1
+instructions: 
+output:
+  usefulR::DMC_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/features/feature_files/R"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/feature_matrix_version0.1.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+
+# I am cleaning the original features
+
+There are some things that I realized last night:
+
+- \verb!sim_ftd! and \verb!sim_lnorm! are identical. They are just scaled versions of the same thing and we can drop them.
+
+- We missed several files, either by their location or structure being problematic.
+
+- We would all feel more comfortable if the orderIDs are on the data.
+
+So I am recreating the feature matrices:
+
+## Universal Features
+
+These are the files that I know contain universal features:
+<!--- : R code (No Results in Document) -->
+```{r echo=TRUE, cache=FALSE}
+   path.to.files = "../universal/individual/"
+   files = list.files(path.to.files)
+   cat(paste(files,collapse="\n"))
+```
+Most of these are the similarity measures, which we can safely remove from import list:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   files = files[!grepl("ftd_",files)]
+```
+We can read each in as follows:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   files = list.files("~/dmc2015/features/feature_files/universal/individual/",full.name=TRUE)
+   features = lapply(files, function(x) readRDS(x))
+```
+Keep in mind that long files have 20,166 rows and wide files have 6722 rows. 
+Wide files should have columns identified as \verb!couponCol!:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideSet = c()
+   longSet = c()
+   noSet = c()
+   for(i in 1:length(features)){
+      if(nrow(features[[i]]) == 20166){
+         longSet = c(longSet,i)
+      }else{
+         if(nrow(features[[i]]) == 6722){
+            wideSet = c(wideSet,i)
+         }else{
+            noSet = c(noSet,i)
+         }
+      }
+   }
+
+   ## wide format sets:
+   wideSet
+
+   ## long format sets:
+   longSet
+
+   ## no format sets:
+   noSet
+```
+in this case, only the second set `r files[longSet]` is long, and it is kind of broken:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   files[longSet[1]]
+   features[[longSet[1]]] %>% head %>% kable
+```
+so I will just convert the long format.
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   features[[longSet[1]]] = features[[longSet[1]]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName))  %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
+```
+
+### Combine Wide Sets:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideFrame = features[[wideSet[1]]] %>% select(orderID)
+   for(x in wideSet){
+      dsn.i = features[[x]]
+      dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
+      if(length(dropCols) == 0){
+         wideFrame = wideFrame %>% left_join(dsn.i,by="orderID")
+      }else{
+         wideFrame = wideFrame %>% left_join(dsn.i[,-dropCols],by="orderID")
+      }
+   }
+   names(wideFrame)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Long Version 
+
+## Feature Matrix for Set 1
