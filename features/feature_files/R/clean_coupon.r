@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 14-05-2015
-#  Last Modified: Thu May 14 19:50:21 2015
+#  Last Modified: Thu May 14 20:15:34 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -83,7 +83,10 @@ names(uf3) = gsub("3","",names(uf3))
 names(uf3) = gsub("2","",names(uf3))
 uf3$couponCol = 3
 
-ul = uf[,c(1:4,32:49)] %>% left_join(uf1 %>% rbind(uf2) %>% rbind(uf3),by="orderID")
+ul = uf[,c(1:4,32:49)] %>% left_join(uf1 %>% rbind(uf2) %>% rbind(uf3),by="orderID") %>%
+   arrange(orderID,couponCol)
+
+
 ##### make long sets (ITS OVER NOW)
 ##### make long sets (ITS OVER NOW)
 ##### make long sets (ITS OVER NOW)
