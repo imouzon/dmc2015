@@ -5,38 +5,47 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Fri May 15 00:08:26 2015
+# Last Modified: Fri May 15 11:46:26 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
 # predictions. Conditional RF's are implemented through the "party" package.
 #
 # Output an RDS with the model saved, predictions sorted by order ID, and 
-# validation error. Save this RDS in predicitons folder with a name like
+# validation error. Save this RDS in predictions folder with a name like
 # 'CRF_FMatVers4.0_couponOnly.rds'
 #
 # ============================================================================
 
+
+# Note: We still need to combine the historical features with universal 
+# features.
+
 install.packages("party")
 library(party)
+source("~/GitHub/dmc2015/pete/10_roc.R")
 
 # Historical set 1
 # ----------------------------------------------------------------------------
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
-h1_t <- cbind(couponUsed = as.factor(h1$train$y$couponUsed), h1$train$X)
-samp <- sample(1:nrow(h1_t), 500)
-# This may take a while...
-h1ct <- ctree(couponUsed~., data = h1_t, subset = samp)
+h1_t <- cbind(couponUsed = h1$train$y$couponUsed, h1$train$X)
 
-h1_v <- cbind(couponUsed = as.factor(h1$validation$y$couponUsed), h1$validation$X)
-h1_v_p <- predict(h1ct, newdata = h1_v)
+vars <- names(h1_t)
+vars1 <- c("couponUsed", vars[grep("llr_[estnaive]+_.*brd.*", vars)][1:20])
 
-sum(h1_v_p == h1_v$couponUsed) / length(h1_v_p)
-sum(h1_v$couponUsed == 0) / length(h1_v$couponUsed)
-table(h1_v_p, h1_v$couponUsed)
+h1ct <- cforest(couponUsed~., data = h1_t[vars1],
+                control = cforest_unbiased(mtry = 3, ntree = 50))
+imp1 <- varimp(h1ct)
+imp1[order(imp1)]
+
+h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, h1$validation$X)
+h1_v_p <- predict(h1ct, newdata = h1_v[vars1])
+
+roc(h1_v_p, h1_v$couponUsed)
+fpr <- d$fpr
+tpr <- d$tpr
 
 
-h1_c <- cbind(couponUsed = as.factor(h1$class$y$couponUsed), h1$class$X)
 
 saveRDS(h1ct, "~/GitHub/dmc2015/predictions/..")
 
