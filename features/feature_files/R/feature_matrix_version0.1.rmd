@@ -58,11 +58,6 @@ These are the files that I know contain universal features:
    files = list.files(path.to.files)
    cat(paste(files,collapse="\n"))
 ```
-Most of these are the similarity measures, which we can safely remove from import list:
-<!--- : R code (No Results in Document) -->
-```{r cache=FALSE}
-   files = files[!grepl("ftd_",files)]
-```
 We can read each in as follows:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
@@ -100,13 +95,13 @@ Wide files should have columns identified as \verb!couponCol!:
 in this case, only the second set `r files[longSet]` is long, and it is kind of broken:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   files[longSet[1]]
-   features[[longSet[1]]] %>% head %>% kable
+   badlong = grep("basePrice_price_ratio.rds",files)
+   features[[badlong]] %>% head
 ```
 so I will just convert the long format.
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   features[[longSet[1]]] = features[[longSet[1]]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName))  %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
+   features[[badlong]] = features[[badlong]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName))  %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
 ```
 
 ### Combine Wide Sets:
@@ -122,25 +117,489 @@ so I will just convert the long format.
          wideFrame = wideFrame %>% left_join(dsn.i[,-dropCols],by="orderID")
       }
    }
-   names(wideFrame)
+   names(wideFrame) = gsub("cos\\.sim","cosSim",names(wideFrame))
+   names(wideFrame) = gsub("([np])Coup(\\d)(Col\\d)","\\1times\\3_\\2",names(wideFrame))
+   names(wideFrame) = gsub("(^.*[^_0-9])(\\d+)$","\\1_\\2", names(wideFrame))
+   wideFrame = wideFrame[,which(!grepl("sim_lnorm_.*_",names(wideFrame)))]
+```
+
+### Long Version 
+We can also convert this set to the long format. 
+Notice that not all of the files are the same "wide" as others, but we would still like to use them:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   coln = names(wideFrame)
+   non_numbered_cols = which(!grepl("_\\d+$", coln))
+   coupon1_cols = c(1,grep("_(\\d*)1(\\d*)$", coln))
+   coupon2_cols = c(1,grep("_(\\d*)2(\\d*)$", coln))
+   coupon3_cols = c(1,grep("_(\\d*)3(\\d*)$", coln))
+
+   ## coupon 1
+   coupon1 = wideFrame[,coupon1_cols]
+   names(coupon1) = gsub("_13$","_to3Col",names(coupon1))
+   names(coupon1) = gsub("_12$","_to2Col",names(coupon1))
+   names(coupon1) = gsub("_1$","",names(coupon1))
+   coupon1$couponCol = 1
+
+   ## coupon 2
+   coupon2 = wideFrame[,coupon2_cols]
+   names(coupon2) = gsub("_23$","_to3Col",names(coupon2))
+   names(coupon2) = gsub("_12$","_to1Col",names(coupon2))
+   names(coupon2) = gsub("_2$","",names(coupon2))
+   coupon2$couponCol = 2
+
+   ## coupon 3
+   coupon3 = wideFrame[,coupon3_cols]
+   names(coupon3) = gsub("_23$","_to2Col",names(coupon3))
+   names(coupon3) = gsub("_13$","_to3Col",names(coupon3))
+   names(coupon3) = gsub("_3$","",names(coupon3))
+   coupon3$couponCol = 3
+
+   coupons = bind_rows(coupon1,coupon2,coupon3) 
+   for(i in grep("_to\\dCol",names(coupons))) is.na(coupons[,i]) = 1
+
+   longFrame = wideFrame[,non_numbered_cols] %>% left_join(coupons,by="orderID") %>% arrange(orderID,couponCol)
 ```
 
 
+### Check Universal Features
+We can check the final results:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dim(wideFrame)
+   dim(longFrame)
+```
 
+### Save Universal
+These are our universal features:
+<!--- writeUniversal: R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(wideFrame,file="../universal/combined/universalFeaturesCombined_wide.rds")
+   saveRDS(longFrame,file="../universal/combined/universalFeaturesCombined_long.rds")
+```
 
+# Feature Matrix for Set 1
+Again we need to read in the files. In addition to the \verb!llrs! we have:
+<!--- : R code (No Results in Document) -->
+```{r echo=TRUE, cache=FALSE}
+   path.to.files = "../set1/individual/"
+   files = list.files(path.to.files,full.name=TRUE)
+   cat(paste(files,collapse="\n"))
+```
+We repeat the process of creating the wide set and then the long set:
+We can read each in as follows:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   path.to.files = "../set1/individual/"
+   path.to.llrs = "../set1/individual/llrs/"
+   files = c(list.files(path.to.files,pattern=".rds",full.name=TRUE),list.files(path.to.llrs,pattern="wide",full.name=TRUE))
+   features = lapply(files, function(x) readRDS(x))
 
+   #make one set of adjustments
+   features[[2]] = do.call("rbind", features[[2]])
+```
+Keep in mind that long files have 20,166 rows and wide files have 6722 rows. 
+Wide files should have columns identified as \verb!couponCol!:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideSet = c()
+   longSet = c()
+   noSet = c()
+   for(i in 1:length(features)){
+      if(nrow(features[[i]]) == 20166){
+         longSet = c(longSet,i)
+      }else{
+         if(nrow(features[[i]]) == 6722){
+            wideSet = c(wideSet,i)
+         }else{
+            noSet = c(noSet,i)
+         }
+      }
+   }
 
+   ## wide format sets:
+   wideSet
 
+   ## long format sets:
+   longSet
 
+   ## no format sets:
+   noSet
+```
+in this case, sets `r files[noSet]` have no proper place. We can figure out why this is by doing the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   features[[noSet[1]]] %>% names
+```
+   The first set appears to be wide and should join well. All of the \verb!NA!s would be in the historical rows and wouldn't make their way to our feature matrix.
+```{r cache=FALSE}
+   features[[noSet[2]]] %>% names
+```
+   The second set appears to be long, so I will just convert the long format.
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   badlong = noSet[2]
+   features[[badlong]] = features[[badlong]][,-(2:31)] %>% gather(columnName,value,-orderID,-couponCol) %>%
+      mutate(varName = paste0(columnName,"_",couponCol)) %>% 
+      select(orderID,varName,value) %>% 
+      spread(varName,value) %>% arrange(orderID)
+```
 
-
-
-
-
-
-
-
+### Combine Wide Sets:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideFrame = features[[badlong]]
+   for(x in wideSet){
+      dsn.i = features[[x]]
+      dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
+      if(length(dropCols) == 0){
+         wideFrame = wideFrame %>% full_join(dsn.i,by="orderID")
+      }else{
+         wideFrame = wideFrame %>% full_join(dsn.i[,-dropCols],by="orderID")
+      }
+   }
+   names(wideFrame) = gsub("_[Cc]ol(\\d+)$","_\\1",names(wideFrame))
+   names(wideFrame) = gsub("(^.*[^_0-9])(\\d+)$","\\1_\\2", names(wideFrame))
+   wideFrame = wideFrame[,which(!grepl("times(N*o*t*)Used*_",names(wideFrame)))]
+```
 
 ### Long Version 
+We can also convert this set to the long format. 
+Notice that not all of the files are the same "wide" as others, but we would still like to use them:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   coln = names(wideFrame)
+   non_numbered_cols = which(!grepl("_\\d+$", coln))
+   coupon1_cols = c(1,grep("_(\\d*)1(\\d*)$", coln))
+   coupon2_cols = c(1,grep("_(\\d*)2(\\d*)$", coln))
+   coupon3_cols = c(1,grep("_(\\d*)3(\\d*)$", coln))
 
-## Feature Matrix for Set 1
+   ## coupon 1
+   coupon1 = wideFrame[,coupon1_cols]
+   names(coupon1) = gsub("_13$","_to3Col",names(coupon1))
+   names(coupon1) = gsub("_12$","_to2Col",names(coupon1))
+   names(coupon1) = gsub("_1$","",names(coupon1))
+   coupon1$couponCol = 1
+
+   ## coupon 2
+   coupon2 = wideFrame[,coupon2_cols]
+   names(coupon2) = gsub("_23$","_to3Col",names(coupon2))
+   names(coupon2) = gsub("_12$","_to1Col",names(coupon2))
+   names(coupon2) = gsub("_2$","",names(coupon2))
+   coupon2$couponCol = 2
+
+   ## coupon 3
+   coupon3 = wideFrame[,coupon3_cols]
+   names(coupon3) = gsub("_23$","_to2Col",names(coupon3))
+   names(coupon3) = gsub("_13$","_to3Col",names(coupon3))
+   names(coupon3) = gsub("_3$","",names(coupon3))
+   coupon3$couponCol = 3
+
+   coupons = bind_rows(coupon1,coupon2,coupon3) 
+
+   longFrame = coupons %>% arrange(orderID,couponCol)
+```
+
+
+### Check Universal Features
+We can check the final results:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dim(wideFrame)
+   dim(longFrame)
+```
+
+### Save Universal
+These are our universal features:
+<!--- writeUniversal: R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(wideFrame,file="../set1/combined/set1FeaturesCombined_wide.rds")
+   saveRDS(longFrame,file="../set1/combined/set1FeaturesCombined_long.rds")
+```
+
+
+# Feature Matrix for Set 2
+Again we need to read in the files. In addition to the \verb!llrs! we have:
+<!--- : R code (No Results in Document) -->
+```{r echo=TRUE, cache=FALSE}
+   path.to.files = "../set2/individual/"
+   files = list.files(path.to.files,full.name=TRUE)
+   cat(paste(files,collapse="\n"))
+```
+We repeat the process of creating the wide set and then the long set:
+We can read each in as follows:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   path.to.files = "../set2/individual/"
+   path.to.llrs = "../set2/individual/llrs/"
+   files = c(list.files(path.to.files,pattern=".rds",full.name=TRUE),list.files(path.to.llrs,pattern="wide",full.name=TRUE))
+   features = lapply(files, function(x) readRDS(x))
+
+   #make one set of adjustments
+   features[[2]] = do.call("rbind", features[[2]])
+```
+Keep in mind that long files have 20,166 rows and wide files have 6722 rows. 
+Wide files should have columns identified as \verb!couponCol!:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideSet = c()
+   longSet = c()
+   noSet = c()
+   for(i in 1:length(features)){
+      if(nrow(features[[i]]) == 20166){
+         longSet = c(longSet,i)
+      }else{
+         if(nrow(features[[i]]) == 6722){
+            wideSet = c(wideSet,i)
+         }else{
+            noSet = c(noSet,i)
+         }
+      }
+   }
+
+   ## wide format sets:
+   wideSet
+
+   ## long format sets:
+   longSet
+
+   ## no format sets:
+   noSet
+```
+in this case, sets `r files[noSet]` have no proper place. We can figure out why this is by doing the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   features[[noSet[1]]] %>% names
+```
+   The first set appears to be long. We can join by couponID:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+features[[noSet[1]]] = features[[noSet[2]]][,-c(2:22,24:31)] %>% 
+   arrange(orderID,couponCol) %>%
+   left_join(features[[noSet[1]]],by="couponID") %>%
+   select(-couponID) %>%
+   gather(varname,value,-couponCol,-orderID) %>%
+   mutate(colname=paste0(varname,'_',couponCol)) %>%
+   select(orderID,colname,value) %>%
+   spread(colname,value) 
+```
+
+```{r cache=FALSE}
+   features[[noSet[1]]] %>% arrange(orderID) %>% select(orderID) %>% head
+```
+
+### Combine Wide Sets:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideFrame = features[[noSet[1]]]
+   for(x in wideSet){
+      dsn.i = features[[x]]
+      dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
+      dropCols = c(dropCols, which(grepl("times(N*o*t*)Used*_",names(dsn.i))))
+      if(length(dropCols) == 0){
+         wideFrame = wideFrame %>% full_join(dsn.i,by="orderID")
+      }else{
+         wideFrame = wideFrame %>% full_join(dsn.i[,-dropCols],by="orderID")
+      }
+   }
+   names(wideFrame) = gsub("_[Cc]ol(\\d+)$","_\\1",names(wideFrame))
+   names(wideFrame) = gsub("(^.*[^_0-9])(\\d+)$","\\1_\\2", names(wideFrame))
+   wideFrame = wideFrame[,which(!grepl("times(N*o*t*)Used*_",names(wideFrame)))]
+```
+
+### Long Version 
+We can also convert this set to the long format. 
+Notice that not all of the files are the same "wide" as others, but we would still like to use them:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   coln = names(wideFrame)
+   non_numbered_cols = which(!grepl("_\\d+$", coln))
+   coupon1_cols = c(1,grep("_(\\d*)1(\\d*)$", coln))
+   coupon2_cols = c(1,grep("_(\\d*)2(\\d*)$", coln))
+   coupon3_cols = c(1,grep("_(\\d*)3(\\d*)$", coln))
+
+   ## coupon 1
+   coupon1 = wideFrame[,coupon1_cols]
+   names(coupon1) = gsub("_13$","_to3Col",names(coupon1))
+   names(coupon1) = gsub("_12$","_to2Col",names(coupon1))
+   names(coupon1) = gsub("_1$","",names(coupon1))
+   coupon1$couponCol = 1
+
+   ## coupon 2
+   coupon2 = wideFrame[,coupon2_cols]
+   names(coupon2) = gsub("_23$","_to3Col",names(coupon2))
+   names(coupon2) = gsub("_12$","_to1Col",names(coupon2))
+   names(coupon2) = gsub("_2$","",names(coupon2))
+   coupon2$couponCol = 2
+
+   ## coupon 3
+   coupon3 = wideFrame[,coupon3_cols]
+   names(coupon3) = gsub("_23$","_to2Col",names(coupon3))
+   names(coupon3) = gsub("_13$","_to3Col",names(coupon3))
+   names(coupon3) = gsub("_3$","",names(coupon3))
+   coupon3$couponCol = 3
+
+   coupons = bind_rows(coupon1,coupon2,coupon3) 
+
+   longFrame = coupons %>% arrange(orderID,couponCol)
+```
+
+
+### Check Universal Features
+We can check the final results:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dim(wideFrame)
+   dim(longFrame)
+```
+
+### Save Universal
+These are our universal features:
+<!--- writeUniversal: R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(wideFrame,file="../set2/combined/set2FeaturesCombined_wide.rds")
+   saveRDS(longFrame,file="../set2/combined/set2FeaturesCombined_long.rds")
+```
+
+
+# Feature Matrix for Set 3
+Again we need to read in the files. In addition to the \verb!llrs! we have:
+<!--- : R code (No Results in Document) -->
+```{r echo=TRUE, cache=FALSE}
+   path.to.files = "../set3/individual/"
+   files = list.files(path.to.files,full.name=TRUE)
+   cat(paste(files,collapse="\n"))
+```
+We repeat the process of creating the wide set and then the long set:
+We can read each in as follows:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   path.to.files = "../set3/individual/"
+   path.to.llrs = "../set3/individual/llrs/"
+   files = c(list.files(path.to.files,pattern=".rds",full.name=TRUE),list.files(path.to.llrs,pattern="wide",full.name=TRUE))
+   features = lapply(files, function(x) readRDS(x))
+
+   #make one set of adjustments
+   features[[1]] = do.call("rbind", features[[1]])
+```
+Keep in mind that long files have 20,166 rows and wide files have 6722 rows. 
+Wide files should have columns identified as \verb!couponCol!:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideSet = c()
+   longSet = c()
+   noSet = c()
+   for(i in 1:length(features)){
+      if(nrow(features[[i]]) == 20166){
+         longSet = c(longSet,i)
+      }else{
+         if(nrow(features[[i]]) == 6722){
+            wideSet = c(wideSet,i)
+         }else{
+            noSet = c(noSet,i)
+         }
+      }
+   }
+
+   ## wide format sets:
+   wideSet
+
+   ## long format sets:
+   longSet
+
+   ## no format sets:
+   noSet
+```
+in this case, sets `r files[noSet]` have no proper place. We can figure out why this is by doing the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   features[[noSet[1]]] %>% select(orderID) %>% arrange(orderID) %>% head
+```
+   The first set appears to be long. We can join by couponID:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+features[[noSet[1]]] = features[[noSet[1]]][,-c(2:22,24:31)] %>%
+   arrange(orderID,couponCol) %>%
+   select(-couponID) %>%
+   gather(varname,value,-couponCol,-orderID) %>%
+   mutate(colname=paste0(varname,'_',couponCol)) %>%
+   select(orderID,colname,value) %>%
+   spread(colname,value) 
+```
+
+```{r cache=FALSE}
+   features[[noSet[1]]] %>% arrange(orderID) %>% select(orderID) %>% head
+```
+
+### Combine Wide Sets:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideFrame = features[[noSet[1]]]
+   for(x in wideSet){
+      dsn.i = features[[x]]
+      dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
+      dropCols = c(dropCols, which(grepl("times(N*o*t*)Used*_",names(dsn.i))))
+      if(length(dropCols) == 0){
+         wideFrame = wideFrame %>% full_join(dsn.i,by="orderID")
+      }else{
+         wideFrame = wideFrame %>% full_join(dsn.i[,-dropCols],by="orderID")
+      }
+   }
+   names(wideFrame) = gsub("_[Cc]ol(\\d+)$","_\\1",names(wideFrame))
+   names(wideFrame) = gsub("(^.*[^_0-9])(\\d+)$","\\1_\\2", names(wideFrame))
+   wideFrame = wideFrame[,which(!grepl("times(N*o*t*)Used*_",names(wideFrame)))]
+```
+
+### Long Version 
+We can also convert this set to the long format. 
+Notice that not all of the files are the same "wide" as others, but we would still like to use them:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   coln = names(wideFrame)
+   non_numbered_cols = which(!grepl("_\\d+$", coln))
+   coupon1_cols = c(1,grep("_(\\d*)1(\\d*)$", coln))
+   coupon2_cols = c(1,grep("_(\\d*)2(\\d*)$", coln))
+   coupon3_cols = c(1,grep("_(\\d*)3(\\d*)$", coln))
+
+   ## coupon 1
+   coupon1 = wideFrame[,coupon1_cols]
+   names(coupon1) = gsub("_13$","_to3Col",names(coupon1))
+   names(coupon1) = gsub("_12$","_to2Col",names(coupon1))
+   names(coupon1) = gsub("_1$","",names(coupon1))
+   coupon1$couponCol = 1
+
+   ## coupon 2
+   coupon2 = wideFrame[,coupon2_cols]
+   names(coupon2) = gsub("_23$","_to3Col",names(coupon2))
+   names(coupon2) = gsub("_12$","_to1Col",names(coupon2))
+   names(coupon2) = gsub("_2$","",names(coupon2))
+   coupon2$couponCol = 2
+
+   ## coupon 3
+   coupon3 = wideFrame[,coupon3_cols]
+   names(coupon3) = gsub("_23$","_to2Col",names(coupon3))
+   names(coupon3) = gsub("_13$","_to3Col",names(coupon3))
+   names(coupon3) = gsub("_3$","",names(coupon3))
+   coupon3$couponCol = 3
+
+   coupons = bind_rows(coupon1,coupon2,coupon3) 
+
+   longFrame = coupons %>% arrange(orderID,couponCol)
+```
+
+
+### Check Universal Features
+We can check the final results:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dim(wideFrame)
+   dim(longFrame)
+```
+
+### Save Universal
+These are our universal features:
+<!--- writeUniversal: R code (No Results in Document) -->
+```{r cache=FALSE}
+   saveRDS(wideFrame,file="../set3/combined/set3FeaturesCombined_wide.rds")
+   saveRDS(longFrame,file="../set3/combined/set3FeaturesCombined_long.rds")
+```

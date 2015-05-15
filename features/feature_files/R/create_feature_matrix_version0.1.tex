@@ -1,0 +1,278 @@
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[none,DMC]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+\pagestyle{fancy}
+   \chead{DMC@ISU:\ Feature Matrix v. 0.1}  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+% header includes
+
+\begin{document}
+
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{DMC@ISU: The 2015 Iowa State University Data Mining Cup Team}\\
+       Creating Feature Matrix Version 0.1\\
+       Spring 2015, A Team as Strong as Steel \\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+    
+    
+    Last Day&  May 19, 2015\\
+    \hline
+ \end{tabular*}
+\end{center}
+
+I am using the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+   \KeywordTok{library}\NormalTok{(magrittr)}
+   \KeywordTok{library}\NormalTok{(dplyr)}
+   \KeywordTok{library}\NormalTok{(tidyr)}
+   \KeywordTok{library}\NormalTok{(lubridate)}
+   \KeywordTok{library}\NormalTok{(ggplot2)}
+   \KeywordTok{library}\NormalTok{(rCharts)}
+   \KeywordTok{library}\NormalTok{(xtable)}
+   \KeywordTok{library}\NormalTok{(foreach)}
+   \KeywordTok{library}\NormalTok{(gtools)}
+   \KeywordTok{library}\NormalTok{(knitr)}
+   \KeywordTok{library}\NormalTok{(utils)}
+   \KeywordTok{source}\NormalTok{(}\StringTok{"~/dmc2015/ian/R/renm.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{makeWideFeatureMatrix =}\StringTok{ }\NormalTok{function(w, uf, set) \{}
+    \NormalTok{## Working with wide versions}
+    \NormalTok{dropcols =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"userID"}\NormalTok{, }\StringTok{"couponsReceived"}\NormalTok{, }\StringTok{"couponID1"}\NormalTok{, }\StringTok{"couponID2"}\NormalTok{, }\StringTok{"couponID3"}\NormalTok{, }
+        \StringTok{"couponsReceivedDate"}\NormalTok{, }\StringTok{"orderTimeDate"}\NormalTok{, }\StringTok{"batchID"}\NormalTok{, }\StringTok{"couponsExpire"}\NormalTok{, }
+        \StringTok{"couponsSent"}\NormalTok{)}
+    
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{uf[, !(}\KeywordTok{names}\NormalTok{(uf) %in%}\StringTok{ }\NormalTok{dropcols)] %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(w, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{arrange}\NormalTok{(orderID)}
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{f1[, !(}\KeywordTok{grepl}\NormalTok{(}\StringTok{"ntimes_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)) |}\StringTok{ }\KeywordTok{grepl}\NormalTok{(}\StringTok{"timesNotUsed_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)) |}\StringTok{ }
+\StringTok{        }\KeywordTok{grepl}\NormalTok{(}\StringTok{"timesUsed_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)))]}
+    
+    \CommentTok{# check for names repeats}
+    \KeywordTok{data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(}\KeywordTok{names}\NormalTok{(f1))) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(Freq) %>%}\StringTok{ }\NormalTok{head}
+    
+    \CommentTok{# check for identical columns:}
+    \NormalTok{nfeat =}\StringTok{ }\KeywordTok{ncol}\NormalTok{(f1)}
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{f1[, !}\KeywordTok{duplicated}\NormalTok{(}\KeywordTok{t}\NormalTok{(f1))]}
+    
+    \CommentTok{# convert characters}
+    \NormalTok{chars =}\StringTok{ }\KeywordTok{names}\NormalTok{(f1)[}\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{ncol}\NormalTok{(f1), function(i) }\KeywordTok{is.character}\NormalTok{(f1[, i]))]}
+    \NormalTok{for (x in chars) f1[, x] =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(f1[, x])}
+    
+    \NormalTok{factors =}\StringTok{ }\KeywordTok{names}\NormalTok{(f1)[}\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{ncol}\NormalTok{(f1), function(i) }\KeywordTok{is.factor}\NormalTok{(f1[, i]))]}
+    
+    \NormalTok{HTV =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(}\StringTok{"~/dmc2015/data/featureMatrix/HTV"}\NormalTok{, set, }\StringTok{".rds"}\NormalTok{))}
+    
+    \CommentTok{# train}
+    \NormalTok{Xtrn =}\StringTok{ }\NormalTok{HTV$T %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, }
+        \NormalTok{basketValue) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID)}
+    \NormalTok{trn =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xtrn %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-coupon1Used, -coupon2Used, -coupon3Used, }
+        \NormalTok{-basketValue), }\DataTypeTok{y =} \NormalTok{Xtrn %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, }
+        \NormalTok{coupon3Used, basketValue))}
+    
+    \CommentTok{# val}
+    \NormalTok{Xval =}\StringTok{ }\NormalTok{HTV$V %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, }
+        \NormalTok{basketValue) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID)}
+    \NormalTok{val =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xval %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-coupon1Used, -coupon2Used, -coupon3Used, }
+        \NormalTok{-basketValue), }\DataTypeTok{y =} \NormalTok{Xval %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, }
+        \NormalTok{coupon3Used, basketValue))}
+    
+    \CommentTok{# class}
+    \NormalTok{Xcls =}\StringTok{ }\NormalTok{HTV$C %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID)}
+    \NormalTok{Xcls =}\StringTok{ }\NormalTok{HTV$C %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, }
+        \NormalTok{basketValue) %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \StringTok{"orderID"}\NormalTok{) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID)}
+    \NormalTok{cls =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xcls %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-coupon1Used, -coupon2Used, -coupon3Used, }
+        \NormalTok{-basketValue), }\DataTypeTok{y =} \NormalTok{Xcls %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, }
+        \NormalTok{coupon3Used, basketValue))}
+    
+    \NormalTok{Fmat1 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \NormalTok{trn, }\DataTypeTok{class =} \NormalTok{cls, }\DataTypeTok{validation =} \NormalTok{val)}
+    \KeywordTok{saveRDS}\NormalTok{(Fmat1, }\DataTypeTok{file =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"~/dmc2015/data/featureMatrix/featMat_based-on-HTV"}\NormalTok{, }
+        \NormalTok{set, }\StringTok{"_WIDE_ver0.1.rds"}\NormalTok{))}
+\NormalTok{\}}
+
+\NormalTok{makeLongFeatureMatrix =}\StringTok{ }\NormalTok{function(l, u, set) \{}
+    \NormalTok{## Working with wide versions}
+    \NormalTok{dropcols =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"userID"}\NormalTok{, }\StringTok{"couponsReceived"}\NormalTok{, }\StringTok{"couponID"}\NormalTok{, }\StringTok{"couponsReceivedDate"}\NormalTok{, }
+        \StringTok{"orderTimeDate"}\NormalTok{, }\StringTok{"batchID"}\NormalTok{, }\StringTok{"couponsExpire"}\NormalTok{, }\StringTok{"couponsSent"}\NormalTok{)}
+    
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{u[, !(}\KeywordTok{names}\NormalTok{(u) %in%}\StringTok{ }\NormalTok{dropcols)] %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(l, }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponCol"}\NormalTok{)) %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{arrange}\NormalTok{(orderID, couponCol)}
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{f1[, !(}\KeywordTok{grepl}\NormalTok{(}\StringTok{"ntimes_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)) |}\StringTok{ }\KeywordTok{grepl}\NormalTok{(}\StringTok{"timesNotUsed_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)) |}\StringTok{ }
+\StringTok{        }\KeywordTok{grepl}\NormalTok{(}\StringTok{"timesUsed_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(f1)))]}
+    
+    \CommentTok{# check for names repeats}
+    \KeywordTok{data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(}\KeywordTok{names}\NormalTok{(f1))) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(-Freq) %>%}\StringTok{ }\NormalTok{head}
+    
+    \CommentTok{# check for identical columns:}
+    \NormalTok{nfeat =}\StringTok{ }\KeywordTok{ncol}\NormalTok{(f1)}
+    \NormalTok{f1 =}\StringTok{ }\NormalTok{f1[, !}\KeywordTok{duplicated}\NormalTok{(}\KeywordTok{t}\NormalTok{(f1))]}
+    
+    \CommentTok{# convert characters}
+    \NormalTok{chars =}\StringTok{ }\KeywordTok{names}\NormalTok{(f1)[}\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{ncol}\NormalTok{(f1), function(i) }\KeywordTok{is.character}\NormalTok{(f1[, i]))]}
+    \NormalTok{for (x in chars) f1[, x] =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(f1[, x])}
+    
+    \NormalTok{factors =}\StringTok{ }\KeywordTok{names}\NormalTok{(f1)[}\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{ncol}\NormalTok{(f1), function(i) }\KeywordTok{is.factor}\NormalTok{(f1[, i]))]}
+    
+    \NormalTok{HTV =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(}\StringTok{"~/dmc2015/data/featureMatrix/HTV"}\NormalTok{, set, }\StringTok{".rds"}\NormalTok{))}
+    
+    \CommentTok{# train}
+    \NormalTok{trn =}\StringTok{ }\NormalTok{HTV$T %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, basketValue) %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{gather}\NormalTok{(colname, couponUsed, -orderID, -basketValue) %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{couponCol =} \KeywordTok{gsub}\NormalTok{(}\StringTok{"coupon"}\NormalTok{, }
+        \StringTok{""}\NormalTok{, }\KeywordTok{gsub}\NormalTok{(}\StringTok{"Used"}\NormalTok{, }\StringTok{""}\NormalTok{, colname))) %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, couponCol, basketValue, }
+        \NormalTok{couponUsed) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, couponCol)}
+    \NormalTok{trn$couponCol =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(trn$couponCol)}
+    
+    \NormalTok{Xtrn =}\StringTok{ }\NormalTok{trn %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponCol"}\NormalTok{)) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, }
+        \NormalTok{couponCol)}
+    \NormalTok{trn =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xtrn %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-couponUsed, -basketValue), }\DataTypeTok{y =} \NormalTok{Xtrn %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{select}\NormalTok{(orderID, couponUsed, basketValue))}
+    
+    \CommentTok{# val}
+    \NormalTok{val =}\StringTok{ }\NormalTok{HTV$V %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, basketValue) %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{gather}\NormalTok{(colname, couponUsed, -orderID, -basketValue) %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{couponCol =} \KeywordTok{gsub}\NormalTok{(}\StringTok{"coupon"}\NormalTok{, }
+        \StringTok{""}\NormalTok{, }\KeywordTok{gsub}\NormalTok{(}\StringTok{"Used"}\NormalTok{, }\StringTok{""}\NormalTok{, colname))) %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, couponCol, basketValue, }
+        \NormalTok{couponUsed) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, couponCol)}
+    \NormalTok{val$couponCol =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(val$couponCol)}
+    
+    \NormalTok{Xval =}\StringTok{ }\NormalTok{val %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponCol"}\NormalTok{)) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, }
+        \NormalTok{couponCol)}
+    \NormalTok{val =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xval %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-couponUsed, -basketValue), }\DataTypeTok{y =} \NormalTok{Xval %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{select}\NormalTok{(orderID, couponUsed, basketValue))}
+    
+    \CommentTok{# class}
+    \NormalTok{cls =}\StringTok{ }\NormalTok{HTV$C %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, coupon1Used, coupon2Used, coupon3Used, basketValue) %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{gather}\NormalTok{(colname, couponUsed, -orderID, -basketValue) %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{couponCol =} \KeywordTok{gsub}\NormalTok{(}\StringTok{"coupon"}\NormalTok{, }
+        \StringTok{""}\NormalTok{, }\KeywordTok{gsub}\NormalTok{(}\StringTok{"Used"}\NormalTok{, }\StringTok{""}\NormalTok{, colname))) %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(orderID, couponCol, basketValue, }
+        \NormalTok{couponUsed) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, couponCol)}
+    \NormalTok{cls$couponCol =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(cls$couponCol)}
+    
+    \NormalTok{Xcls =}\StringTok{ }\NormalTok{cls %>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(f1, }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"orderID"}\NormalTok{, }\StringTok{"couponCol"}\NormalTok{)) %>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(orderID, }
+        \NormalTok{couponCol)}
+    \NormalTok{cls =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{X =} \NormalTok{Xcls %>%}\StringTok{ }\KeywordTok{select}\NormalTok{(-couponUsed, -basketValue), }\DataTypeTok{y =} \NormalTok{Xcls %>%}\StringTok{ }
+\StringTok{        }\KeywordTok{select}\NormalTok{(orderID, couponUsed, basketValue))}
+    
+    \NormalTok{Fmat1 =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{train =} \NormalTok{trn, }\DataTypeTok{class =} \NormalTok{cls, }\DataTypeTok{validation =} \NormalTok{val)}
+    \KeywordTok{saveRDS}\NormalTok{(Fmat1, }\DataTypeTok{file =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"~/dmc2015/data/featureMatrix/featMat_based-on-HTV"}\NormalTok{, }
+        \NormalTok{set, }\StringTok{"_LONG_ver0.1.rds"}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Combine the features}\label{combine-the-features}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## universal}
+\NormalTok{ul =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../universal/combined/universalFeaturesCombined_long.rds"}\NormalTok{)}
+\NormalTok{uw =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../universal/combined/universalFeaturesCombined_wide.rds"}\NormalTok{)}
+
+\NormalTok{## set1}
+\NormalTok{s1l =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set1/combined/set1FeaturesCombined_long.rds"}\NormalTok{)}
+\NormalTok{s1w =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set1/combined/set1FeaturesCombined_wide.rds"}\NormalTok{)}
+
+\CommentTok{# make the features}
+\KeywordTok{makeWideFeatureMatrix}\NormalTok{(s1w, uw, }\StringTok{"set1"}\NormalTok{)}
+\KeywordTok{makeLongFeatureMatrix}\NormalTok{(s1l, ul, }\StringTok{"set1"}\NormalTok{)}
+
+\NormalTok{## set2}
+\NormalTok{s2l =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set2/combined/set2FeaturesCombined_long.rds"}\NormalTok{)}
+\NormalTok{s2w =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set2/combined/set2FeaturesCombined_wide.rds"}\NormalTok{)}
+
+\CommentTok{# make the features}
+\KeywordTok{makeWideFeatureMatrix}\NormalTok{(s2w, uw, }\StringTok{"set2"}\NormalTok{)}
+\KeywordTok{makeLongFeatureMatrix}\NormalTok{(s2l, ul, }\StringTok{"set2"}\NormalTok{)}
+
+\NormalTok{## set3}
+\NormalTok{s3l =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set3/combined/set3FeaturesCombined_long.rds"}\NormalTok{)}
+\NormalTok{s3w =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../set3/combined/set3FeaturesCombined_wide.rds"}\NormalTok{)}
+
+\CommentTok{# make the features}
+\KeywordTok{makeWideFeatureMatrix}\NormalTok{(s3w, uw, }\StringTok{"set3"}\NormalTok{)}
+\KeywordTok{makeLongFeatureMatrix}\NormalTok{(s3l, ul, }\StringTok{"set3"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

@@ -127,3 +127,108 @@ lines(sort(margins.test), (1:length(margins.test)) / length(margins.test),
       type = "l", cex = .5, col = "green", lwd = 2)
 legend("topleft", c("test", "train"), col = c("green", "blue3"),
        lty = 1:2, lwd = 2);
+
+
+#################
+#################
+dset1 = readRDS("../data/featureMatrix/HTVset1.rds")
+
+H = dset1$H
+V = dset1$V
+T = dset1$T
+C = dset1$C
+
+
+T1 = T[, c(2,4,6,7,8,9,10,11,29,33,34,35,36,37,38,39,40,41,42, 43:49)]
+#T1 = T1[,c(3,4,5,6,9)]
+T1$coupon1Used = as.factor(T1$coupon1Used)
+
+V1 = V[, c(2,4,6,7,8,9,10,11,29,33,34,35,36,37,38,39,40,41,42, 43:49)]
+#V1 = V1[,c(3,4,5,6,9)]
+V1$coupon1Used = as.factor(V1$coupon1Used)
+
+dmc.adaboost <- boosting(coupon1Used ~., data = T1, mfinal = 10)
+
+1 - sum(dmc.adaboost$class == T1$coupon1Used)/
+    length(T1$coupon1Used)
+
+dmc.adaboost.pred <- predict.boosting(dmc.adaboost, newdata = V1)
+
+dmc.adaboost.pred$confusion
+dmc.adaboost.pred$error
+
+
+dmc = readRDS("../data/featureMatrix/featMat_v3.0.rds")
+
+cUsed = readRDS("./feature/couponUsed.rds")
+T2 = cbind(T1, cUsed$T)
+V2 = cbind(V1, cUsed$V)
+
+## H1 = H[, c(2,4,6,7,8,9,10,11,29,33,34,35,36,37,38,39,40,41,42, 43:49)]
+##H2 = cbind(H1, trn[,-c(1:11, 15:23)])
+##dmc.adaboost <- boosting(coupon1Used ~., data = H2, mfinal = 10)
+
+
+dmc.adaboost <- boosting(coupon1Used ~., data = T2, mfinal = 10)
+
+table(dmc.adaboost$class, T2$coupon1Used,
+      dnn = c("Predicted Class", "Observed Class"))
+
+1 - sum(dmc.adaboost$class == T2$coupon1Used)/
+    length(T2$coupon1Used)
+
+dmc.adaboost.pred <- predict.boosting(dmc.adaboost, newdata = V2)
+
+dmc.adaboost.pred$confusion
+dmc.adaboost.pred$error
+
+
+dmc.SAMME <- boosting(coupon1Used ~ ., data = T2, mfinal = 10,
+                      coeflearn = "Zhu", boos = TRUE)
+1 - sum(dmc.SAMME$class == T2$coupon1Used) /
+    length(T2$coupon1Used)
+
+dmc.SAMME.pred <- predict.boosting(dmc.SAMME,
+                                       newdata = V2)
+dmc.SAMME.pred$confusion
+dmc.SAMME.pred$error
+
+
+
+dat = readRDS("./data/dat_1111.rds")
+str(dat)
+trt = dat$trt
+
+col_pred <-
+    c(which(names(trt)%in%c("couponsReceivedTime","couponsReceivedDoW","batchID",
+                            "TimeBtwnRecOrder", "price","basePrice","reward","premiumProduct", "couponCol","ratio_bp_p", "couponUsed"))
+     ,which(grepl("prob",names(trt))))
+
+trt1 = trt[, col_pred]
+trt1$couponUsed = as.factor(trt1$couponUsed)
+tst = dat$tst
+tst1 = tst[, col_pred]
+tst1$couponUsed = as.factor(tst1$couponUsed)
+
+cntrl <- rpart.control(maxdepth = 5, minsplit = 0, cp = -1)
+dmc.adaboost <- boosting( couponUsed~., data = trt1, control = cntrl)
+
+table(dmc.adaboost$class, trt1$couponUsed,
+      dnn = c("Predicted Class", "Observed Class"))
+
+1 - sum(dmc.adaboost$class == trt1$couponUsed)/
+    length(trt1$couponUsed)
+
+dmc.adaboost.pred <- predict.boosting(dmc.adaboost, newdata = tst1)
+dmc.adaboost.pred$confusion
+dmc.adaboost.pred$error
+
+dmc.SAMME <- boosting(couponUsed~., data = trt1, coeflearn = "Zhu", boos = TRUE)
+table(dmc.SAMME$class, trt1$couponUsed,
+      dnn = c("Predicted Class", "Observed Class"))
+1 - sum(dmc.SAMME$class == trt1$couponUsed)/
+    length(trt1$couponUsed)
+
+dmc.SAMME.pred <- predict.boosting(dmc.SAMME, newdata = tst1)
+dmc.SAMME.pred$confusion
+dmc.SAMME.pred$error

@@ -45,15 +45,20 @@ for (i in 1:N) {
   }
 }
 
+saveRDS(Feature, './yihua/HTVmelt3_Combn_UniqueUser.rds')
+
+
 
 ### read and random forest ###
 Feature <- readRDS('./yihua/HTVmelt3_Combn_UniqueUser.rds')
-rf1 <- randomForest(x=Feature$T_melt[,c(34,36:ncol(Feature$T_melt))], 
+rf1 <- randomForest(x=Feature$T_melt[,c(7,8,12,13,21,34,36:ncol(Feature$T_melt))], 
                     y=as.factor(Feature$T_melt$couponUsed), 
-                    xtest=Feature$V_melt[,c(34,36:ncol(Feature$T_melt))], 
+                    xtest=Feature$V_melt[,c(7,8,12,13,21,34,36:ncol(Feature$T_melt))], 
                     ytest=as.factor(Feature$V_melt$couponUsed), 
-                    ntree=500, mtry=120)
-
+                    ntree=500, mtry=120, maxnodes=50,
+                    keep.forest=TRUE)
+rf.predicted <- predict(rf1, Feature$V_melt[,c(7,8,12,13,21,34,36:ncol(Feature$T_melt))], type="prob")
+rf1
 rf1$confusion
 rf1$test$confusion
 x <- table(as.factor(Feature$V_melt$couponUsed), rf1$test$predicted)
@@ -64,7 +69,6 @@ y = as.vector(rf1$importance)
 names(y)=rownames(rf1$importance)
 y <- sort(y, decreasing=TRUE)
 head(y,100)
-
 
 y1 <- names(y[1:100])
 y2 <- names(y[1:100])
@@ -78,4 +82,35 @@ length(grep('*nUserUsed',y))
 length(grep('*prob',y))
 length(grep('*Twice',y))
 
-saveRDS(Feature, './yihua/HTVmelt3_Combn_UniqueUser.rds')
+# probability version
+result <- data.frame(orderID=Feature$V_melt$orderID, 
+                     couponUsed=Feature$V_melt$couponUsed, 
+                     couponcol=rep(c(1,2,3),568), 
+                     predicted=rf.predicted[,2])
+# 0-1 version
+result1 <- data.frame(orderID=Feature$V_melt$orderID, 
+                     couponUsed=Feature$V_melt$couponUsed, 
+                     couponcol=rep(c(1,2,3),568), 
+                     predicted=rf.predicted[,2]>0.5)
+
+roc <- ROC_curve(result$predicted, result$couponUsed)
+plot(roc$x, roc$y, type='s')
+auc <- AUC(result$predicted, result$couponUsed)
+
+Loss_calculator(coupon1pred=result$predicted[result$couponcol==1], 
+                coupon1true=result$couponUsed[result$couponcol==1],
+                coupon2pred=result$predicted[result$couponcol==2], 
+                coupon2true=result$couponUsed[result$couponcol==2],
+                coupon3pred=result$predicted[result$couponcol==3], 
+                coupon3true=result$couponUsed[result$couponcol==3])
+Loss_calculator(coupon1pred=result1$predicted[result1$couponcol==1], 
+                coupon1true=result1$couponUsed[result1$couponcol==1],
+                coupon2pred=result1$predicted[result1$couponcol==2], 
+                coupon2true=result1$couponUsed[result1$couponcol==2],
+                coupon3pred=result1$predicted[result1$couponcol==3], 
+                coupon3true=result1$couponUsed[result1$couponcol==3])
+
+
+plot(result$predicted, col=result$couponUsed+2)
+boxplot(result$predicted~as.factor(result$couponUsed))
+
