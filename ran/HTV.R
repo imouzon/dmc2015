@@ -209,7 +209,7 @@ svmfit_linear <- svm(x = Feature$train$X[, col_pred],
 # validation error
 pred_linear <- predict(svmfit_linear, Feature$validation$X[, col_pred])
 table_linear <- table(pred_linear, Feature$validation$y$couponUsed)
-1 - sum(diag(table_linear)) / sum(table_linear)  # 0.
+1 - sum(diag(table_linear)) / sum(table_linear)  # 0.1896
 
 # polynomial kernel with default order 3
 svmfit_polynomial <- svm(x = Feature$train$X[, col_pred], 
@@ -218,7 +218,7 @@ svmfit_polynomial <- svm(x = Feature$train$X[, col_pred],
 # validation error
 pred_polynomial <- predict(svmfit_polynomial, Feature$validation$X[, col_pred])
 table_polynomial <- table(pred_polynomial, Feature$validation$y$couponUsed)
-1 - sum(diag(table_polynomial)) / sum(table_polynomial)  # 0.
+1 - sum(diag(table_polynomial)) / sum(table_polynomial)  # 0.1911
 
 # radial kernel with default gamma
 svmfit_radial <- svm(x = Feature$train$X[, col_pred], 
@@ -227,7 +227,7 @@ svmfit_radial <- svm(x = Feature$train$X[, col_pred],
 # validation error
 pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred])
 table_radial <- table(pred_radial, Feature$validation$y$couponUsed)
-1 - sum(diag(table_radial)) / sum(table_radial)  # 0.
+1 - sum(diag(table_radial)) / sum(table_radial)  # 0.1869
 
 # radial kernel with half default gamma
 svmfit_radial0.5 <- svm(x = Feature$train$X[, col_pred], 
@@ -236,7 +236,7 @@ svmfit_radial0.5 <- svm(x = Feature$train$X[, col_pred],
 # validation error
 pred_radial0.5 <- predict(svmfit_radial0.5, Feature$validation$X[, col_pred])
 table_radial0.5 <- table(pred_radial0.5, Feature$validation$y$couponUsed)
-1 - sum(diag(table_radial0.5)) / sum(table_radial0.5)  # 0.
+1 - sum(diag(table_radial0.5)) / sum(table_radial0.5)  # 0.1888
 
 # radial kernel with double default gamma
 svmfit_radial2 <- svm(x = Feature$train$X[, col_pred], 
@@ -245,4 +245,12 @@ svmfit_radial2 <- svm(x = Feature$train$X[, col_pred],
 # validation error
 pred_radial2 <- predict(svmfit_radial2, Feature$validation$X[, col_pred])
 table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
-1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.
+1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.1879
+
+# loss
+cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
+cpn2 <- cpn1 + 1
+cpn3 <- cpn1 + 2
+sum(Loss_calculator(as.numeric(pred_polynomial[cpn1]) - 1, Feature$validation$y$couponUsed[cpn1],
+                as.numeric(pred_polynomial[cpn2]) - 1, Feature$validation$y$couponUsed[cpn2],
+                as.numeric(pred_polynomial[cpn3]) - 1, Feature$validation$y$couponUsed[cpn3]))
