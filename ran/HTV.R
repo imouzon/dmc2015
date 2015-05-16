@@ -1,6 +1,6 @@
-HTVset1 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset1.rds")
-HTVset2 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset2.rds")
-HTVset3 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset3.rds")
+HTVset1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset1.rds")
+HTVset2 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset2.rds")
+HTVset3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset3.rds")
 
 names(HTVset1)
 names(HTVset1$H)
@@ -61,7 +61,7 @@ usr.info <- cbind(TimeBtwnSentRec.info, TimeBtwnRecExpire.info[, -(1:2)],
 order.usr <- data[, c(1, 3)]
 order.usr.info <- order.usr %>% left_join(usr.info)
 order.usr.info <- order.usr.info[order(order.usr.info$orderID), ]
-saveRDS(order.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
+saveRDS(order.usr.info, "//Users/Ran/Google Drive/ISU/dmc2015/features/feature_files/universal/user_info.rds")
 
 
 ###################
@@ -92,7 +92,7 @@ alpha <- mmedist(coupon.usr.info$prop, "beta")$estimate[1]
 beta <- mmedist(coupon.usr.info$prop, "beta")$estimate[2]
 
 coupon.usr.info$prob <- (coupon.usr.info$nUserUsed + alpha) / (coupon.usr.info$nUserSent + alpha + beta)
-saveRDS(coupon.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/ran/coupon_usr_info.rds")
+saveRDS(coupon.usr.info, "//Users/Ran/Google Drive/ISU/dmc2015/ran/coupon_usr_info.rds")
 
 
 ###########
@@ -189,7 +189,7 @@ table_radial2 <- table(pred_radial2, Feature$V_melt$couponUsed)
 ### Feature ver0 ###
 ####################
 
-Feature <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
+Feature <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
 dat_tr_x <- Feature$train$X
 col_pred <- c(which(names(dat_tr_x) %in% c("couponsReceivedTime",
                                            "orderTimeTime",
@@ -246,6 +246,20 @@ svmfit_radial2 <- svm(x = Feature$train$X[, col_pred],
 pred_radial2 <- predict(svmfit_radial2, Feature$validation$X[, col_pred])
 table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
 1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.1879
+
+# sigmoid kernel
+svmfit_sigmoid <- svm(x = Feature$train$X[, col_pred], 
+                      y = as.factor(Feature$train$y$couponUsed), 
+                      kernel = "sigmoid", coef0 = -1.5)
+# validation error
+pred_sigmoid <- predict(svmfit_sigmoid, Feature$validation$X[, col_pred])
+table_sigmoid <- table(pred_sigmoid, Feature$validation$y$couponUsed)
+1 - sum(diag(table_sigmoid)) / sum(table_sigmoid)  # 0.2729
+
+coef00 <- seq(-20, 0, 0.5)
+svmfit_sigmoid_tune <- tune.svm(x = Feature$train$X[, col_pred], 
+                                y = as.factor(Feature$train$y$couponUsed), 
+                                kernel = "sigmoid", coef0 = coef00)
 
 # loss
 cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
