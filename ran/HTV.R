@@ -223,11 +223,17 @@ table_polynomial <- table(pred_polynomial, Feature$validation$y$couponUsed)
 # radial kernel with default gamma
 svmfit_radial <- svm(x = Feature$train$X[, col_pred], 
                      y = as.factor(Feature$train$y$couponUsed), 
-                     kernel = "radial")
+                     kernel = "radial", probability = TRUE)
 # validation error
-pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred])
+pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred], probability = TRUE)
 table_radial <- table(pred_radial, Feature$validation$y$couponUsed)
 1 - sum(diag(table_radial)) / sum(table_radial)  # 0.1869
+
+prob_radial <- attr(pred_radial, "probabilities")[, 1]
+prob_radial1 <- prob_radial
+prob_radial1[prob_radial < 0.7] = 1
+prob_radial1[prob_radial >= 0.7] = 0
+table(prob_radial1,Feature$validation$y$couponUsed) 
 
 # radial kernel with half default gamma
 svmfit_radial0.5 <- svm(x = Feature$train$X[, col_pred], 
@@ -257,10 +263,11 @@ table_sigmoid <- table(pred_sigmoid, Feature$validation$y$couponUsed)
 1 - sum(diag(table_sigmoid)) / sum(table_sigmoid)  # 0.1906
 
 # loss
-cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
+pred <- prob_radial1
+cpn1 <- (1:(length(pred)/3)) * 3 - 2
 cpn2 <- cpn1 + 1
 cpn3 <- cpn1 + 2
-pred <- pred_radial
-sum(Loss_calculator(as.numeric(pred[cpn1]) - 1, Feature$validation$y$couponUsed[cpn1],
-                    as.numeric(pred[cpn2]) - 1, Feature$validation$y$couponUsed[cpn2],
-                    as.numeric(pred[cpn3]) - 1, Feature$validation$y$couponUsed[cpn3]))
+sum(Loss_calculator(as.numeric(pred[cpn1]), Feature$validation$y$couponUsed[cpn1],
+                    as.numeric(pred[cpn2]), Feature$validation$y$couponUsed[cpn2],
+                    as.numeric(pred[cpn3]), Feature$validation$y$couponUsed[cpn3]))
+
