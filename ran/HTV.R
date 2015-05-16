@@ -1,6 +1,6 @@
-HTVset1 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset1.rds")
-HTVset2 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset2.rds")
-HTVset3 <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/HTVset3.rds")
+HTVset1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset1.rds")
+HTVset2 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset2.rds")
+HTVset3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/HTVset3.rds")
 
 names(HTVset1)
 names(HTVset1$H)
@@ -61,7 +61,7 @@ usr.info <- cbind(TimeBtwnSentRec.info, TimeBtwnRecExpire.info[, -(1:2)],
 order.usr <- data[, c(1, 3)]
 order.usr.info <- order.usr %>% left_join(usr.info)
 order.usr.info <- order.usr.info[order(order.usr.info$orderID), ]
-saveRDS(order.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/features/feature_files/universal/user_info.rds")
+saveRDS(order.usr.info, "//Users/Ran/Google Drive/ISU/dmc2015/features/feature_files/universal/user_info.rds")
 
 
 ###################
@@ -92,7 +92,7 @@ alpha <- mmedist(coupon.usr.info$prop, "beta")$estimate[1]
 beta <- mmedist(coupon.usr.info$prop, "beta")$estimate[2]
 
 coupon.usr.info$prob <- (coupon.usr.info$nUserUsed + alpha) / (coupon.usr.info$nUserSent + alpha + beta)
-saveRDS(coupon.usr.info, "//Users/Ran/Dropbox/ISU/dmc2015/ran/coupon_usr_info.rds")
+saveRDS(coupon.usr.info, "//Users/Ran/Google Drive/ISU/dmc2015/ran/coupon_usr_info.rds")
 
 
 ###########
@@ -189,7 +189,7 @@ table_radial2 <- table(pred_radial2, Feature$V_melt$couponUsed)
 ### Feature ver0 ###
 ####################
 
-Feature <- readRDS("//Users/Ran/Dropbox/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
+Feature <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
 dat_tr_x <- Feature$train$X
 col_pred <- c(which(names(dat_tr_x) %in% c("couponsReceivedTime",
                                            "orderTimeTime",
@@ -223,11 +223,17 @@ table_polynomial <- table(pred_polynomial, Feature$validation$y$couponUsed)
 # radial kernel with default gamma
 svmfit_radial <- svm(x = Feature$train$X[, col_pred], 
                      y = as.factor(Feature$train$y$couponUsed), 
-                     kernel = "radial")
+                     kernel = "radial", probability = TRUE)
 # validation error
-pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred])
+pred_radial <- predict(svmfit_radial, Feature$validation$X[, col_pred], probability = TRUE)
 table_radial <- table(pred_radial, Feature$validation$y$couponUsed)
 1 - sum(diag(table_radial)) / sum(table_radial)  # 0.1869
+
+prob_radial <- attr(pred_radial, "probabilities")[, 1]
+prob_radial1 <- prob_radial
+prob_radial1[prob_radial < 0.7] = 1
+prob_radial1[prob_radial >= 0.7] = 0
+table(prob_radial1,Feature$validation$y$couponUsed) 
 
 # radial kernel with half default gamma
 svmfit_radial0.5 <- svm(x = Feature$train$X[, col_pred], 
@@ -247,11 +253,21 @@ pred_radial2 <- predict(svmfit_radial2, Feature$validation$X[, col_pred])
 table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
 1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.1879
 
+# sigmoid kernel
+svmfit_sigmoid <- svm(x = Feature$train$X[, col_pred], 
+                      y = as.factor(Feature$train$y$couponUsed), 
+                      kernel = "sigmoid", coef0 = -4)
+# validation error
+pred_sigmoid <- predict(svmfit_sigmoid, Feature$validation$X[, col_pred])
+table_sigmoid <- table(pred_sigmoid, Feature$validation$y$couponUsed)
+1 - sum(diag(table_sigmoid)) / sum(table_sigmoid)  # 0.1906
+
 # loss
-cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
+pred <- prob_radial1
+cpn1 <- (1:(length(pred)/3)) * 3 - 2
 cpn2 <- cpn1 + 1
 cpn3 <- cpn1 + 2
-pred <- pred_radial
-sum(Loss_calculator(as.numeric(pred[cpn1]) - 1, Feature$validation$y$couponUsed[cpn1],
-                    as.numeric(pred[cpn2]) - 1, Feature$validation$y$couponUsed[cpn2],
-                    as.numeric(pred[cpn3]) - 1, Feature$validation$y$couponUsed[cpn3]))
+sum(Loss_calculator(as.numeric(pred[cpn1]), Feature$validation$y$couponUsed[cpn1],
+                    as.numeric(pred[cpn2]), Feature$validation$y$couponUsed[cpn2],
+                    as.numeric(pred[cpn3]), Feature$validation$y$couponUsed[cpn3]))
+
