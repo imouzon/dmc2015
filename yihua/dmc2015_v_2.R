@@ -13,7 +13,7 @@ library(randomForest)
 
 setwd('/Users/yihuali/Documents/dmc2015')
 
-dat <- readRDS('./data/featureMatrix/HTVset3.rds')
+dat <- readRDS('./data/featureMatrix/HTVset2.rds')
 H <- dat$H
 T <- dat$T
 V <- dat$V
@@ -23,29 +23,37 @@ T_melt <- stackCoupons2(T, idcols = c(1:4, 32:49))
 V_melt <- stackCoupons2(V, idcols = c(1:4, 32:49))
 C_melt <- stackCoupons2(C, idcols = c(1:4, 32:49))
 
-Feature <- addFeatures_HTV(H_melt, T_melt, V_melt)
+Feature <- addFeatures_HTVC(H_melt, T_melt, V_melt, C_melt)
 
 any(is.na(Feature$H_melt))
 any(is.na(Feature$T_melt))
 any(is.na(Feature$V_melt))
+sum(is.na(Feature$C_melt))/nrow(Feature$C_melt)
 names(Feature$H_melt)[80]
 Feature$H_melt <- Feature$H_melt[,-80]
 Feature$T_melt <- Feature$T_melt[,-80]
 Feature$V_melt <- Feature$V_melt[,-80]
+Feature$C_melt <- Feature$C_melt[,-80]
 N <- ncol(Feature$H_melt)
-for (i in 1:N) {
-  if (length(unique(Feature$H_melt[,i])) == 1 ||
-        length(unique(Feature$H_melt[,i])) == 1 ||
-        length(unique(Feature$H_melt[,i])) == 1) {
-    Feature$H_melt <- Feature$H_melt[,-i]
-    Feature$T_melt <- Feature$T_melt[,-i]
-    Feature$V_melt <- Feature$V_melt[,-i]
+col.remove <- c()
+for (i in names(Feature$H_melt)[33:N]) {
+  if (i %in% names(Feature$C_melt)) {
+    if (length(unique(Feature$H_melt[,i]))==1 ||
+          length(unique(Feature$T_melt[,i]))==1 ||
+          length(unique(Feature$V_melt[,i]))==1 ||
+          length(unique(Feature$C_melt[,i]))==1) {
+      col.remove <- c(col.remove, i)
+    }
   }
 }
+Feature1 <- Feature
+remove.num <- which(names(Feature$H_melt) %in% col.remove)
+Feature$H_melt <- Feature$H_melt[,-remove.num]
+Feature$T_melt <- Feature$T_melt[,-remove.num]
+Feature$V_melt <- Feature$V_melt[,-remove.num]
+Feature$C_melt <- Feature$C_melt[,-remove.num]
 
-saveRDS(Feature, './yihua/HTVmelt3_Combn_UniqueUser.rds')
-
-
+saveRDS(Feature, './yihua/HTVCmelt2_Combn_UniqueUser.rds')
 
 ### read and random forest ###
 Feature <- readRDS('./yihua/HTVmelt3_Combn_UniqueUser.rds')

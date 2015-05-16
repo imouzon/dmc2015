@@ -1,4 +1,4 @@
-addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
+addKey_UniqueUser = function(H_melt, T_melt, V_melt, C_melt, key){
   n = length(key)
   key_paste = key[1]
   if(n >= 2){
@@ -11,17 +11,20 @@ addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
     H_melt$key_paste = H_melt[,key_cols[1]]
     T_melt$key_paste = T_melt[,key_cols[1]]
     V_melt$key_paste = V_melt[,key_cols[1]]    
+    C_melt$key_paste = C_melt[,key_cols[1]]    
     if(n >= 2){
       for(i in 2:n){
         H_melt$key_paste = paste(H_melt$key_paste,H_melt[,key_cols[i]])
         T_melt$key_paste = paste(T_melt$key_paste,T_melt[,key_cols[i]])
         V_melt$key_paste = paste(V_melt$key_paste,V_melt[,key_cols[i]])
+        C_melt$key_paste = paste(C_melt$key_paste,C_melt[,key_cols[i]])
       }
     }
   }else{
     H_melt$key_paste = H_melt[,key_cols[1]]
     T_melt$key_paste = T_melt[,key_cols[1]]
     V_melt$key_paste = V_melt[,key_cols[1]]
+    C_melt$key_paste = C_melt[,key_cols[1]]
   }
 
   key_ID = unique(H_melt$key_paste)
@@ -49,20 +52,26 @@ addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
   H_melt = H_melt %>% left_join(key_summ)
   T_melt = T_melt %>% left_join(key_summ)
   V_melt = V_melt %>% left_join(key_summ)
+  C_melt = C_melt %>% left_join(key_summ)
   T_melt$key_nUser[is.na(T_melt$key_nUser)] = 0
   V_melt$key_nUser[is.na(V_melt$key_nUser)] = 0
+  C_melt$key_nUser[is.na(C_melt$key_nUser)] = 0
   T_melt$key_nUserUsed[is.na(T_melt$key_nUserUsed)] = 0
   V_melt$key_nUserUsed[is.na(V_melt$key_nUserUsed)] = 0
+  C_melt$key_nUserUsed[is.na(C_melt$key_nUserUsed)] = 0
   T_melt$key_TwiceOrMore[is.na(T_melt$key_TwiceOrMore)] = 0
   V_melt$key_TwiceOrMore[is.na(V_melt$key_TwiceOrMore)] = 0
+  C_melt$key_TwiceOrMore[is.na(C_melt$key_TwiceOrMore)] = 0
   
   T_melt$key_prob[is.na(T_melt$key_prob)] = alpha/(alpha+beta)
   V_melt$key_prob[is.na(V_melt$key_prob)] = alpha/(alpha+beta)
+  C_melt$key_prob[is.na(C_melt$key_prob)] = alpha/(alpha+beta)
   
   if(key_paste %in% names(H_melt)){
     H_melt = H_melt %>% select(-key_paste)
     T_melt = T_melt %>% select(-key_paste)
     V_melt = V_melt %>% select(-key_paste)
+    C_melt = C_melt %>% select(-key_paste)
   }
   
   if(!(key_paste %in% names(H_melt))){
@@ -84,6 +93,10 @@ addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
     names(V_melt)[names(V_melt)=="key_nUserUsed"] <- paste0(key_paste1,"_nUserUsed")
     names(V_melt)[names(V_melt)=="key_TwiceOrMore"] <- paste0(key_paste1,"_Twice")
     names(V_melt)[names(V_melt)=="key_prob"] <- paste0(key_paste1,"_prob")
+    names(C_melt)[names(C_melt)=="key_nUser"] <- paste0(key_paste1,"_nUser")
+    names(C_melt)[names(C_melt)=="key_nUserUsed"] <- paste0(key_paste1,"_nUserUsed")
+    names(C_melt)[names(C_melt)=="key_TwiceOrMore"] <- paste0(key_paste1,"_Twice")
+    names(C_melt)[names(C_melt)=="key_prob"] <- paste0(key_paste1,"_prob")
   }else{
     names(H_melt)[names(H_melt)=="key_nUser"] <- paste0(key_paste,"_nUser")
     names(H_melt)[names(H_melt)=="key_nUserUsed"] <- paste0(key_paste,"_nUserUsed")
@@ -97,10 +110,16 @@ addKey_UniqueUser = function(H_melt, T_melt, V_melt, key){
     names(V_melt)[names(V_melt)=="key_nUserUsed"] <- paste0(key_paste,"_nUserUsed")
     names(V_melt)[names(V_melt)=="key_TwiceOrMore"] <- paste0(key_paste,"_Twice")
     names(V_melt)[names(V_melt)=="key_prob"] <- paste0(key_paste,"_prob")
+    names(C_melt)[names(C_melt)=="key_nUser"] <- paste0(key_paste,"_nUser")
+    names(C_melt)[names(C_melt)=="key_nUserUsed"] <- paste0(key_paste,"_nUserUsed")
+    names(C_melt)[names(C_melt)=="key_TwiceOrMore"] <- paste0(key_paste,"_Twice")
+    names(C_melt)[names(C_melt)=="key_prob"] <- paste0(key_paste,"_prob")
   }
   H_melt = H_melt %>% arrange(orderID, couponCol)
   T_melt = T_melt %>% arrange(orderID, couponCol)
   V_melt = V_melt %>% arrange(orderID, couponCol)
+  C_melt = C_melt %>% arrange(orderID, couponCol)
   
-  return(list("H_melt"=H_melt,"T_melt"=T_melt, "V_melt"=V_melt))
+  return(list("H_melt"=H_melt, "T_melt"=T_melt, 
+              "V_melt"=V_melt, "C_melt"=C_melt))
 }
