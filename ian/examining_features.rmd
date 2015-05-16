@@ -30,6 +30,7 @@ I am using the following packages:
    library(tidyr)
    library(lubridate)
    library(ggplot2)
+   library(directlabels)
    library(rCharts)
    library(xtable)
    library(foreach)
@@ -78,11 +79,23 @@ And this is our loss function:
 <!--- loss: R code (No Results in Document) -->
 ```{r loss,cache=FALSE}
    lossFunMethod = function(yval,Xval,method){
-      hatmat = as.matrix(matrix(predict(method,newdata = Xval),ncol=3,byrow=TRUE))
+      hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response"),ncol=3,byrow=TRUE))
       ymat = matrix(yval,ncol=3,byrow=TRUE)
 
       error = colSums((ymat - hatmat)^2)
       wt = colMeans(ymat)^2
+
+      cat("The coupon error is:  ",sum(error/wt),"\n")
+      cat("By column error:      ",error,"\n")
+      cat("By column weight:     ",error,"\n\n")
+      return(sum(error/wt))
+   }
+
+   lossFunCV = function(yval,Xval,method){
+
+      hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response"),ncol=3,byrow=TRUE))
+      ymat = matrix(yval,ncol=3,byrow=TRUE)
+
       cat("The coupon error is:  ",sum(error/wt),"\n")
       cat("By column error:      ",error,"\n")
       cat("By column weight:     ",error,"\n\n")
@@ -93,30 +106,59 @@ And this is our loss function:
 The following functions will help me in this process:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-## I will use cross validation to estimate an error instead of checking the validation set
-RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50){
-   row.order = sample(1:nrow(Xrf))
-   CVk = 40
-   CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
-   OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
+   ## I will use cross validation to estimate an error instead of checking the validation set
+   RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50){
+      row.order = sample(1:nrow(Xrf))
+      CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
+      OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
 
-   #Fit a random forest for couponUsed
-   cvRF = function(rows) randomForest(Xrf[rows,], y=yrf[rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
-   rf_cvs = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
-   return(rf_cvs)
-}
+      #Fit a random forest for couponUsed
+      cvRF = function(rows) randomForest(Xrf[-rows,], y=yrf[-rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
+      message("Fitting randomForest")
+      rf_cvs = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
+      return(rf_cvs)
+   }
 
-##CV to get the mean importance
-RFxVal_imp = function(RFs){
-   RFimp = RFs[[1]]
-   for(i in 2:length(RFs)){
+   ## CV to get the mean importance
+   RFxVal_imp = function(RFs){
+      RFimp = data.frame("feature" = rownames(RFs[[1]]$importance), "IncNodePurity1" = RFs[[1]]$importance)
+      rownames(RFimp) = NULL
+      names(RFimp) = c("feature","IncNodePurity1")
+      for(i in 2:length(RFs)){
+         RFimp.i = data.frame("feature" = rownames(RFs[[i]]$importance), "IncNodePurity1" = RFs[[i]]$importance)
+         names(RFimp.i) = c("feature",paste0("IncNodePurity",i))
+         rownames(RFimp.i) = NULL
+         RFimp = RFimp %>% left_join(RFimp.i,by="feature")
+      }
+      RFimplong = RFimp %>%
+         gather(colname,IncNodePurity,-feature) %>%
+         mutate(CViteration = as.numeric(gsub("IncNodePurity","",colname))) %>%
+         select(feature,CViteration,IncNodePurity) %>%
+         arrange(feature,CViteration)
 
+      RFimplongMeans = RFimplong %>% 
+         group_by(feature) %>% 
+         summarize(meanIncNodePurity = mean(IncNodePurity))
 
+      CVimpplotfunc = function(dsn){
+         CVplot = ggplot(data=dsn, aes(x=CViteration,y=IncNodePurity, group = feature, color=feature)) +
+                     geom_line() +
+                     theme(legend.position = "none") + 
+                     geom_text(data = RFimplong[RFimplong$CViteration == 1,],
+                               aes(label = feature), hjust=1,size=.1)
+         CVplot = direct.label(CVplot+xlim(0,44),"last.qp")
+         return(CVplot)
+      }
+
+      RFimp = list("importance"=RFimp, 
+                   "iterations" = RFimplong, 
+                   "mean" =RFimplongMeans, 
+                   "plot" = CVimpplotfunc(RFimplong),
+                   makeplot = CVimpplotfunc)
+
+      return(RFimp)
+   }
 ```
-
-
-
-
 
 #I am going to start with a simple random forest
 <!--- rf: R code (No Results in Document) -->
@@ -136,35 +178,14 @@ RFxVal_imp = function(RFs){
 
    ## I will use cross validation to estimate an error instead of checking the validation set
    set.seed = 1999
-   row.order = sample(1:nrow(Xrf))
-   CVk = 40
-   CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
-   OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
+   CVrf = RFxVal(5,Xrf,yn[,"couponUsed"],mtry=8,ntree=1000,maxnodes=50)
+   CVimp = RFxVal_imp(CVrf)
 
-   #Fit a random forest for couponUsed
-   cvRF = function(rows) randomForest(Xrf[rows,], y=yrf[rows], ntree=1000, mtry=8, replace=TRUE, maxnodes = 50)
-   rf_cpn = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
+   CVimp$plot
 
-   rf_cpn_imp = function(
-   names(
-         rf_cpn[[1]]$importance
-         )
-   ## print
-   print(rf_cpn)
+   CVimp$makeplot(CVimp$iteration[which(CVimp$iteration$IncNodePurity > 1),])
 
-   ## plots
-   varImpPlot(rf_cpn,n.var=11)
-   qplot(Xrf$order_match_class,rf_cpn$predicted,geom="boxplot",fill=as.factor(f1$train$y$couponUsed))
-   lossFun(rf_cpn, d1, Xv[,which(names(Xv) %in% names(Xrf))])
-   #write.csv(matrix(c(Xn$orderID, rf_cpn$predicted),ncol=2),row.names=FALSE,quote=FALSE,file="./written_data/rf_prediction.csv")
-
-   #
-   lossFunMethod(yv$couponUsed,Xv[,which(names(Xv) %in% names(Xrf))],rf_cpn)
-
-   rf_bval = randomForest(Xrf, y=f1$train$y$basketValue,  ntree=1000, mtry=10, replace=TRUE, keep.forest = TRUE, maxnodes = 100)
-   print(rf_bval)
-   keepercols = names(Xn[,17:20])
-   dropercols = names(Xn[,c(13:16,21:30)])
+   #Loss function
+   message("Calculating Loss")
+   lossFunction = lapply(rf_cvs, function(fit) lossFunMethod(yrf[rows],Xv[rows,which(names(Xv) %in% names(Xrf))],fit))
 ```
-
-
