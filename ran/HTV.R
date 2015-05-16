@@ -270,4 +270,3 @@ cpn3 <- cpn1 + 2
 sum(Loss_calculator(as.numeric(pred[cpn1]), Feature$validation$y$couponUsed[cpn1],
                     as.numeric(pred[cpn2]), Feature$validation$y$couponUsed[cpn2],
                     as.numeric(pred[cpn3]), Feature$validation$y$couponUsed[cpn3]))
-
