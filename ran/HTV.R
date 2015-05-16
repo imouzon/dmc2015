@@ -250,16 +250,11 @@ table_radial2 <- table(pred_radial2, Feature$validation$y$couponUsed)
 # sigmoid kernel
 svmfit_sigmoid <- svm(x = Feature$train$X[, col_pred], 
                       y = as.factor(Feature$train$y$couponUsed), 
-                      kernel = "sigmoid", coef0 = -1.5)
+                      kernel = "sigmoid", coef0 = -4)
 # validation error
 pred_sigmoid <- predict(svmfit_sigmoid, Feature$validation$X[, col_pred])
 table_sigmoid <- table(pred_sigmoid, Feature$validation$y$couponUsed)
-1 - sum(diag(table_sigmoid)) / sum(table_sigmoid)  # 0.2729
-
-coef00 <- seq(-20, 0, 0.5)
-svmfit_sigmoid_tune <- tune.svm(x = Feature$train$X[, col_pred], 
-                                y = as.factor(Feature$train$y$couponUsed), 
-                                kernel = "sigmoid", coef0 = coef00)
+1 - sum(diag(table_sigmoid)) / sum(table_sigmoid)  # 0.1906
 
 # loss
 cpn1 <- (1:(length(pred_polynomial)/3)) * 3 - 2
