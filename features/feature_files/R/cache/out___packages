@@ -1,13 +1,7 @@
 base
-methods
 colorout
 setwidth
 vimcom
-datasets
-utils
-grDevices
-graphics
-stats
 dplyr
 magrittr
 tidyr

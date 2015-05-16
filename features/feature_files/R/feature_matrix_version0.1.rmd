@@ -151,15 +151,36 @@ Notice that not all of the files are the same "wide" as others, but we would sti
    ## coupon 3
    coupon3 = wideFrame[,coupon3_cols]
    names(coupon3) = gsub("_23$","_to2Col",names(coupon3))
-   names(coupon3) = gsub("_13$","_to3Col",names(coupon3))
+   names(coupon3) = gsub("_13$","_to1Col",names(coupon3))
    names(coupon3) = gsub("_3$","",names(coupon3))
    coupon3$couponCol = 3
 
-   coupons = bind_rows(coupon1,coupon2,coupon3) 
-   for(i in grep("_to\\dCol",names(coupons))) is.na(coupons[,i]) = 1
+   coupons = bind_rows(coupon1,coupon2,coupon3)  %>% arrange(orderID,couponCol)
+   for(i in grep("_to2Col",names(coupons))) coupons[is.na(coupons[,i]) & coupons$couponCol == 2,i] = 1
+   for(i in grep("_to1Col",names(coupons))) coupons[is.na(coupons[,i]) & coupons$couponCol == 1,i] = 1
+   for(i in grep("_to3Col",names(coupons))) coupons[is.na(coupons[,i]) & coupons$couponCol == 3,i] = 1
+      
+   names(coupons)[grep("_to\\dCol",names(coupons))]
+   coupons$sim_ftd_invmax_cosSim_mean = apply(coupons[,grep("sim_ftd_invmax",names(coupons))],1,mean)
+   coupons$sim_ftd_ivf_cosSim_mean = apply(coupons[,grep("sim_ftd_ivf",names(coupons))],1,mean)
+   coupons$sim_ftd_lnorm_cosSim_mean = apply(coupons[,grep("sim_ftd_lnorm",names(coupons))],1,mean)
+   coupons$sim_ftd_pif_cosSim_mean = apply(coupons[,grep("sim_ftd_pif",names(coupons))],1,mean)
+   coupons$sim_jaccard_mean = apply(coupons[,grep("jaccard",names(coupons))],1,mean)
 
    longFrame = wideFrame[,non_numbered_cols] %>% left_join(coupons,by="orderID") %>% arrange(orderID,couponCol)
 ```
+
+and we can add a few nice variables to the matrices:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   wideFrame[,"sim_ftd_ivf_mean"] =  rowMeans(wideFrame[,grep("sim_ftd_ivf",names(wideFrame))])
+   wideFrame[,"sim_ftd_lnorm_mean"] =  rowMeans(wideFrame[,grep("sim_ftd_lnorm",names(wideFrame))])
+   wideFrame[,"sim_ftd_pif_mean"] =  rowMeans(wideFrame[,grep("sim_ftd_pif",names(wideFrame))])
+   wideFrame[,"sim_ftd_invmax_mean"] =  rowMeans(wideFrame[,grep("sim_ftd_invmax",names(wideFrame))])
+
+   names(longFrame)[sapply(1:ncol(longFrame), function(i) sum(is.na(longFrame[,i]))) > 0]
+```
+
 
 
 ### Check Universal Features
@@ -307,6 +328,9 @@ We can check the final results:
 ```{r cache=FALSE}
    dim(wideFrame)
    dim(longFrame)
+
+   names(wideFrame)[colSums(is.na(wideFrame)) > 0]
+   names(longFrame)[colSums(is.na(longFrame)) > 0]
 ```
 
 ### Save Universal
@@ -451,6 +475,9 @@ We can check the final results:
 ```{r cache=FALSE}
    dim(wideFrame)
    dim(longFrame)
+
+   names(wideFrame)[colSums(is.na(wideFrame)) > 0]
+   names(longFrame)[colSums(is.na(longFrame)) > 0]
 ```
 
 ### Save Universal
@@ -594,6 +621,9 @@ We can check the final results:
 ```{r cache=FALSE}
    dim(wideFrame)
    dim(longFrame)
+
+   names(wideFrame)[colSums(is.na(wideFrame)) > 0]
+   names(longFrame)[colSums(is.na(longFrame)) > 0]
 ```
 
 ### Save Universal

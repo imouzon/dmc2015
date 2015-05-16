@@ -1,6 +1,6 @@
 ---
-title: Creating Feature Matrix Version 0.1
-titleshort: Feature Matrix v. 0.1
+title: Creating Feature Matrix Version 0.2
+titleshort: Feature Matrix v. 0.2
 instructions: 
 output:
   usefulR::DMC_format
@@ -17,7 +17,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/feature_matrix_version0.1.rmd")
+      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/feature_matrix_version0.2.rmd")
 ```
 
 I am using the following packages:
@@ -86,7 +86,7 @@ makeWideFeatureMatrix = function(w,uf,set){
               "y" = Xcls %>% select(orderID,coupon1Used, coupon2Used, coupon3Used, basketValue))
 
    Fmat1 = list("train" = trn, "class" = cls, "validation" = val)
-   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_WIDE_ver0.1.rds"))
+   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_WIDE_ver0.2.rds"))
 }
 
 makeLongFeatureMatrix = function(l,u,set){
@@ -154,7 +154,7 @@ makeLongFeatureMatrix = function(l,u,set){
               "y" = Xcls %>% select(orderID,couponUsed, basketValue))
 
    Fmat1 = list("train" = trn, "class" = cls, "validation" = val)
-   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_LONG_ver0.1.rds"))
+   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_LONG_ver0.2.rds"))
 }
 ```
 
