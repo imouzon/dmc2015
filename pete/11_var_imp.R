@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 15-05-2015
-# Last Modified: Fri May 15 22:08:17 2015
+# Last Modified: Fri May 15 22:58:35 2015
 #
 # Purpose: Measure variable importance with regard to conditional random
 # forests. To do this we will randomly group variables and fit conditional
@@ -34,7 +34,7 @@ source("~/GitHub/dmc2015/pete/10_roc.R")
 library(party)
 
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.rds")
-
+h12 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.2.rds")
 # We will take random samples of 10/11 variables and fit a conditional random 
 # forest and record the importance of each variable. We then repeat this 
 # process on a new disjoint random set of predictors. This is repeated until
@@ -62,3 +62,24 @@ importance <- readRDS("~/GitHub/dmc2015/pete/predictions/importance.rds")
 # How do naive estimators compare to non-naive?
 mean(importance$imp[grep("naive", importance$var)])
 mean(importance$imp[grep("est", importance$var)])
+
+importance$var <- as.character(importance$var)
+
+# Test model with top 10 predictors 
+vars <- importance$var[c(1:7,9:11)]
+train <- cbind(couponUsed = h1$train$y$couponUsed, 
+               h1$train$X[vars])
+cf <- cforest(couponUsed~., data = train,
+              control = cforest_unbiased(mtry = 3, ntree = 50))
+
+h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
+              h1$validation$X[vars])
+m1_v_p <- predict(cf, newdata = h1_v)
+
+roc(h1_v_p, h1_v$couponUsed)
+
+library(randomForest)
+rf <- randomForest(couponUsed~., data = train,
+                   mtry = 3, ntree = 50)
+h1_v_p2 <- predict(rf, newdata = h1_v)
+roc(h1_v_p2, h1_v$couponUsed)
