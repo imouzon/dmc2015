@@ -89,6 +89,10 @@ makeWideFeatureMatrix = function(w,uf,set){
    saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_WIDE_ver0.2.rds"))
 }
 
+   makeLongFeatureMatrix(s1l,ul,"set1")
+   l = s1l
+   u = ul
+   set = "set1"
 makeLongFeatureMatrix = function(l,u,set){
    ## Working with wide versions
    dropcols = c("userID",
@@ -117,6 +121,8 @@ makeLongFeatureMatrix = function(l,u,set){
    factors = names(f1)[sapply(1:ncol(f1), function(i) is.factor(f1[,i]))]
 
    HTV = readRDS(paste0("~/dmc2015/data/featureMatrix/HTV",set,".rds"))
+   names(HTV)
+   dim(HTV$T)
 
    #train
    trn = HTV$T %>% select(orderID,coupon1Used,coupon2Used,coupon3Used,basketValue) %>% 
