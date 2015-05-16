@@ -1,0 +1,193 @@
+---
+title: 
+titleshort:
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/weichengs_features.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+
+Here you go Weicheng
+<!--- set1: R code (No Results in Document) -->
+```{r set1,cache=FALSE}
+   set1 = readRDS("../data/featureMatrix/HTVset1.rds")
+   set2 = readRDS("../data/featureMatrix/HTVset2.rds")
+   set3 = readRDS("../data/featureMatrix/HTVset3.rds")
+```
+
+# Getting Tranthe Data and Manipulations 
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   d = readRDS("../data/clean_data/universalCleanData.rds")
+
+   source("./R/clean_factor.r")
+   d = clean_factor(d,"couponID","cpn")
+   d = clean_factor(d,"brand","brand")
+   d = clean_factor(d,"productGroup","prod")
+   d = clean_factor(d,"categoryIDs")
+```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("./r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49)) 
+```
+
+## Make a few quick features
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dm$ShopFast = 1*(dm$TimeBtwnRecOrder < 28)
+   dm$EarlyRec = 1*(dm$TimeBtwnSentRec < 8)
+
+   dm$Shop60 = floor(dm$orderTimeTime)
+   dm$Shop30 = floor(dm$orderTimeTime * 60/30)*30/60
+   dm$Shop15 = floor(dm$orderTimeTime * 60/15)*15/60
+
+   dm$RecExpire60 = floor(dm$TimeBtwnSentRec)
+   dm$RecOrder60 = floor(dm$TimeBtwnRecOrder)
+   dm$OrderExpire60 = floor(dm$TimeBtwnOrderExpire)
+   dm$basePrice_price_ratio = dm$basePrice/dm$price
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("./r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+   dmc = dmc[,-which(names(dmc) == "categoryIDs")]
+   dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")
+   dmc = dm %>% 
+      left_join(dmc %>%
+            select(orderID,couponCol,categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+            gather(tmp,categoryID,-orderID,-couponCol) %>%
+            mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
+            select(orderID,couponCol,categoryEntry,categoryID) %>%
+            arrange(orderID,couponCol,categoryEntry) %>%
+            filter(!is.na(categoryID)),
+         by = c("orderID","couponCol")) %>%
+      arrange(orderID,couponCol,categoryEntry)
+```
+
+# bayes as f
+## Set 1
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   hst = set1$H
+   dsn = d
+   dsn.hist = dsn[which(dsn$orderID %in% hst$orderID),]
+
+   bb = dsn %>% filter(!is.na(coupon1Used)) %>% 
+       arrange(userID) %>%
+       group_by(orderID) %>%
+       mutate(couponInd = 1*((coupon1Used + coupon2Used + coupon3Used)>0)) %>% 
+       group_by(userID) %>% 
+       summarize(nvisits = n(), ncouponvisits = sum(couponInd)) %>%
+       filter(ncouponvisits > 0) %>% 
+       mutate(propcouponvisits = ncouponvisits/nvisits)
+
+   M = mean(bb$propcouponvisits,na.rm=TRUE)
+   M2 = mean(bb$propcouponvisits^2,na.rm=TRUE)
+
+   alpha.est = M * (M - M2) / ( M2 - M*M ) 
+   beta.est = ( 1 - M ) * ( M - M2 ) / (M2 - M*M)
+
+   ff.1 = dsn %>% select(orderID,userID) %>% left_join(
+      dsn %>% select(orderID,userID) %>% 
+         full_join(dsn.hist %>% 
+                   group_by(orderID) %>% 
+                   mutate(visit = 1),
+            by=c("orderID","userID")) %>%
+            group_by(orderID) %>% 
+            mutate(visit = 1*!is.na(visit), couponInd = visit*max(c(0,coupon1Used,coupon2Used,coupon3Used),na.rm=T)) %>% 
+            group_by(userID) %>%
+            summarize(nvisits = sum(visit),
+                      ncouponvisits = sum(couponInd),
+                      propcouponvisits = (ncouponvisits + alpha.est)/(nvisits + alpha.est + beta.est)) %>%
+            select(userID,propcouponvisits), 
+            by=c("userID"))
+     
+   hst = set2$H
+   dsn = d
+   dsn.hist = dsn[which(dsn$orderID %in% hst$orderID),]
+
+   ff.2 = dsn %>% select(orderID,userID) %>% left_join(
+      dsn %>% select(orderID,userID) %>% 
+         full_join(dsn.hist %>% 
+                   group_by(orderID) %>% 
+                   mutate(visit = 1),
+            by=c("orderID","userID")) %>%
+            group_by(orderID) %>% 
+            mutate(visit = 1*!is.na(visit), couponInd = visit*max(c(0,coupon1Used,coupon2Used,coupon3Used),na.rm=T)) %>% 
+            group_by(userID) %>%
+            summarize(nvisits = sum(visit),
+                      ncouponvisits = sum(couponInd),
+                      propcouponvisits = (ncouponvisits + alpha.est)/(nvisits + alpha.est + beta.est)) %>%
+            select(userID,propcouponvisits), 
+            by=c("userID"))
+
+   hst = set3$H
+   dsn = d
+   dsn.hist = dsn[which(dsn$orderID %in% hst$orderID),]
+
+   ff.3 = dsn %>% select(orderID,userID) %>% left_join(
+      dsn %>% select(orderID,userID) %>% 
+         full_join(dsn.hist %>% 
+                   group_by(orderID) %>% 
+                   mutate(visit = 1),
+            by=c("orderID","userID")) %>%
+            group_by(orderID) %>% 
+            mutate(visit = 1*!is.na(visit), couponInd = visit*max(c(0,coupon1Used,coupon2Used,coupon3Used),na.rm=T)) %>% 
+            group_by(userID) %>%
+            summarize(nvisits = sum(visit),
+                      ncouponvisits = sum(couponInd),
+                      propcouponvisits = (ncouponvisits + alpha.est)/(nvisits + alpha.est + beta.est)) %>%
+            select(userID,propcouponvisits), 
+            by=c("userID"))
+
+    saveRDS(ff.1,file="../features/feature_files/set1/weichangsFeature.rds")
+    saveRDS(ff.2,file="../features/feature_files/set2/weichangsFeature.rds")
+    saveRDS(ff.3,file="../features/feature_files/set3/weichangsFeature.rds")
+```
