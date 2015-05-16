@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>To filter the feature matrix from set3_ver0.3 </title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</head>
+
+<body>
+<h1>To filter the feature matrix from set3_ver0.3 </h1>
+
+<pre><code class="r">Feature3 &lt;- readRDS(&quot;~/dmc2015/featMat_based-on-HTVset3_LONG_ver0.3.rds&quot;)
+
+w31 = Feature3[[1]]
+w33 = Feature3[[3]]
+
+cw31 = cbind(w31[[1]],w31[[2]])
+cw33 = cbind(w33[[1]],w33[[2]])
+########## the following is for safe check for categorical variables ###########
+i = sapply(cw31, is.factor)
+colnames(cw31)[i]
+</code></pre>
+
+<pre><code>## [1] &quot;order_match_class&quot; &quot;firstTimeCoup1Rec&quot; &quot;firstTimeCoup2Rec&quot;
+## [4] &quot;firstTimeCoup3Rec&quot;
+</code></pre>
+
+<pre><code class="r"># we excluded the last three and included the first into model0 later
+# [1] &quot;order_match_class&quot; &quot;firstTimeCoup1Rec&quot; &quot;firstTimeCoup2Rec&quot; &quot;firstTimeCoup3Rec&quot;
+</code></pre>
+
+<h2>Bad numbers (corresponding names) we excluded</h2>
+
+<pre><code class="r"># badnum = -c(1,7,8,9,50,   94:103,   476:937)
+# 
+# [1] &quot;orderID&quot;                                             
+# 
+# [7] &quot;firstTimeCoup1Rec&quot;                                   &quot;firstTimeCoup2Rec&quot;                                  
+# [9] &quot;firstTimeCoup3Rec&quot;                                                
+# 
+# [49]                                                       &quot;bPr2pr_approx_ratio&quot; 
+# 
+# [93]                                                       &quot;sim_ftd_invmax_cosSim_to1Col&quot;                       
+# [95] &quot;sim_ftd_ivf_cosSim_to1Col&quot;                           &quot;sim_ftd_lnorm_cosSim_to1Col&quot;                        
+# [97] &quot;sim_ftd_pif_cosSim_to1Col&quot;                           &quot;jaccard_to1Col&quot;                                     
+# [99] &quot;sim_ftd_invmax_cosSim_mean&quot;                          &quot;sim_ftd_ivf_cosSim_mean&quot;                            
+# [101] &quot;sim_ftd_lnorm_cosSim_mean&quot;                           &quot;sim_ftd_pif_cosSim_mean&quot;                            
+# [103] &quot;sim_jaccard_mean&quot; 
+# 
+# [475]                                                       &quot;llr_est_basePrice_price_ratio&quot;                      
+# [477] &quot;llr_naive_basePrice_price_ratio&quot;                     &quot;llr_est_basePriceXbasePrice_price_ratio&quot;            
+# [479] &quot;llr_naive_basePriceXbasePrice_price_ratio&quot;           &quot;llr_est_brdXbasePrice_price_ratio&quot;                  
+# [481] &quot;llr_naive_brdXbasePrice_price_ratio&quot;                 &quot;llr_est_brdXcatidsXbasePrice_price_ratio&quot;           
+# [483] &quot;llr_naive_brdXcatidsXbasePrice_price_ratio&quot;          &quot;llr_est_brdXprodXbasePrice_price_ratio&quot;             
+# [485] &quot;llr_naive_brdXprodXbasePrice_price_ratio&quot;            &quot;llr_est_rwdXbrdXbasePrice_price_ratio&quot;              
+# [487] &quot;llr_naive_rwdXbrdXbasePrice_price_ratio&quot;             &quot;llr_est_catidsXbasePrice_price_ratio&quot;               
+# [489] &quot;llr_naive_catidsXbasePrice_price_ratio&quot;              &quot;llr_est_rwdXcatidsXbasePrice_price_ratio&quot;           
+# [491] &quot;llr_naive_rwdXcatidsXbasePrice_price_ratio&quot;          &quot;llr_est_EarlyRecXbasePrice_price_ratio&quot;             
+# [493] &quot;llr_naive_EarlyRecXbasePrice_price_ratio&quot;            &quot;llr_est_brdXEarlyRecXbasePrice_price_ratio&quot;         
+# [495] &quot;llr_naive_brdXEarlyRecXbasePrice_price_ratio&quot;        &quot;llr_est_catidsXEarlyRecXbasePrice_price_ratio&quot;      
+# [497] &quot;llr_naive_catidsXEarlyRecXbasePrice_price_ratio&quot;     &quot;llr_est_luxXEarlyRecXbasePrice_price_ratio&quot;         
+# [499] &quot;llr_naive_luxXEarlyRecXbasePrice_price_ratio&quot;        &quot;llr_est_prodXEarlyRecXbasePrice_price_ratio&quot;        
+# [501] &quot;llr_naive_prodXEarlyRecXbasePrice_price_ratio&quot;       &quot;llr_est_rwdXEarlyRecXbasePrice_price_ratio&quot;         
+# [503] &quot;llr_naive_rwdXEarlyRecXbasePrice_price_ratio&quot;        &quot;llr_est_luxXbasePrice_price_ratio&quot;                  
+# [505] &quot;llr_naive_luxXbasePrice_price_ratio&quot;                 &quot;llr_est_luxXbrdXbasePrice_price_ratio&quot;              
+# [507] &quot;llr_naive_luxXbrdXbasePrice_price_ratio&quot;             &quot;llr_est_luxXcatidsXbasePrice_price_ratio&quot;           
+# [509] &quot;llr_naive_luxXcatidsXbasePrice_price_ratio&quot;          &quot;llr_est_luxXprodXbasePrice_price_ratio&quot;             
+# [511] &quot;llr_naive_luxXprodXbasePrice_price_ratio&quot;            &quot;llr_est_rwdXluxXbasePrice_price_ratio&quot;              
+# [513] &quot;llr_naive_rwdXluxXbasePrice_price_ratio&quot;             &quot;llr_est_priceXbasePrice_price_ratio&quot;                
+# [515] &quot;llr_naive_priceXbasePrice_price_ratio&quot;               &quot;llr_est_prodXbasePrice_price_ratio&quot;                 
+# [517] &quot;llr_naive_prodXbasePrice_price_ratio&quot;                &quot;llr_est_prodXcatidsXbasePrice_price_ratio&quot;          
+# [519] &quot;llr_naive_prodXcatidsXbasePrice_price_ratio&quot;         &quot;llr_est_rwdXprodXbasePrice_price_ratio&quot;             
+# [521] &quot;llr_naive_rwdXprodXbasePrice_price_ratio&quot;            &quot;llr_est_rwdXbasePrice_price_ratio&quot;                  
+# [523] &quot;llr_naive_rwdXbasePrice_price_ratio&quot;                 &quot;llr_est_ShopFastXbasePrice_price_ratio&quot;             
+# [525] &quot;llr_naive_ShopFastXbasePrice_price_ratio&quot;            &quot;llr_est_brdXShopFastXbasePrice_price_ratio&quot;         
+# [527] &quot;llr_naive_brdXShopFastXbasePrice_price_ratio&quot;        &quot;llr_est_catidsXShopFastXbasePrice_price_ratio&quot;      
+# [529] &quot;llr_naive_catidsXShopFastXbasePrice_price_ratio&quot;     &quot;llr_est_ShopFastXEarlyRecXbasePrice_price_ratio&quot;    
+# [531] &quot;llr_naive_ShopFastXEarlyRecXbasePrice_price_ratio&quot;   &quot;llr_est_luxXShopFastXbasePrice_price_ratio&quot;         
+# [533] &quot;llr_naive_luxXShopFastXbasePrice_price_ratio&quot;        &quot;llr_est_prodXShopFastXbasePrice_price_ratio&quot;        
+# [535] &quot;llr_naive_prodXShopFastXbasePrice_price_ratio&quot;       &quot;llr_est_rwdXShopFastXbasePrice_price_ratio&quot;         
+# [537] &quot;llr_naive_rwdXShopFastXbasePrice_price_ratio&quot;        &quot;llr_est_basePrice&quot;                                  
+# [539] &quot;llr_naive_basePrice&quot;                                 &quot;llr_est_basePriceXbrd&quot;                              
+# [541] &quot;llr_naive_basePriceXbrd&quot;                             &quot;llr_est_basePriceXbrdXcatids&quot;                       
+# [543] &quot;llr_naive_basePriceXbrdXcatids&quot;                      &quot;llr_est_basePriceXbrdXprod&quot;                         
+# [545] &quot;llr_naive_basePriceXbrdXprod&quot;                        &quot;llr_est_basePriceXrwdXbrd&quot;                          
+# [547] &quot;llr_naive_basePriceXrwdXbrd&quot;                         &quot;llr_est_basePriceXcatids&quot;                           
+# [549] &quot;llr_naive_basePriceXcatids&quot;                          &quot;llr_est_basePriceXrwdXcatids&quot;                       
+# [551] &quot;llr_naive_basePriceXrwdXcatids&quot;                      &quot;llr_est_basePriceXEarlyRec&quot;                         
+# [553] &quot;llr_naive_basePriceXEarlyRec&quot;                        &quot;llr_est_basePriceXbrdXEarlyRec&quot;                     
+# [555] &quot;llr_naive_basePriceXbrdXEarlyRec&quot;                    &quot;llr_est_basePriceXcatidsXEarlyRec&quot;                  
+# [557] &quot;llr_naive_basePriceXcatidsXEarlyRec&quot;                 &quot;llr_est_basePriceXluxXEarlyRec&quot;                     
+# [559] &quot;llr_naive_basePriceXluxXEarlyRec&quot;                    &quot;llr_est_basePriceXprodXEarlyRec&quot;                    
+# [561] &quot;llr_naive_basePriceXprodXEarlyRec&quot;                   &quot;llr_est_basePriceXrwdXEarlyRec&quot;                     
+# [563] &quot;llr_naive_basePriceXrwdXEarlyRec&quot;                    &quot;llr_est_basePriceXlux&quot;                              
+# [565] &quot;llr_naive_basePriceXlux&quot;                             &quot;llr_est_basePriceXluxXbrd&quot;                          
+# [567] &quot;llr_naive_basePriceXluxXbrd&quot;                         &quot;llr_est_basePriceXluxXcatids&quot;                       
+# [569] &quot;llr_naive_basePriceXluxXcatids&quot;                      &quot;llr_est_basePriceXluxXprod&quot;                         
+# [571] &quot;llr_naive_basePriceXluxXprod&quot;                        &quot;llr_est_basePriceXrwdXlux&quot;                          
+# [573] &quot;llr_naive_basePriceXrwdXlux&quot;                         &quot;llr_est_basePriceXprod&quot;                             
+# [575] &quot;llr_naive_basePriceXprod&quot;                            &quot;llr_est_basePriceXprodXcatids&quot;                      
+# [577] &quot;llr_naive_basePriceXprodXcatids&quot;                     &quot;llr_est_basePriceXrwdXprod&quot;                         
+# [579] &quot;llr_naive_basePriceXrwdXprod&quot;                        &quot;llr_est_basePriceXrwd&quot;                              
+# [581] &quot;llr_naive_basePriceXrwd&quot;                             &quot;llr_est_basePriceXShopFast&quot;                         
+# [583] &quot;llr_naive_basePriceXShopFast&quot;                        &quot;llr_est_basePriceXbrdXShopFast&quot;                     
+# [585] &quot;llr_naive_basePriceXbrdXShopFast&quot;                    &quot;llr_est_basePriceXcatidsXShopFast&quot;                  
+# [587] &quot;llr_naive_basePriceXcatidsXShopFast&quot;                 &quot;llr_est_basePriceXShopFastXEarlyRec&quot;                
+# [589] &quot;llr_naive_basePriceXShopFastXEarlyRec&quot;               &quot;llr_est_basePriceXluxXShopFast&quot;                     
+# [591] &quot;llr_naive_basePriceXluxXShopFast&quot;                    &quot;llr_est_basePriceXprodXShopFast&quot;                    
+# [593] &quot;llr_naive_basePriceXprodXShopFast&quot;                   &quot;llr_est_basePriceXrwdXShopFast&quot;                     
+# [595] &quot;llr_naive_basePriceXrwdXShopFast&quot;                    &quot;llr_est_brd&quot;                                        
+# [597] &quot;llr_naive_brd&quot;                                       &quot;llr_est_basePriceXbrdXbasePrice_price_ratio&quot;        
+# [599] &quot;llr_naive_basePriceXbrdXbasePrice_price_ratio&quot;       &quot;llr_est_priceXbrdXbasePrice_price_ratio&quot;            
+# [601] &quot;llr_naive_priceXbrdXbasePrice_price_ratio&quot;           &quot;llr_est_brdXcatids&quot;                                 
+# [603] &quot;llr_naive_brdXcatids&quot;                                &quot;llr_est_rwdXbrdXcatids&quot;                             
+# [605] &quot;llr_naive_rwdXbrdXcatids&quot;                            &quot;llr_est_brdXprod&quot;                                   
+# [607] &quot;llr_naive_brdXprod&quot;                                  &quot;llr_est_brdXprodXcatids&quot;                            
+# [609] &quot;llr_naive_brdXprodXcatids&quot;                           &quot;llr_est_rwdXbrdXprodXcatids&quot;                        
+# [611] &quot;llr_naive_rwdXbrdXprodXcatids&quot;                       &quot;llr_est_rwdXbrdXprod&quot;                               
+# [613] &quot;llr_naive_rwdXbrdXprod&quot;                              &quot;llr_est_rwdXbrd&quot;                                    
+# [615] &quot;llr_naive_rwdXbrd&quot;                                   &quot;llr_est_catids&quot;                                     
+# [617] &quot;llr_naive_catids&quot;                                    &quot;llr_est_basePriceXcatidsXbasePrice_price_ratio&quot;     
+# [619] &quot;llr_naive_basePriceXcatidsXbasePrice_price_ratio&quot;    &quot;llr_est_priceXcatidsXbasePrice_price_ratio&quot;         
+# [621] &quot;llr_naive_priceXcatidsXbasePrice_price_ratio&quot;        &quot;llr_est_rwdXcatids&quot;                                 
+# [623] &quot;llr_naive_rwdXcatids&quot;                                &quot;llr_est_cpn&quot;                                        
+# [625] &quot;llr_naive_cpn&quot;                                       &quot;llr_est_cpnXEarlyRec&quot;                               
+# [627] &quot;llr_naive_cpnXEarlyRec&quot;                              &quot;llr_est_cpnXShopFast&quot;                               
+# [629] &quot;llr_naive_cpnXShopFast&quot;                              &quot;llr_est_EarlyRec&quot;                                   
+# [631] &quot;llr_naive_EarlyRec&quot;                                  &quot;llr_est_basePriceXEarlyRecXbasePrice_price_ratio&quot;   
+# [633] &quot;llr_naive_basePriceXEarlyRecXbasePrice_price_ratio&quot;  &quot;llr_est_priceXEarlyRecXbasePrice_price_ratio&quot;       
+# [635] &quot;llr_naive_priceXEarlyRecXbasePrice_price_ratio&quot;      &quot;llr_est_brdXEarlyRec&quot;                               
+# [637] &quot;llr_naive_brdXEarlyRec&quot;                              &quot;llr_est_brdXcatidsXEarlyRec&quot;                        
+# [639] &quot;llr_naive_brdXcatidsXEarlyRec&quot;                       &quot;llr_est_rwdXbrdXcatidsXEarlyRec&quot;                    
+# [641] &quot;llr_naive_rwdXbrdXcatidsXEarlyRec&quot;                   &quot;llr_est_brdXprodXEarlyRec&quot;                          
+# [643] &quot;llr_naive_brdXprodXEarlyRec&quot;                         &quot;llr_est_brdXprodXcatidsXEarlyRec&quot;                   
+# [645] &quot;llr_naive_brdXprodXcatidsXEarlyRec&quot;                  &quot;llr_est_rwdXbrdXprodXcatidsXEarlyRec&quot;               
+# [647] &quot;llr_naive_rwdXbrdXprodXcatidsXEarlyRec&quot;              &quot;llr_est_rwdXbrdXprodXEarlyRec&quot;                      
+# [649] &quot;llr_naive_rwdXbrdXprodXEarlyRec&quot;                     &quot;llr_est_rwdXbrdXEarlyRec&quot;                           
+# [651] &quot;llr_naive_rwdXbrdXEarlyRec&quot;                          &quot;llr_est_catidsXEarlyRec&quot;                            
+# [653] &quot;llr_naive_catidsXEarlyRec&quot;                           &quot;llr_est_rwdXcatidsXEarlyRec&quot;                        
+# [655] &quot;llr_naive_rwdXcatidsXEarlyRec&quot;                       &quot;llr_est_luxXEarlyRec&quot;                               
+# [657] &quot;llr_naive_luxXEarlyRec&quot;                              &quot;llr_est_luxXbrdXEarlyRec&quot;                           
+# [659] &quot;llr_naive_luxXbrdXEarlyRec&quot;                          &quot;llr_est_luxXbrdXcatidsXEarlyRec&quot;                    
+# [661] &quot;llr_naive_luxXbrdXcatidsXEarlyRec&quot;                   &quot;llr_est_rwdXluxXbrdXcatidsXEarlyRec&quot;                
+# [663] &quot;llr_naive_rwdXluxXbrdXcatidsXEarlyRec&quot;               &quot;llr_est_luxXbrdXprodXEarlyRec&quot;                      
+# [665] &quot;llr_naive_luxXbrdXprodXEarlyRec&quot;                     &quot;llr_est_luxXbrdXprodXcatidsXEarlyRec&quot;               
+# [667] &quot;llr_naive_luxXbrdXprodXcatidsXEarlyRec&quot;              &quot;llr_est_rwdXluxXbrdXprodXEarlyRec&quot;                  
+# [669] &quot;llr_naive_rwdXluxXbrdXprodXEarlyRec&quot;                 &quot;llr_est_rwdXluxXbrdXEarlyRec&quot;                       
+# [671] &quot;llr_naive_rwdXluxXbrdXEarlyRec&quot;                      &quot;llr_est_luxXcatidsXEarlyRec&quot;                        
+# [673] &quot;llr_naive_luxXcatidsXEarlyRec&quot;                       &quot;llr_est_rwdXluxXcatidsXEarlyRec&quot;                    
+# [675] &quot;llr_naive_rwdXluxXcatidsXEarlyRec&quot;                   &quot;llr_est_luxXprodXEarlyRec&quot;                          
+# [677] &quot;llr_naive_luxXprodXEarlyRec&quot;                         &quot;llr_est_luxXprodXcatidsXEarlyRec&quot;                   
+# [679] &quot;llr_naive_luxXprodXcatidsXEarlyRec&quot;                  &quot;llr_est_rwdXluxXprodXcatidsXEarlyRec&quot;               
+# [681] &quot;llr_naive_rwdXluxXprodXcatidsXEarlyRec&quot;              &quot;llr_est_rwdXluxXprodXEarlyRec&quot;                      
+# [683] &quot;llr_naive_rwdXluxXprodXEarlyRec&quot;                     &quot;llr_est_rwdXluxXEarlyRec&quot;                           
+# [685] &quot;llr_naive_rwdXluxXEarlyRec&quot;                          &quot;llr_est_prodXEarlyRec&quot;                              
+# [687] &quot;llr_naive_prodXEarlyRec&quot;                             &quot;llr_est_prodXcatidsXEarlyRec&quot;                       
+# [689] &quot;llr_naive_prodXcatidsXEarlyRec&quot;                      &quot;llr_est_rwdXprodXcatidsXEarlyRec&quot;                   
+# [691] &quot;llr_naive_rwdXprodXcatidsXEarlyRec&quot;                  &quot;llr_est_rwdXprodXEarlyRec&quot;                          
+# [693] &quot;llr_naive_rwdXprodXEarlyRec&quot;                         &quot;llr_est_rwdXEarlyRec&quot;                               
+# [695] &quot;llr_naive_rwdXEarlyRec&quot;                              &quot;llr_est_OrderExpire60&quot;                              
+# [697] &quot;llr_naive_OrderExpire60&quot;                             &quot;llr_est_lux&quot;                                        
+# [699] &quot;llr_naive_lux&quot;                                       &quot;llr_est_basePriceXluxXbasePrice_price_ratio&quot;        
+# [701] &quot;llr_naive_basePriceXluxXbasePrice_price_ratio&quot;       &quot;llr_est_priceXluxXbasePrice_price_ratio&quot;            
+# [703] &quot;llr_naive_priceXluxXbasePrice_price_ratio&quot;           &quot;llr_est_luxXbrd&quot;                                    
+# [705] &quot;llr_naive_luxXbrd&quot;                                   &quot;llr_est_luxXbrdXcatids&quot;                             
+# [707] &quot;llr_naive_luxXbrdXcatids&quot;                            &quot;llr_est_rwdXluxXbrdXcatids&quot;                         
+# [709] &quot;llr_naive_rwdXluxXbrdXcatids&quot;                        &quot;llr_est_luxXbrdXprod&quot;                               
+# [711] &quot;llr_naive_luxXbrdXprod&quot;                              &quot;llr_est_luxXbrdXprodXcatids&quot;                        
+# [713] &quot;llr_naive_luxXbrdXprodXcatids&quot;                       &quot;llr_est_rwdXluxXbrdXprodXcatids&quot;                    
+# [715] &quot;llr_naive_rwdXluxXbrdXprodXcatids&quot;                   &quot;llr_est_rwdXluxXbrdXprod&quot;                           
+# [717] &quot;llr_naive_rwdXluxXbrdXprod&quot;                          &quot;llr_est_rwdXluxXbrd&quot;                                
+# [719] &quot;llr_naive_rwdXluxXbrd&quot;                               &quot;llr_est_luxXcatids&quot;                                 
+# [721] &quot;llr_naive_luxXcatids&quot;                                &quot;llr_est_rwdXluxXcatids&quot;                             
+# [723] &quot;llr_naive_rwdXluxXcatids&quot;                            &quot;llr_est_luxXprod&quot;                                   
+# [725] &quot;llr_naive_luxXprod&quot;                                  &quot;llr_est_luxXprodXcatids&quot;                            
+# [727] &quot;llr_naive_luxXprodXcatids&quot;                           &quot;llr_est_rwdXluxXprodXcatids&quot;                        
+# [729] &quot;llr_naive_rwdXluxXprodXcatids&quot;                       &quot;llr_est_rwdXluxXprod&quot;                               
+# [731] &quot;llr_naive_rwdXluxXprod&quot;                              &quot;llr_est_rwdXlux&quot;                                    
+# [733] &quot;llr_naive_rwdXlux&quot;                                   &quot;llr_est_price&quot;                                      
+# [735] &quot;llr_naive_price&quot;                                     &quot;llr_est_priceXbrd&quot;                                  
+# [737] &quot;llr_naive_priceXbrd&quot;                                 &quot;llr_est_priceXbrdXcatids&quot;                           
+# [739] &quot;llr_naive_priceXbrdXcatids&quot;                          &quot;llr_est_priceXbrdXprod&quot;                             
+# [741] &quot;llr_naive_priceXbrdXprod&quot;                            &quot;llr_est_priceXrwdXbrd&quot;                              
+# [743] &quot;llr_naive_priceXrwdXbrd&quot;                             &quot;llr_est_priceXcatids&quot;                               
+# [745] &quot;llr_naive_priceXcatids&quot;                              &quot;llr_est_priceXrwdXcatids&quot;                           
+# [747] &quot;llr_naive_priceXrwdXcatids&quot;                          &quot;llr_est_priceXEarlyRec&quot;                             
+# [749] &quot;llr_naive_priceXEarlyRec&quot;                            &quot;llr_est_priceXbrdXEarlyRec&quot;                         
+# [751] &quot;llr_naive_priceXbrdXEarlyRec&quot;                        &quot;llr_est_priceXcatidsXEarlyRec&quot;                      
+# [753] &quot;llr_naive_priceXcatidsXEarlyRec&quot;                     &quot;llr_est_priceXluxXEarlyRec&quot;                         
+# [755] &quot;llr_naive_priceXluxXEarlyRec&quot;                        &quot;llr_est_priceXprodXEarlyRec&quot;                        
+# [757] &quot;llr_naive_priceXprodXEarlyRec&quot;                       &quot;llr_est_priceXrwdXEarlyRec&quot;                         
+# [759] &quot;llr_naive_priceXrwdXEarlyRec&quot;                        &quot;llr_est_priceXlux&quot;                                  
+# [761] &quot;llr_naive_priceXlux&quot;                                 &quot;llr_est_priceXluxXbrd&quot;                              
+# [763] &quot;llr_naive_priceXluxXbrd&quot;                             &quot;llr_est_priceXluxXcatids&quot;                           
+# [765] &quot;llr_naive_priceXluxXcatids&quot;                          &quot;llr_est_priceXluxXprod&quot;                             
+# [767] &quot;llr_naive_priceXluxXprod&quot;                            &quot;llr_est_priceXrwdXlux&quot;                              
+# [769] &quot;llr_naive_priceXrwdXlux&quot;                             &quot;llr_est_priceXprod&quot;                                 
+# [771] &quot;llr_naive_priceXprod&quot;                                &quot;llr_est_priceXprodXcatids&quot;                          
+# [773] &quot;llr_naive_priceXprodXcatids&quot;                         &quot;llr_est_priceXrwdXprod&quot;                             
+# [775] &quot;llr_naive_priceXrwdXprod&quot;                            &quot;llr_est_priceXrwd&quot;                                  
+# [777] &quot;llr_naive_priceXrwd&quot;                                 &quot;llr_est_priceXShopFast&quot;                             
+# [779] &quot;llr_naive_priceXShopFast&quot;                            &quot;llr_est_priceXbrdXShopFast&quot;                         
+# [781] &quot;llr_naive_priceXbrdXShopFast&quot;                        &quot;llr_est_priceXcatidsXShopFast&quot;                      
+# [783] &quot;llr_naive_priceXcatidsXShopFast&quot;                     &quot;llr_est_priceXShopFastXEarlyRec&quot;                    
+# [785] &quot;llr_naive_priceXShopFastXEarlyRec&quot;                   &quot;llr_est_priceXluxXShopFast&quot;                         
+# [787] &quot;llr_naive_priceXluxXShopFast&quot;                        &quot;llr_est_priceXprodXShopFast&quot;                        
+# [789] &quot;llr_naive_priceXprodXShopFast&quot;                       &quot;llr_est_priceXrwdXShopFast&quot;                         
+# [791] &quot;llr_naive_priceXrwdXShopFast&quot;                        &quot;llr_est_prod&quot;                                       
+# [793] &quot;llr_naive_prod&quot;                                      &quot;llr_est_basePriceXprodXbasePrice_price_ratio&quot;       
+# [795] &quot;llr_naive_basePriceXprodXbasePrice_price_ratio&quot;      &quot;llr_est_priceXprodXbasePrice_price_ratio&quot;           
+# [797] &quot;llr_naive_priceXprodXbasePrice_price_ratio&quot;          &quot;llr_est_prodXcatids&quot;                                
+# [799] &quot;llr_naive_prodXcatids&quot;                               &quot;llr_est_rwdXprodXcatids&quot;                            
+# [801] &quot;llr_naive_rwdXprodXcatids&quot;                           &quot;llr_est_rwdXprod&quot;                                   
+# [803] &quot;llr_naive_rwdXprod&quot;                                  &quot;llr_est_RecExpire60&quot;                                
+# [805] &quot;llr_naive_RecExpire60&quot;                               &quot;llr_est_RecOrder60&quot;                                 
+# [807] &quot;llr_naive_RecOrder60&quot;                                &quot;llr_est_rwd&quot;                                        
+# [809] &quot;llr_naive_rwd&quot;                                       &quot;llr_est_basePriceXrwdXbasePrice_price_ratio&quot;        
+# [811] &quot;llr_naive_basePriceXrwdXbasePrice_price_ratio&quot;       &quot;llr_est_priceXrwdXbasePrice_price_ratio&quot;            
+# [813] &quot;llr_naive_priceXrwdXbasePrice_price_ratio&quot;           &quot;llr_est_Shop15&quot;                                     
+# [815] &quot;llr_naive_Shop15&quot;                                    &quot;llr_est_Shop30&quot;                                     
+# [817] &quot;llr_naive_Shop30&quot;                                    &quot;llr_est_Shop60&quot;                                     
+# [819] &quot;llr_naive_Shop60&quot;                                    &quot;llr_est_ShopFast&quot;                                   
+# [821] &quot;llr_naive_ShopFast&quot;                                  &quot;llr_est_basePriceXShopFastXbasePrice_price_ratio&quot;   
+# [823] &quot;llr_naive_basePriceXShopFastXbasePrice_price_ratio&quot;  &quot;llr_est_priceXShopFastXbasePrice_price_ratio&quot;       
+# [825] &quot;llr_naive_priceXShopFastXbasePrice_price_ratio&quot;      &quot;llr_est_brdXShopFast&quot;                               
+# [827] &quot;llr_naive_brdXShopFast&quot;                              &quot;llr_est_brdXcatidsXShopFast&quot;                        
+# [829] &quot;llr_naive_brdXcatidsXShopFast&quot;                       &quot;llr_est_rwdXbrdXcatidsXShopFast&quot;                    
+# [831] &quot;llr_naive_rwdXbrdXcatidsXShopFast&quot;                   &quot;llr_est_brdXprodXShopFast&quot;                          
+# [833] &quot;llr_naive_brdXprodXShopFast&quot;                         &quot;llr_est_brdXprodXcatidsXShopFast&quot;                   
+# [835] &quot;llr_naive_brdXprodXcatidsXShopFast&quot;                  &quot;llr_est_rwdXbrdXprodXcatidsXShopFast&quot;               
+# [837] &quot;llr_naive_rwdXbrdXprodXcatidsXShopFast&quot;              &quot;llr_est_rwdXbrdXprodXShopFast&quot;                      
+# [839] &quot;llr_naive_rwdXbrdXprodXShopFast&quot;                     &quot;llr_est_rwdXbrdXShopFast&quot;                           
+# [841] &quot;llr_naive_rwdXbrdXShopFast&quot;                          &quot;llr_est_catidsXShopFast&quot;                            
+# [843] &quot;llr_naive_catidsXShopFast&quot;                           &quot;llr_est_rwdXcatidsXShopFast&quot;                        
+# [845] &quot;llr_naive_rwdXcatidsXShopFast&quot;                       &quot;llr_est_ShopFastXEarlyRec&quot;                          
+# [847] &quot;llr_naive_ShopFastXEarlyRec&quot;                         &quot;llr_est_brdXShopFastXEarlyRec&quot;                      
+# [849] &quot;llr_naive_brdXShopFastXEarlyRec&quot;                     &quot;llr_est_brdXcatidsXShopFastXEarlyRec&quot;               
+# [851] &quot;llr_naive_brdXcatidsXShopFastXEarlyRec&quot;              &quot;llr_est_rwdXbrdXcatidsXShopFastXEarlyRec&quot;           
+# [853] &quot;llr_naive_rwdXbrdXcatidsXShopFastXEarlyRec&quot;          &quot;llr_est_brdXprodXShopFastXEarlyRec&quot;                 
+# [855] &quot;llr_naive_brdXprodXShopFastXEarlyRec&quot;                &quot;llr_est_brdXprodXcatidsXShopFastXEarlyRec&quot;          
+# [857] &quot;llr_naive_brdXprodXcatidsXShopFastXEarlyRec&quot;         &quot;llr_est_rwdXbrdXprodXShopFastXEarlyRec&quot;             
+# [859] &quot;llr_naive_rwdXbrdXprodXShopFastXEarlyRec&quot;            &quot;llr_est_rwdXbrdXShopFastXEarlyRec&quot;                  
+# [861] &quot;llr_naive_rwdXbrdXShopFastXEarlyRec&quot;                 &quot;llr_est_catidsXShopFastXEarlyRec&quot;                   
+# [863] &quot;llr_naive_catidsXShopFastXEarlyRec&quot;                  &quot;llr_est_rwdXcatidsXShopFastXEarlyRec&quot;               
+# [865] &quot;llr_naive_rwdXcatidsXShopFastXEarlyRec&quot;              &quot;llr_est_luxXShopFastXEarlyRec&quot;                      
+# [867] &quot;llr_naive_luxXShopFastXEarlyRec&quot;                     &quot;llr_est_luxXbrdXShopFastXEarlyRec&quot;                  
+# [869] &quot;llr_naive_luxXbrdXShopFastXEarlyRec&quot;                 &quot;llr_est_luxXbrdXcatidsXShopFastXEarlyRec&quot;           
+# [871] &quot;llr_naive_luxXbrdXcatidsXShopFastXEarlyRec&quot;          &quot;llr_est_luxXbrdXprodXShopFastXEarlyRec&quot;             
+# [873] &quot;llr_naive_luxXbrdXprodXShopFastXEarlyRec&quot;            &quot;llr_est_rwdXluxXbrdXShopFastXEarlyRec&quot;              
+# [875] &quot;llr_naive_rwdXluxXbrdXShopFastXEarlyRec&quot;             &quot;llr_est_luxXcatidsXShopFastXEarlyRec&quot;               
+# [877] &quot;llr_naive_luxXcatidsXShopFastXEarlyRec&quot;              &quot;llr_est_rwdXluxXcatidsXShopFastXEarlyRec&quot;           
+# [879] &quot;llr_naive_rwdXluxXcatidsXShopFastXEarlyRec&quot;          &quot;llr_est_luxXprodXShopFastXEarlyRec&quot;                 
+# [881] &quot;llr_naive_luxXprodXShopFastXEarlyRec&quot;                &quot;llr_est_luxXprodXcatidsXShopFastXEarlyRec&quot;          
+# [883] &quot;llr_naive_luxXprodXcatidsXShopFastXEarlyRec&quot;         &quot;llr_est_rwdXluxXprodXShopFastXEarlyRec&quot;             
+# [885] &quot;llr_naive_rwdXluxXprodXShopFastXEarlyRec&quot;            &quot;llr_est_rwdXluxXShopFastXEarlyRec&quot;                  
+# [887] &quot;llr_naive_rwdXluxXShopFastXEarlyRec&quot;                 &quot;llr_est_prodXShopFastXEarlyRec&quot;                     
+# [889] &quot;llr_naive_prodXShopFastXEarlyRec&quot;                    &quot;llr_est_prodXcatidsXShopFastXEarlyRec&quot;              
+# [891] &quot;llr_naive_prodXcatidsXShopFastXEarlyRec&quot;             &quot;llr_est_rwdXprodXcatidsXShopFastXEarlyRec&quot;          
+# [893] &quot;llr_naive_rwdXprodXcatidsXShopFastXEarlyRec&quot;         &quot;llr_est_rwdXprodXShopFastXEarlyRec&quot;                 
+# [895] &quot;llr_naive_rwdXprodXShopFastXEarlyRec&quot;                &quot;llr_est_rwdXShopFastXEarlyRec&quot;                      
+# [897] &quot;llr_naive_rwdXShopFastXEarlyRec&quot;                     &quot;llr_est_luxXShopFast&quot;                               
+# [899] &quot;llr_naive_luxXShopFast&quot;                              &quot;llr_est_luxXbrdXShopFast&quot;                           
+# [901] &quot;llr_naive_luxXbrdXShopFast&quot;                          &quot;llr_est_luxXbrdXcatidsXShopFast&quot;                    
+# [903] &quot;llr_naive_luxXbrdXcatidsXShopFast&quot;                   &quot;llr_est_rwdXluxXbrdXcatidsXShopFast&quot;                
+# [905] &quot;llr_naive_rwdXluxXbrdXcatidsXShopFast&quot;               &quot;llr_est_luxXbrdXprodXShopFast&quot;                      
+# [907] &quot;llr_naive_luxXbrdXprodXShopFast&quot;                     &quot;llr_est_luxXbrdXprodXcatidsXShopFast&quot;               
+# [909] &quot;llr_naive_luxXbrdXprodXcatidsXShopFast&quot;              &quot;llr_est_rwdXluxXbrdXprodXShopFast&quot;                  
+# [911] &quot;llr_naive_rwdXluxXbrdXprodXShopFast&quot;                 &quot;llr_est_rwdXluxXbrdXShopFast&quot;                       
+# [913] &quot;llr_naive_rwdXluxXbrdXShopFast&quot;                      &quot;llr_est_luxXcatidsXShopFast&quot;                        
+# [915] &quot;llr_naive_luxXcatidsXShopFast&quot;                       &quot;llr_est_rwdXluxXcatidsXShopFast&quot;                    
+# [917] &quot;llr_naive_rwdXluxXcatidsXShopFast&quot;                   &quot;llr_est_luxXprodXShopFast&quot;                          
+# [919] &quot;llr_naive_luxXprodXShopFast&quot;                         &quot;llr_est_luxXprodXcatidsXShopFast&quot;                   
+# [921] &quot;llr_naive_luxXprodXcatidsXShopFast&quot;                  &quot;llr_est_rwdXluxXprodXcatidsXShopFast&quot;               
+# [923] &quot;llr_naive_rwdXluxXprodXcatidsXShopFast&quot;              &quot;llr_est_rwdXluxXprodXShopFast&quot;                      
+# [925] &quot;llr_naive_rwdXluxXprodXShopFast&quot;                     &quot;llr_est_rwdXluxXShopFast&quot;                           
+# [927] &quot;llr_naive_rwdXluxXShopFast&quot;                          &quot;llr_est_prodXShopFast&quot;                              
+# [929] &quot;llr_naive_prodXShopFast&quot;                             &quot;llr_est_prodXcatidsXShopFast&quot;                       
+# [931] &quot;llr_naive_prodXcatidsXShopFast&quot;                      &quot;llr_est_rwdXprodXcatidsXShopFast&quot;                   
+# [933] &quot;llr_naive_rwdXprodXcatidsXShopFast&quot;                  &quot;llr_est_rwdXprodXShopFast&quot;                          
+# [935] &quot;llr_naive_rwdXprodXShopFast&quot;                         &quot;llr_est_rwdXShopFast&quot;                               
+# [937] &quot;llr_naive_rwdXShopFast&quot;                              
+# 
+</code></pre>
+
+<h2>Good numbers that we included as base model: model0</h2>
+
+<pre><code class="r">#######################
+
+# model0_colnames_num = c(2,3,10,31,47,48,49,87,88,89,90)
+# 
+# [1]                                                        &quot;couponCol&quot;     
+# [3] &quot;order_match_class&quot;                                        
+# [9]                                                        &quot;n.usr&quot;                
+# [31] &quot;order.early&quot;               
+# [47] &quot;batch_visits&quot;                                        &quot;batch_visitOrder&quot; 
+# [49] &quot;bPr2pr_ratio&quot;                                          
+# [87] &quot;nCoupon&quot;                                             &quot;ntimesCol1&quot;                                         
+# [89] &quot;ntimesCol2&quot;                                          &quot;ntimesCol3&quot;      
+</code></pre>
+
+<h2>Random columnns those will enter our model by forward selection</h2>
+
+<pre><code class="r">######################## random numbers #################
+
+# ran_num = seq(941)[-c(2,3,10,31,49,87,88,89,90,1,7,8,9,50,94:103,476:937)]
+# sort(ran_num)
+# 
+# 4 5 6  
+# 11:30
+# 32:48
+# 51:86  
+# 91:93 
+# 104:475 
+# 938
+# 
+# 
+# &gt; names(cw31)[sort(ran_num)]
+# the following names are right, the front index is right, from 104 to 475 the showing index is wrong, but # it does not matter
+
+# [3]                                                        &quot;nCoup1Batch&quot;                                                                                 
+# [5]  &quot;nCoup2Batch&quot;                                         &quot;nCoup3Batch&quot;                                         
+
+# [10]                                                       &quot;TimeBtwnSentRec.mean&quot;                               
+# [12] &quot;TimeBtwnSentRec.max&quot;                                 &quot;TimeBtwnSentRec.min&quot;                                
+# [14] &quot;TimeBtwnSentRec.median&quot;                              &quot;TimeBtwnRecExpire.mean&quot;                             
+# [16] &quot;TimeBtwnRecExpire.max&quot;                               &quot;TimeBtwnRecExpire.min&quot;                              
+# [18] &quot;TimeBtwnRecExpire.median&quot;                            &quot;TimeBtwnRecOrder.mean&quot;                              
+# [20] &quot;TimeBtwnRecOrder.max&quot;                                &quot;TimeBtwnRecOrder.min&quot;                               
+# [22] &quot;TimeBtwnRecOrder.median&quot;                             &quot;TimeBtwnOrderExpire.mean&quot;                           
+# [24] &quot;TimeBtwnOrderExpire.max&quot;                             &quot;TimeBtwnOrderExpire.min&quot;                            
+# [26] &quot;TimeBtwnOrderExpire.median&quot;                          &quot;order.weekend&quot;                                      
+# [28] &quot;order.FriSat&quot;                                        &quot;order.weekday&quot;                                      
+# [30] &quot;order.worktime&quot;                                      
+# 
+# [31]                                                       &quot;couponRec.weekend&quot;                                  
+# [33] &quot;couponRec.FriSat&quot;                                    &quot;couponRec.weekday&quot;                                  
+# [35] &quot;orderMaxPerWeek&quot;                                     &quot;orderMinPerWeek&quot;                                    
+# [37] &quot;ActiveWeek&quot;                                          &quot;tot_visitOrder&quot;                                     
+# [39] &quot;time_lastVisit&quot;                                      &quot;avgTime_visit&quot;                                      
+# [41] &quot;var_visit&quot;                                           &quot;medianTime_visit&quot;                                   
+# [43] &quot;maxTime_visit&quot;                                       &quot;minTime_visit&quot;                                      
+# [45] &quot;avgTime_recd_order&quot;                                  &quot;avgTime_order&quot;                                      
+# [47] &quot;batch_visits&quot;                                        &quot;batch_visitOrder&quot;                                   
+
+# [51] &quot;sim_ftd_invmax_cosSim_to2Col&quot;                        &quot;sim_ftd_invmax_cosSim_to3Col&quot;                       
+# [53] &quot;sim_ftd_ivf_cosSim_to2Col&quot;                           &quot;sim_ftd_ivf_cosSim_to3Col&quot;                          
+# [55] &quot;sim_ftd_lnorm_cosSim_to2Col&quot;                         &quot;sim_ftd_lnorm_cosSim_to3Col&quot;                        
+# [57] &quot;sim_ftd_pif_cosSim_to2Col&quot;                           &quot;sim_ftd_pif_cosSim_to3Col&quot;                          
+# [59] &quot;brand3_or_not&quot;                                       &quot;item_premium_version&quot;                               
+# [61] &quot;item_price_max&quot;                                      &quot;item_price_min&quot;                                     
+# [63] &quot;item_price_num&quot;                                      &quot;item_zprice_unique&quot;                                 
+# [65] &quot;item_zprice_orig&quot;                                    &quot;item_zprice_unscale&quot;                                
+# [67] &quot;item_price_max_scale&quot;                                &quot;item_basePrice_max&quot;                                 
+# [69] &quot;item_basePrice_min&quot;                                  &quot;item_basePrice_num&quot;                                 
+# [71] &quot;item_zbasePrice_unique&quot;                              &quot;item_zbasePrice_orig&quot;                               
+# [73] &quot;item_zbasePrice_unscale&quot;                             &quot;item_basePrice_max_scale&quot;                           
+# [75] &quot;item_reward_max&quot;                                     &quot;item_reward_min&quot;                                    
+# [77] &quot;item_reward_num&quot;                                     &quot;item_zreward_unique&quot;                                
+# [79] &quot;item_zreward_orig&quot;                                   &quot;item_zreward_unscale&quot;                               
+# [81] &quot;item_reward_max_scale&quot;                               &quot;item_zbp_zp_ratio_unique&quot;                           
+# [83] &quot;item_zbp_zp_ratio_orig&quot;                              &quot;item_zbp_zp_ratio_unscale&quot;                          
+# [85] &quot;jaccard_to2Col&quot;                                      &quot;jaccard_to3Col&quot;                                     
+
+# [91] &quot;ptimesCol1&quot;                                          &quot;ptimesCol2&quot;                                         
+# [93] &quot;ptimesCol3&quot;                                          
+
+# [103]                                                      &quot;basePrice_brand_nUser&quot;                              
+# [105] &quot;basePrice_brand_nUserUsed&quot;                           &quot;basePrice_brand_prob&quot;                               
+# [107] &quot;basePrice_brand_Twice&quot;                               &quot;basePrice_categoryIDs_nUser&quot;                        
+# [109] &quot;basePrice_categoryIDs_nUserUsed&quot;                     &quot;basePrice_categoryIDs_prob&quot;                         
+# [111] &quot;basePrice_categoryIDs_Twice&quot;                         &quot;basePrice_nUser&quot;                                    
+# [113] &quot;basePrice_nUserUsed&quot;                                 &quot;basePrice_premiumProduct_nUser&quot;                     
+# [115] &quot;basePrice_premiumProduct_nUserUsed&quot;                  &quot;basePrice_premiumProduct_prob&quot;                      
+# [117] &quot;basePrice_premiumProduct_Twice&quot;                      &quot;basePrice_prob&quot;                                     
+# [119] &quot;basePrice_productGroup_nUser&quot;                        &quot;basePrice_productGroup_nUserUsed&quot;                   
+# [121] &quot;basePrice_productGroup_prob&quot;                         &quot;basePrice_productGroup_Twice&quot;                       
+# [123] &quot;basePrice_ratio_bp_p_round_nUser&quot;                    &quot;basePrice_ratio_bp_p_round_nUserUsed&quot;               
+# [125] &quot;basePrice_ratio_bp_p_round_prob&quot;                     &quot;basePrice_ratio_bp_p_round_Twice&quot;                   
+# [127] &quot;basePrice_Twice&quot;                                     &quot;brand_premiumProduct_nUser&quot;                         
+# [129] &quot;brand_premiumProduct_nUserUsed&quot;                      &quot;brand_premiumProduct_prob&quot;                          
+# [131] &quot;brand_premiumProduct_Twice&quot;                          &quot;categoryIDs_brand_nUser&quot;                            
+# [133] &quot;categoryIDs_brand_nUserUsed&quot;                         &quot;categoryIDs_brand_prob&quot;                             
+# [135] &quot;categoryIDs_brand_Twice&quot;                             &quot;categoryIDs_nUser&quot;                                  
+# [137] &quot;categoryIDs_nUserUsed&quot;                               &quot;categoryIDs_premiumProduct_nUser&quot;                   
+# [139] &quot;categoryIDs_premiumProduct_nUserUsed&quot;                &quot;categoryIDs_premiumProduct_prob&quot;                    
+# [141] &quot;categoryIDs_premiumProduct_Twice&quot;                    &quot;categoryIDs_prob&quot;                                   
+# [143] &quot;categoryIDs_ratio_bp_p_round_nUser&quot;                  &quot;categoryIDs_ratio_bp_p_round_nUserUsed&quot;             
+# [145] &quot;categoryIDs_ratio_bp_p_round_prob&quot;                   &quot;categoryIDs_ratio_bp_p_round_Twice&quot;                 
+# [147] &quot;categoryIDs_Twice&quot;                                   &quot;couponID_couponsReceivedDoW_nUser&quot;                  
+# [149] &quot;couponID_couponsReceivedDoW_nUserUsed&quot;               &quot;couponID_couponsReceivedDoW_prob&quot;                   
+# [151] &quot;couponID_couponsReceivedDoW_Twice&quot;                   &quot;couponID_couponsReceivedTime_nUser&quot;                 
+# [153] &quot;couponID_couponsReceivedTime_nUserUsed&quot;              &quot;couponID_couponsReceivedTime_prob&quot;                  
+# [155] &quot;couponID_couponsReceivedTime_Twice&quot;                  &quot;couponID_nUser&quot;                                     
+# [157] &quot;couponID_nUserUsed&quot;                                  &quot;couponID_orderTimeDoW_nUser&quot;                        
+# [159] &quot;couponID_orderTimeDoW_nUserUsed&quot;                     &quot;couponID_orderTimeDoW_prob&quot;                         
+# [161] &quot;couponID_orderTimeDoW_Twice&quot;                         &quot;couponID_orderTimeTime_nUser&quot;                       
+# [163] &quot;couponID_orderTimeTime_nUserUsed&quot;                    &quot;couponID_orderTimeTime_prob&quot;                        
+# [165] &quot;couponID_prob&quot;                                       &quot;couponID_TimeBtwnRecOrder_disc_nUser&quot;               
+# [167] &quot;couponID_TimeBtwnRecOrder_disc_nUserUsed&quot;            &quot;couponID_TimeBtwnRecOrder_disc_prob&quot;                
+# [169] &quot;couponID_TimeBtwnRecOrder_disc_Twice&quot;                &quot;couponID_Twice&quot;                                     
+# [171] &quot;couponsReceivedDoW_basePrice_nUser&quot;                  &quot;couponsReceivedDoW_basePrice_nUserUsed&quot;             
+# [173] &quot;couponsReceivedDoW_basePrice_prob&quot;                   &quot;couponsReceivedDoW_basePrice_Twice&quot;                 
+# [175] &quot;couponsReceivedDoW_brand_nUser&quot;                      &quot;couponsReceivedDoW_brand_nUserUsed&quot;                 
+# [177] &quot;couponsReceivedDoW_brand_prob&quot;                       &quot;couponsReceivedDoW_brand_Twice&quot;                     
+# [179] &quot;couponsReceivedDoW_categoryIDs_nUser&quot;                &quot;couponsReceivedDoW_categoryIDs_nUserUsed&quot;           
+# [181] &quot;couponsReceivedDoW_categoryIDs_prob&quot;                 &quot;couponsReceivedDoW_categoryIDs_Twice&quot;               
+# [183] &quot;couponsReceivedDoW_nUser&quot;                            &quot;couponsReceivedDoW_nUserUsed&quot;                       
+# [185] &quot;couponsReceivedDoW_orderTimeDoW_nUser&quot;               &quot;couponsReceivedDoW_orderTimeDoW_nUserUsed&quot;          
+# [187] &quot;couponsReceivedDoW_orderTimeDoW_prob&quot;                &quot;couponsReceivedDoW_orderTimeDoW_Twice&quot;              
+# [189] &quot;couponsReceivedDoW_orderTimeTime_nUser&quot;              &quot;couponsReceivedDoW_orderTimeTime_nUserUsed&quot;         
+# [191] &quot;couponsReceivedDoW_orderTimeTime_prob&quot;               &quot;couponsReceivedDoW_orderTimeTime_Twice&quot;             
+# [193] &quot;couponsReceivedDoW_premiumProduct_nUser&quot;             &quot;couponsReceivedDoW_premiumProduct_nUserUsed&quot;      
+# [171] &quot;couponsReceivedDoW_premiumProduct_prob&quot;              &quot;couponsReceivedDoW_price_nUser&quot;                     
+# [173] &quot;couponsReceivedDoW_price_nUserUsed&quot;                  &quot;couponsReceivedDoW_price_prob&quot;                      
+# [175] &quot;couponsReceivedDoW_price_Twice&quot;                      &quot;couponsReceivedDoW_prob&quot;                            
+# [177] &quot;couponsReceivedDoW_productGroup_nUser&quot;               &quot;couponsReceivedDoW_productGroup_nUserUsed&quot;          
+# [179] &quot;couponsReceivedDoW_productGroup_prob&quot;                &quot;couponsReceivedDoW_productGroup_Twice&quot;              
+# [181] &quot;couponsReceivedDoW_ratio_bp_p_round_nUser&quot;           &quot;couponsReceivedDoW_ratio_bp_p_round_nUserUsed&quot;      
+# [183] &quot;couponsReceivedDoW_ratio_bp_p_round_prob&quot;            &quot;couponsReceivedDoW_ratio_bp_p_round_Twice&quot;          
+# [185] &quot;couponsReceivedDoW_TimeBtwnRecOrder_disc_nUser&quot;      &quot;couponsReceivedDoW_TimeBtwnRecOrder_disc_nUserUsed&quot; 
+# [187] &quot;couponsReceivedDoW_TimeBtwnRecOrder_disc_prob&quot;       &quot;couponsReceivedDoW_TimeBtwnRecOrder_disc_Twice&quot;     
+# [189] &quot;couponsReceivedTime_basePrice_nUser&quot;                 &quot;couponsReceivedTime_basePrice_nUserUsed&quot;            
+# [191] &quot;couponsReceivedTime_basePrice_prob&quot;                  &quot;couponsReceivedTime_basePrice_Twice&quot;                
+# [193] &quot;couponsReceivedTime_brand_nUser&quot;                     &quot;couponsReceivedTime_brand_nUserUsed&quot;                
+# [195] &quot;couponsReceivedTime_brand_prob&quot;                      &quot;couponsReceivedTime_brand_Twice&quot;                    
+# [197] &quot;couponsReceivedTime_categoryIDs_nUser&quot;               &quot;couponsReceivedTime_categoryIDs_nUserUsed&quot;          
+# [199] &quot;couponsReceivedTime_categoryIDs_prob&quot;                &quot;couponsReceivedTime_categoryIDs_Twice&quot;              
+# [201] &quot;couponsReceivedTime_couponsReceivedDoW_nUser&quot;        &quot;couponsReceivedTime_couponsReceivedDoW_nUserUsed&quot;   
+# [203] &quot;couponsReceivedTime_couponsReceivedDoW_prob&quot;         &quot;couponsReceivedTime_couponsReceivedDoW_Twice&quot;       
+# [205] &quot;couponsReceivedTime_nUser&quot;                           &quot;couponsReceivedTime_nUserUsed&quot;                      
+# [207] &quot;couponsReceivedTime_orderTimeDoW_nUser&quot;              &quot;couponsReceivedTime_orderTimeDoW_nUserUsed&quot;         
+# [209] &quot;couponsReceivedTime_orderTimeDoW_prob&quot;               &quot;couponsReceivedTime_orderTimeDoW_Twice&quot;             
+# [211] &quot;couponsReceivedTime_orderTimeTime_nUserUsed&quot;         &quot;couponsReceivedTime_orderTimeTime_prob&quot;             
+# [213] &quot;couponsReceivedTime_orderTimeTime_Twice&quot;             &quot;couponsReceivedTime_premiumProduct_nUser&quot;           
+# [215] &quot;couponsReceivedTime_premiumProduct_nUserUsed&quot;        &quot;couponsReceivedTime_premiumProduct_prob&quot;            
+# [217] &quot;couponsReceivedTime_premiumProduct_Twice&quot;            &quot;couponsReceivedTime_price_nUser&quot;                    
+# [219] &quot;couponsReceivedTime_price_nUserUsed&quot;                 &quot;couponsReceivedTime_price_prob&quot;                     
+# [221] &quot;couponsReceivedTime_price_Twice&quot;                     &quot;couponsReceivedTime_prob&quot;                           
+# [223] &quot;couponsReceivedTime_productGroup_nUser&quot;              &quot;couponsReceivedTime_productGroup_nUserUsed&quot;         
+# [225] &quot;couponsReceivedTime_productGroup_prob&quot;               &quot;couponsReceivedTime_productGroup_Twice&quot;             
+# [227] &quot;couponsReceivedTime_ratio_bp_p_round_nUser&quot;          &quot;couponsReceivedTime_ratio_bp_p_round_nUserUsed&quot;     
+# [229] &quot;couponsReceivedTime_ratio_bp_p_round_prob&quot;           &quot;couponsReceivedTime_ratio_bp_p_round_Twice&quot;         
+# [231] &quot;couponsReceivedTime_TimeBtwnRecOrder_disc_nUser&quot;     &quot;couponsReceivedTime_TimeBtwnRecOrder_disc_nUserUsed&quot;
+# [233] &quot;couponsReceivedTime_TimeBtwnRecOrder_disc_prob&quot;      &quot;couponsReceivedTime_TimeBtwnRecOrder_disc_Twice&quot;    
+# [235] &quot;couponsReceivedTime_Twice&quot;                           &quot;orderTimeDoW_basePrice_nUser&quot;                       
+# [237] &quot;orderTimeDoW_basePrice_nUserUsed&quot;                    &quot;orderTimeDoW_basePrice_prob&quot;                        
+# [239] &quot;orderTimeDoW_basePrice_Twice&quot;                        &quot;orderTimeDoW_brand_nUser&quot;                           
+# [241] &quot;orderTimeDoW_brand_nUserUsed&quot;                        &quot;orderTimeDoW_brand_prob&quot;                            
+# [243] &quot;orderTimeDoW_brand_Twice&quot;                            &quot;orderTimeDoW_categoryIDs_nUser&quot;                     
+# [245] &quot;orderTimeDoW_categoryIDs_nUserUsed&quot;                  &quot;orderTimeDoW_categoryIDs_prob&quot;                      
+# [247] &quot;orderTimeDoW_categoryIDs_Twice&quot;                      &quot;orderTimeDoW_nUser&quot;                                 
+# [249] &quot;orderTimeDoW_nUserUsed&quot;                              &quot;orderTimeDoW_premiumProduct_nUser&quot;                  
+# [251] &quot;orderTimeDoW_premiumProduct_nUserUsed&quot;               &quot;orderTimeDoW_premiumProduct_prob&quot;                   
+# [253] &quot;orderTimeDoW_price_nUser&quot;                            &quot;orderTimeDoW_price_nUserUsed&quot;                       
+# [255] &quot;orderTimeDoW_price_prob&quot;                             &quot;orderTimeDoW_price_Twice&quot;                           
+# [257] &quot;orderTimeDoW_prob&quot;                                   &quot;orderTimeDoW_productGroup_nUser&quot;                    
+# [259] &quot;orderTimeDoW_productGroup_nUserUsed&quot;                 &quot;orderTimeDoW_productGroup_prob&quot;                     
+# [261] &quot;orderTimeDoW_productGroup_Twice&quot;                     &quot;orderTimeDoW_ratio_bp_p_round_nUser&quot;                
+# [263] &quot;orderTimeDoW_ratio_bp_p_round_nUserUsed&quot;             &quot;orderTimeDoW_ratio_bp_p_round_prob&quot;                 
+# [265] &quot;orderTimeDoW_ratio_bp_p_round_Twice&quot;                 &quot;orderTimeDoW_TimeBtwnRecOrder_disc_nUser&quot;           
+# [267] &quot;orderTimeDoW_TimeBtwnRecOrder_disc_nUserUsed&quot;        &quot;orderTimeDoW_TimeBtwnRecOrder_disc_prob&quot;            
+# [269] &quot;orderTimeDoW_TimeBtwnRecOrder_disc_Twice&quot;            &quot;orderTimeTime_basePrice_nUser&quot;                      
+# [271] &quot;orderTimeTime_basePrice_nUserUsed&quot;                   &quot;orderTimeTime_basePrice_prob&quot;                       
+# [273] &quot;orderTimeTime_basePrice_Twice&quot;                       &quot;orderTimeTime_brand_nUser&quot;                          
+# [275] &quot;orderTimeTime_brand_nUserUsed&quot;                       &quot;orderTimeTime_brand_prob&quot;                           
+# [277] &quot;orderTimeTime_brand_Twice&quot;                           &quot;orderTimeTime_categoryIDs_nUser&quot;                    
+# [279] &quot;orderTimeTime_categoryIDs_nUserUsed&quot;                 &quot;orderTimeTime_categoryIDs_prob&quot;                     
+# [281] &quot;orderTimeTime_categoryIDs_Twice&quot;                     &quot;orderTimeTime_nUser&quot;                                
+# [283] &quot;orderTimeTime_nUserUsed&quot;                             &quot;orderTimeTime_orderTimeDoW_nUser&quot;                   
+# [285] &quot;orderTimeTime_orderTimeDoW_nUserUsed&quot;                &quot;orderTimeTime_orderTimeDoW_prob&quot;                    
+# [287] &quot;orderTimeTime_orderTimeDoW_Twice&quot;                    &quot;orderTimeTime_premiumProduct_nUser&quot;                 
+# [289] &quot;orderTimeTime_premiumProduct_nUserUsed&quot;              &quot;orderTimeTime_premiumProduct_prob&quot;                  
+# [291] &quot;orderTimeTime_premiumProduct_Twice&quot;                  &quot;orderTimeTime_price_nUser&quot;                          
+# [293] &quot;orderTimeTime_price_nUserUsed&quot;                       &quot;orderTimeTime_price_prob&quot;                           
+# [295] &quot;orderTimeTime_price_Twice&quot;                           &quot;orderTimeTime_prob&quot;                                 
+# [297] &quot;orderTimeTime_productGroup_nUser&quot;                    &quot;orderTimeTime_productGroup_nUserUsed&quot;               
+# [299] &quot;orderTimeTime_productGroup_prob&quot;                     &quot;orderTimeTime_productGroup_Twice&quot;                   
+# [301] &quot;orderTimeTime_ratio_bp_p_round_nUser&quot;                &quot;orderTimeTime_ratio_bp_p_round_nUserUsed&quot;           
+# [303] &quot;orderTimeTime_ratio_bp_p_round_prob&quot;                 &quot;orderTimeTime_ratio_bp_p_round_Twice&quot;               
+# [305] &quot;orderTimeTime_TimeBtwnRecOrder_disc_nUser&quot;           &quot;orderTimeTime_TimeBtwnRecOrder_disc_nUserUsed&quot;      
+# [307] &quot;orderTimeTime_TimeBtwnRecOrder_disc_prob&quot;            &quot;orderTimeTime_TimeBtwnRecOrder_disc_Twice&quot;          
+# [309] &quot;orderTimeTime_Twice&quot;                                 &quot;price_basePrice_nUser&quot;                              
+# [311] &quot;price_basePrice_nUserUsed&quot;                           &quot;price_basePrice_prob&quot;                               
+# [313] &quot;price_basePrice_Twice&quot;                               &quot;price_brand_nUser&quot;                                  
+# [315] &quot;price_brand_nUserUsed&quot;                               &quot;price_brand_prob&quot;                                   
+# [317] &quot;price_brand_Twice&quot;                                   &quot;price_categoryIDs_nUser&quot;                            
+# [319] &quot;price_categoryIDs_nUserUsed&quot;                         &quot;price_categoryIDs_prob&quot;                             
+# [321] &quot;price_categoryIDs_Twice&quot;                             &quot;price_nUser&quot;                                        
+# [323] &quot;price_nUserUsed&quot;                                     &quot;price_premiumProduct_nUser&quot;                         
+# [325] &quot;price_premiumProduct_nUserUsed&quot;                      &quot;price_premiumProduct_prob&quot;                          
+# [327] &quot;price_premiumProduct_Twice&quot;                          &quot;price_prob&quot;                                         
+# [329] &quot;price_productGroup_nUser&quot;                            &quot;price_productGroup_nUserUsed&quot;                       
+# [331] &quot;price_productGroup_prob&quot;                             &quot;price_productGroup_Twice&quot;                           
+# [333] &quot;price_ratio_bp_p_round_nUser&quot;                        &quot;price_ratio_bp_p_round_nUserUsed&quot;                   
+# [335] &quot;price_ratio_bp_p_round_prob&quot;                         &quot;price_ratio_bp_p_round_Twice&quot;                       
+# [337] &quot;price_Twice&quot;                                         &quot;productGroup_brand_nUser&quot;                           
+# [339] &quot;productGroup_brand_nUserUsed&quot;                        &quot;productGroup_brand_prob&quot;                            
+# [341] &quot;productGroup_brand_Twice&quot;                            &quot;productGroup_categoryIDs_nUser&quot;                     
+# [343] &quot;productGroup_categoryIDs_nUserUsed&quot;                  &quot;productGroup_categoryIDs_prob&quot;                      
+# [345] &quot;productGroup_categoryIDs_Twice&quot;                      &quot;productGroup_nUser&quot;                                 
+# [347] &quot;productGroup_nUserUsed&quot;                              &quot;productGroup_premiumProduct_nUser&quot;                  
+# [349] &quot;productGroup_premiumProduct_nUserUsed&quot;               &quot;productGroup_premiumProduct_prob&quot;                   
+# [351] &quot;productGroup_premiumProduct_Twice&quot;                   &quot;productGroup_prob&quot;                                  
+# [353] &quot;productGroup_ratio_bp_p_round_nUser&quot;                 &quot;productGroup_ratio_bp_p_round_nUserUsed&quot;            
+# [355] &quot;productGroup_ratio_bp_p_round_prob&quot;                  &quot;productGroup_ratio_bp_p_round_Twice&quot;                
+# [357] &quot;productGroup_Twice&quot;                                  &quot;ratio_bp_p.y&quot;                                       
+# [359] &quot;ratio_bp_p_round&quot;                                    &quot;ratio_bp_p_round_brand_nUser&quot;                       
+# [361] &quot;ratio_bp_p_round_brand_nUserUsed&quot;                    &quot;ratio_bp_p_round_brand_prob&quot;                        
+# [363] &quot;ratio_bp_p_round_brand_Twice&quot;                        &quot;ratio_bp_p_round_nUser&quot;                             
+# [365] &quot;ratio_bp_p_round_nUserUsed&quot;                          &quot;ratio_bp_p_round_premiumProduct_nUser&quot;              
+# [367] &quot;ratio_bp_p_round_premiumProduct_nUserUsed&quot;           &quot;ratio_bp_p_round_premiumProduct_prob&quot;               
+# [369] &quot;ratio_bp_p_round_premiumProduct_Twice&quot;               &quot;ratio_bp_p_round_prob&quot;                              
+# [371] &quot;ratio_bp_p_round_Twice&quot;                              &quot;reward_basePrice_nUser&quot;                             
+# [373] &quot;reward_basePrice_nUserUsed&quot;                          &quot;reward_basePrice_prob&quot;                              
+# [375] &quot;reward_basePrice_Twice&quot;                              &quot;reward_brand_nUser&quot;                                 
+# [377] &quot;reward_brand_nUserUsed&quot;                              &quot;reward_brand_prob&quot;                                  
+# [379] &quot;reward_brand_Twice&quot;                                  &quot;reward_categoryIDs_nUser&quot;                           
+# [381] &quot;reward_categoryIDs_nUserUsed&quot;                        &quot;reward_categoryIDs_prob&quot;                            
+# [383] &quot;reward_categoryIDs_Twice&quot;                            &quot;reward_couponsReceivedDoW_nUser&quot;                    
+# [385] &quot;reward_couponsReceivedDoW_nUserUsed&quot;                 &quot;reward_couponsReceivedDoW_prob&quot;                     
+# [387] &quot;reward_couponsReceivedDoW_Twice&quot;                     &quot;reward_couponsReceivedTime_nUser&quot;                   
+# [389] &quot;reward_couponsReceivedTime_nUserUsed&quot;                &quot;reward_couponsReceivedTime_prob&quot;                    
+# [391] &quot;reward_couponsReceivedTime_Twice&quot;                    &quot;reward_orderTimeDoW_nUser&quot;                          
+# [393] &quot;reward_orderTimeDoW_nUserUsed&quot;                       &quot;reward_orderTimeDoW_prob&quot;                           
+# [395] &quot;reward_orderTimeDoW_Twice&quot;                           &quot;reward_orderTimeTime_nUser&quot;                         
+# [397] &quot;reward_orderTimeTime_nUserUsed&quot;                      &quot;reward_orderTimeTime_prob&quot;                          
+# [399] &quot;reward_orderTimeTime_Twice&quot;                          &quot;reward_premiumProduct_nUser&quot;                        
+# [401] &quot;reward_premiumProduct_nUserUsed&quot;                     &quot;reward_premiumProduct_prob&quot;                         
+# [403] &quot;reward_premiumProduct_Twice&quot;                         &quot;reward_price_nUser&quot;                                 
+# [405] &quot;reward_price_nUserUsed&quot;                              &quot;reward_price_prob&quot;                                  
+# [407] &quot;reward_price_Twice&quot;                                  &quot;reward_productGroup_nUser&quot;                          
+# [409] &quot;reward_productGroup_nUserUsed&quot;                       &quot;reward_productGroup_prob&quot;                           
+# [411] &quot;reward_productGroup_Twice&quot;                           &quot;reward_ratio_bp_p_round_nUser&quot;                      
+# [413] &quot;reward_ratio_bp_p_round_nUserUsed&quot;                   &quot;reward_ratio_bp_p_round_prob&quot;                       
+# [415] &quot;reward_ratio_bp_p_round_Twice&quot;                       &quot;reward_TimeBtwnRecOrder_disc_nUser&quot;                 
+# [417] &quot;reward_TimeBtwnRecOrder_disc_nUserUsed&quot;              &quot;reward_TimeBtwnRecOrder_disc_prob&quot;                  
+# [419] &quot;reward_TimeBtwnRecOrder_disc_Twice&quot;                  &quot;TimeBtwnRecOrder_disc&quot;                              
+# [421] &quot;TimeBtwnRecOrder_disc_basePrice_nUser&quot;               &quot;TimeBtwnRecOrder_disc_basePrice_nUserUsed&quot;          
+# [423] &quot;TimeBtwnRecOrder_disc_basePrice_prob&quot;                &quot;TimeBtwnRecOrder_disc_basePrice_Twice&quot;              
+# [425] &quot;TimeBtwnRecOrder_disc_brand_nUser&quot;                   &quot;TimeBtwnRecOrder_disc_brand_nUserUsed&quot;              
+# [427] &quot;TimeBtwnRecOrder_disc_brand_prob&quot;                    &quot;TimeBtwnRecOrder_disc_brand_Twice&quot;                  
+# [429] &quot;TimeBtwnRecOrder_disc_categoryIDs_nUser&quot;             &quot;TimeBtwnRecOrder_disc_categoryIDs_nUserUsed&quot;        
+# [431] &quot;TimeBtwnRecOrder_disc_categoryIDs_prob&quot;              &quot;TimeBtwnRecOrder_disc_categoryIDs_Twice&quot;            
+# [433] &quot;TimeBtwnRecOrder_disc_nUser&quot;                         &quot;TimeBtwnRecOrder_disc_nUserUsed&quot;                    
+# [435] &quot;TimeBtwnRecOrder_disc_premiumProduct_nUser&quot;          &quot;TimeBtwnRecOrder_disc_premiumProduct_nUserUsed&quot;     
+# [437] &quot;TimeBtwnRecOrder_disc_premiumProduct_prob&quot;           &quot;TimeBtwnRecOrder_disc_premiumProduct_Twice&quot;         
+# [439] &quot;TimeBtwnRecOrder_disc_price_nUser&quot;                   &quot;TimeBtwnRecOrder_disc_price_nUserUsed&quot;              
+# [441] &quot;TimeBtwnRecOrder_disc_price_prob&quot;                    &quot;TimeBtwnRecOrder_disc_price_Twice&quot;                  
+# [443] &quot;TimeBtwnRecOrder_disc_prob&quot;                          &quot;TimeBtwnRecOrder_disc_productGroup_nUser&quot;           
+# [445] &quot;TimeBtwnRecOrder_disc_productGroup_nUserUsed&quot;        &quot;TimeBtwnRecOrder_disc_productGroup_prob&quot;            
+# [447] &quot;TimeBtwnRecOrder_disc_productGroup_Twice&quot;            &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_nUser&quot;       
+# [449] &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_nUserUsed&quot;    &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_prob&quot;        
+# [475] &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_Twice&quot;        
+
+# [938] &quot;weichengProb&quot;                                       
+</code></pre>
+
+</body>
+
+</html>
+
