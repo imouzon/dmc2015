@@ -201,7 +201,7 @@ colnames(cw31)[i]
 # [1] &quot;order_match_class&quot; &quot;firstTimeCoup1Rec&quot; &quot;firstTimeCoup2Rec&quot; &quot;firstTimeCoup3Rec&quot;
 </code></pre>
 
-<h1>Bad numbers (corresponding names) we excluded</h1>
+<h2>Bad numbers (corresponding names) we excluded</h2>
 
 <pre><code class="r"># badnum = -c(1,7,8,9,50,   94:103,   476:937)
 # 
@@ -454,7 +454,7 @@ colnames(cw31)[i]
 # 
 </code></pre>
 
-<h1>Good numbers that we included as base model: model0</h1>
+<h2>Good numbers that we included as base model: model0</h2>
 
 <pre><code class="r">#######################
 
@@ -470,7 +470,7 @@ colnames(cw31)[i]
 # [89] &quot;ntimesCol2&quot;                                          &quot;ntimesCol3&quot;      
 </code></pre>
 
-<h1>Random columnns those will enter our model by forward selection</h1>
+<h2>Random columnns those will enter our model by forward selection</h2>
 
 <pre><code class="r">######################## random numbers #################
 
@@ -483,95 +483,105 @@ colnames(cw31)[i]
 # 51:86  
 # 91:93 
 # 104:475 
-# 938 939 940 941
+# 938
 # 
 # 
 # &gt; names(cw31)[sort(ran_num)]
-# [1] &quot;nCoup1Batch&quot;                                         &quot;nCoup2Batch&quot;                                        
-# [3] &quot;nCoup3Batch&quot;                                         &quot;TimeBtwnSentRec.mean&quot;                               
-# [5] &quot;TimeBtwnSentRec.max&quot;                                 &quot;TimeBtwnSentRec.min&quot;                                
-# [7] &quot;TimeBtwnSentRec.median&quot;                              &quot;TimeBtwnRecExpire.mean&quot;                             
-# [9] &quot;TimeBtwnRecExpire.max&quot;                               &quot;TimeBtwnRecExpire.min&quot;                              
-# [11] &quot;TimeBtwnRecExpire.median&quot;                            &quot;TimeBtwnRecOrder.mean&quot;                              
-# [13] &quot;TimeBtwnRecOrder.max&quot;                                &quot;TimeBtwnRecOrder.min&quot;                               
-# [15] &quot;TimeBtwnRecOrder.median&quot;                             &quot;TimeBtwnOrderExpire.mean&quot;                           
-# [17] &quot;TimeBtwnOrderExpire.max&quot;                             &quot;TimeBtwnOrderExpire.min&quot;                            
-# [19] &quot;TimeBtwnOrderExpire.median&quot;                          &quot;order.weekend&quot;                                      
-# [21] &quot;order.FriSat&quot;                                        &quot;order.weekday&quot;                                      
-# [23] &quot;order.worktime&quot;                                      &quot;couponRec.weekend&quot;                                  
-# [25] &quot;couponRec.FriSat&quot;                                    &quot;couponRec.weekday&quot;                                  
-# [27] &quot;orderMaxPerWeek&quot;                                     &quot;orderMinPerWeek&quot;                                    
-# [29] &quot;ActiveWeek&quot;                                          &quot;tot_visitOrder&quot;                                     
-# [31] &quot;time_lastVisit&quot;                                      &quot;avgTime_visit&quot;                                      
-# [33] &quot;var_visit&quot;                                           &quot;medianTime_visit&quot;                                   
-# [35] &quot;maxTime_visit&quot;                                       &quot;minTime_visit&quot;                                      
-# [37] &quot;avgTime_recd_order&quot;                                  &quot;avgTime_order&quot;                                      
-# [39] &quot;batch_visits&quot;                                        &quot;batch_visitOrder&quot;                                   
-# [41] &quot;sim_ftd_invmax_cosSim_to2Col&quot;                        &quot;sim_ftd_invmax_cosSim_to3Col&quot;                       
-# [43] &quot;sim_ftd_ivf_cosSim_to2Col&quot;                           &quot;sim_ftd_ivf_cosSim_to3Col&quot;                          
-# [45] &quot;sim_ftd_lnorm_cosSim_to2Col&quot;                         &quot;sim_ftd_lnorm_cosSim_to3Col&quot;                        
-# [47] &quot;sim_ftd_pif_cosSim_to2Col&quot;                           &quot;sim_ftd_pif_cosSim_to3Col&quot;                          
-# [49] &quot;brand3_or_not&quot;                                       &quot;item_premium_version&quot;                               
-# [51] &quot;item_price_max&quot;                                      &quot;item_price_min&quot;                                     
-# [53] &quot;item_price_num&quot;                                      &quot;item_zprice_unique&quot;                                 
-# [55] &quot;item_zprice_orig&quot;                                    &quot;item_zprice_unscale&quot;                                
-# [57] &quot;item_price_max_scale&quot;                                &quot;item_basePrice_max&quot;                                 
-# [59] &quot;item_basePrice_min&quot;                                  &quot;item_basePrice_num&quot;                                 
-# [61] &quot;item_zbasePrice_unique&quot;                              &quot;item_zbasePrice_orig&quot;                               
-# [63] &quot;item_zbasePrice_unscale&quot;                             &quot;item_basePrice_max_scale&quot;                           
-# [65] &quot;item_reward_max&quot;                                     &quot;item_reward_min&quot;                                    
-# [67] &quot;item_reward_num&quot;                                     &quot;item_zreward_unique&quot;                                
-# [69] &quot;item_zreward_orig&quot;                                   &quot;item_zreward_unscale&quot;                               
-# [71] &quot;item_reward_max_scale&quot;                               &quot;item_zbp_zp_ratio_unique&quot;                           
-# [73] &quot;item_zbp_zp_ratio_orig&quot;                              &quot;item_zbp_zp_ratio_unscale&quot;                          
-# [75] &quot;jaccard_to2Col&quot;                                      &quot;jaccard_to3Col&quot;                                     
-# [77] &quot;ptimesCol1&quot;                                          &quot;ptimesCol2&quot;                                         
-# [79] &quot;ptimesCol3&quot;                                          &quot;basePrice_brand_nUser&quot;                              
-# [81] &quot;basePrice_brand_nUserUsed&quot;                           &quot;basePrice_brand_prob&quot;                               
-# [83] &quot;basePrice_brand_Twice&quot;                               &quot;basePrice_categoryIDs_nUser&quot;                        
-# [85] &quot;basePrice_categoryIDs_nUserUsed&quot;                     &quot;basePrice_categoryIDs_prob&quot;                         
-# [87] &quot;basePrice_categoryIDs_Twice&quot;                         &quot;basePrice_nUser&quot;                                    
-# [89] &quot;basePrice_nUserUsed&quot;                                 &quot;basePrice_premiumProduct_nUser&quot;                     
-# [91] &quot;basePrice_premiumProduct_nUserUsed&quot;                  &quot;basePrice_premiumProduct_prob&quot;                      
-# [93] &quot;basePrice_premiumProduct_Twice&quot;                      &quot;basePrice_prob&quot;                                     
-# [95] &quot;basePrice_productGroup_nUser&quot;                        &quot;basePrice_productGroup_nUserUsed&quot;                   
-# [97] &quot;basePrice_productGroup_prob&quot;                         &quot;basePrice_productGroup_Twice&quot;                       
-# [99] &quot;basePrice_ratio_bp_p_round_nUser&quot;                    &quot;basePrice_ratio_bp_p_round_nUserUsed&quot;               
-# [101] &quot;basePrice_ratio_bp_p_round_prob&quot;                     &quot;basePrice_ratio_bp_p_round_Twice&quot;                   
-# [103] &quot;basePrice_Twice&quot;                                     &quot;brand_premiumProduct_nUser&quot;                         
-# [105] &quot;brand_premiumProduct_nUserUsed&quot;                      &quot;brand_premiumProduct_prob&quot;                          
-# [107] &quot;brand_premiumProduct_Twice&quot;                          &quot;categoryIDs_brand_nUser&quot;                            
-# [109] &quot;categoryIDs_brand_nUserUsed&quot;                         &quot;categoryIDs_brand_prob&quot;                             
-# [111] &quot;categoryIDs_brand_Twice&quot;                             &quot;categoryIDs_nUser&quot;                                  
-# [113] &quot;categoryIDs_nUserUsed&quot;                               &quot;categoryIDs_premiumProduct_nUser&quot;                   
-# [115] &quot;categoryIDs_premiumProduct_nUserUsed&quot;                &quot;categoryIDs_premiumProduct_prob&quot;                    
-# [117] &quot;categoryIDs_premiumProduct_Twice&quot;                    &quot;categoryIDs_prob&quot;                                   
-# [119] &quot;categoryIDs_ratio_bp_p_round_nUser&quot;                  &quot;categoryIDs_ratio_bp_p_round_nUserUsed&quot;             
-# [121] &quot;categoryIDs_ratio_bp_p_round_prob&quot;                   &quot;categoryIDs_ratio_bp_p_round_Twice&quot;                 
-# [123] &quot;categoryIDs_Twice&quot;                                   &quot;couponID_couponsReceivedDoW_nUser&quot;                  
-# [125] &quot;couponID_couponsReceivedDoW_nUserUsed&quot;               &quot;couponID_couponsReceivedDoW_prob&quot;                   
-# [127] &quot;couponID_couponsReceivedDoW_Twice&quot;                   &quot;couponID_couponsReceivedTime_nUser&quot;                 
-# [129] &quot;couponID_couponsReceivedTime_nUserUsed&quot;              &quot;couponID_couponsReceivedTime_prob&quot;                  
-# [131] &quot;couponID_couponsReceivedTime_Twice&quot;                  &quot;couponID_nUser&quot;                                     
-# [133] &quot;couponID_nUserUsed&quot;                                  &quot;couponID_orderTimeDoW_nUser&quot;                        
-# [135] &quot;couponID_orderTimeDoW_nUserUsed&quot;                     &quot;couponID_orderTimeDoW_prob&quot;                         
-# [137] &quot;couponID_orderTimeDoW_Twice&quot;                         &quot;couponID_orderTimeTime_nUser&quot;                       
-# [139] &quot;couponID_orderTimeTime_nUserUsed&quot;                    &quot;couponID_orderTimeTime_prob&quot;                        
-# [141] &quot;couponID_prob&quot;                                       &quot;couponID_TimeBtwnRecOrder_disc_nUser&quot;               
-# [143] &quot;couponID_TimeBtwnRecOrder_disc_nUserUsed&quot;            &quot;couponID_TimeBtwnRecOrder_disc_prob&quot;                
-# [145] &quot;couponID_TimeBtwnRecOrder_disc_Twice&quot;                &quot;couponID_Twice&quot;                                     
-# [147] &quot;couponsReceivedDoW_basePrice_nUser&quot;                  &quot;couponsReceivedDoW_basePrice_nUserUsed&quot;             
-# [149] &quot;couponsReceivedDoW_basePrice_prob&quot;                   &quot;couponsReceivedDoW_basePrice_Twice&quot;                 
-# [151] &quot;couponsReceivedDoW_brand_nUser&quot;                      &quot;couponsReceivedDoW_brand_nUserUsed&quot;                 
-# [153] &quot;couponsReceivedDoW_brand_prob&quot;                       &quot;couponsReceivedDoW_brand_Twice&quot;                     
-# [155] &quot;couponsReceivedDoW_categoryIDs_nUser&quot;                &quot;couponsReceivedDoW_categoryIDs_nUserUsed&quot;           
-# [157] &quot;couponsReceivedDoW_categoryIDs_prob&quot;                 &quot;couponsReceivedDoW_categoryIDs_Twice&quot;               
-# [159] &quot;couponsReceivedDoW_nUser&quot;                            &quot;couponsReceivedDoW_nUserUsed&quot;                       
-# [161] &quot;couponsReceivedDoW_orderTimeDoW_nUser&quot;               &quot;couponsReceivedDoW_orderTimeDoW_nUserUsed&quot;          
-# [163] &quot;couponsReceivedDoW_orderTimeDoW_prob&quot;                &quot;couponsReceivedDoW_orderTimeDoW_Twice&quot;              
-# [165] &quot;couponsReceivedDoW_orderTimeTime_nUser&quot;              &quot;couponsReceivedDoW_orderTimeTime_nUserUsed&quot;         
-# [167] &quot;couponsReceivedDoW_orderTimeTime_prob&quot;               &quot;couponsReceivedDoW_orderTimeTime_Twice&quot;             
-# [169] &quot;couponsReceivedDoW_premiumProduct_nUser&quot;             &quot;couponsReceivedDoW_premiumProduct_nUserUsed&quot;        
+# the following names are right, the front index is right, from 104 to 475 the showing index is wrong, but # it does not matter
+
+# [3]                                                        &quot;nCoup1Batch&quot;                                                                                 
+# [5]  &quot;nCoup2Batch&quot;                                         &quot;nCoup3Batch&quot;                                         
+
+# [10]                                                       &quot;TimeBtwnSentRec.mean&quot;                               
+# [12] &quot;TimeBtwnSentRec.max&quot;                                 &quot;TimeBtwnSentRec.min&quot;                                
+# [14] &quot;TimeBtwnSentRec.median&quot;                              &quot;TimeBtwnRecExpire.mean&quot;                             
+# [16] &quot;TimeBtwnRecExpire.max&quot;                               &quot;TimeBtwnRecExpire.min&quot;                              
+# [18] &quot;TimeBtwnRecExpire.median&quot;                            &quot;TimeBtwnRecOrder.mean&quot;                              
+# [20] &quot;TimeBtwnRecOrder.max&quot;                                &quot;TimeBtwnRecOrder.min&quot;                               
+# [22] &quot;TimeBtwnRecOrder.median&quot;                             &quot;TimeBtwnOrderExpire.mean&quot;                           
+# [24] &quot;TimeBtwnOrderExpire.max&quot;                             &quot;TimeBtwnOrderExpire.min&quot;                            
+# [26] &quot;TimeBtwnOrderExpire.median&quot;                          &quot;order.weekend&quot;                                      
+# [28] &quot;order.FriSat&quot;                                        &quot;order.weekday&quot;                                      
+# [30] &quot;order.worktime&quot;                                      
+# 
+# [31]                                                       &quot;couponRec.weekend&quot;                                  
+# [33] &quot;couponRec.FriSat&quot;                                    &quot;couponRec.weekday&quot;                                  
+# [35] &quot;orderMaxPerWeek&quot;                                     &quot;orderMinPerWeek&quot;                                    
+# [37] &quot;ActiveWeek&quot;                                          &quot;tot_visitOrder&quot;                                     
+# [39] &quot;time_lastVisit&quot;                                      &quot;avgTime_visit&quot;                                      
+# [41] &quot;var_visit&quot;                                           &quot;medianTime_visit&quot;                                   
+# [43] &quot;maxTime_visit&quot;                                       &quot;minTime_visit&quot;                                      
+# [45] &quot;avgTime_recd_order&quot;                                  &quot;avgTime_order&quot;                                      
+# [47] &quot;batch_visits&quot;                                        &quot;batch_visitOrder&quot;                                   
+
+# [51] &quot;sim_ftd_invmax_cosSim_to2Col&quot;                        &quot;sim_ftd_invmax_cosSim_to3Col&quot;                       
+# [53] &quot;sim_ftd_ivf_cosSim_to2Col&quot;                           &quot;sim_ftd_ivf_cosSim_to3Col&quot;                          
+# [55] &quot;sim_ftd_lnorm_cosSim_to2Col&quot;                         &quot;sim_ftd_lnorm_cosSim_to3Col&quot;                        
+# [57] &quot;sim_ftd_pif_cosSim_to2Col&quot;                           &quot;sim_ftd_pif_cosSim_to3Col&quot;                          
+# [59] &quot;brand3_or_not&quot;                                       &quot;item_premium_version&quot;                               
+# [61] &quot;item_price_max&quot;                                      &quot;item_price_min&quot;                                     
+# [63] &quot;item_price_num&quot;                                      &quot;item_zprice_unique&quot;                                 
+# [65] &quot;item_zprice_orig&quot;                                    &quot;item_zprice_unscale&quot;                                
+# [67] &quot;item_price_max_scale&quot;                                &quot;item_basePrice_max&quot;                                 
+# [69] &quot;item_basePrice_min&quot;                                  &quot;item_basePrice_num&quot;                                 
+# [71] &quot;item_zbasePrice_unique&quot;                              &quot;item_zbasePrice_orig&quot;                               
+# [73] &quot;item_zbasePrice_unscale&quot;                             &quot;item_basePrice_max_scale&quot;                           
+# [75] &quot;item_reward_max&quot;                                     &quot;item_reward_min&quot;                                    
+# [77] &quot;item_reward_num&quot;                                     &quot;item_zreward_unique&quot;                                
+# [79] &quot;item_zreward_orig&quot;                                   &quot;item_zreward_unscale&quot;                               
+# [81] &quot;item_reward_max_scale&quot;                               &quot;item_zbp_zp_ratio_unique&quot;                           
+# [83] &quot;item_zbp_zp_ratio_orig&quot;                              &quot;item_zbp_zp_ratio_unscale&quot;                          
+# [85] &quot;jaccard_to2Col&quot;                                      &quot;jaccard_to3Col&quot;                                     
+
+# [91] &quot;ptimesCol1&quot;                                          &quot;ptimesCol2&quot;                                         
+# [93] &quot;ptimesCol3&quot;                                          
+
+# [103]                                                      &quot;basePrice_brand_nUser&quot;                              
+# [105] &quot;basePrice_brand_nUserUsed&quot;                           &quot;basePrice_brand_prob&quot;                               
+# [107] &quot;basePrice_brand_Twice&quot;                               &quot;basePrice_categoryIDs_nUser&quot;                        
+# [109] &quot;basePrice_categoryIDs_nUserUsed&quot;                     &quot;basePrice_categoryIDs_prob&quot;                         
+# [111] &quot;basePrice_categoryIDs_Twice&quot;                         &quot;basePrice_nUser&quot;                                    
+# [113] &quot;basePrice_nUserUsed&quot;                                 &quot;basePrice_premiumProduct_nUser&quot;                     
+# [115] &quot;basePrice_premiumProduct_nUserUsed&quot;                  &quot;basePrice_premiumProduct_prob&quot;                      
+# [117] &quot;basePrice_premiumProduct_Twice&quot;                      &quot;basePrice_prob&quot;                                     
+# [119] &quot;basePrice_productGroup_nUser&quot;                        &quot;basePrice_productGroup_nUserUsed&quot;                   
+# [121] &quot;basePrice_productGroup_prob&quot;                         &quot;basePrice_productGroup_Twice&quot;                       
+# [123] &quot;basePrice_ratio_bp_p_round_nUser&quot;                    &quot;basePrice_ratio_bp_p_round_nUserUsed&quot;               
+# [125] &quot;basePrice_ratio_bp_p_round_prob&quot;                     &quot;basePrice_ratio_bp_p_round_Twice&quot;                   
+# [127] &quot;basePrice_Twice&quot;                                     &quot;brand_premiumProduct_nUser&quot;                         
+# [129] &quot;brand_premiumProduct_nUserUsed&quot;                      &quot;brand_premiumProduct_prob&quot;                          
+# [131] &quot;brand_premiumProduct_Twice&quot;                          &quot;categoryIDs_brand_nUser&quot;                            
+# [133] &quot;categoryIDs_brand_nUserUsed&quot;                         &quot;categoryIDs_brand_prob&quot;                             
+# [135] &quot;categoryIDs_brand_Twice&quot;                             &quot;categoryIDs_nUser&quot;                                  
+# [137] &quot;categoryIDs_nUserUsed&quot;                               &quot;categoryIDs_premiumProduct_nUser&quot;                   
+# [139] &quot;categoryIDs_premiumProduct_nUserUsed&quot;                &quot;categoryIDs_premiumProduct_prob&quot;                    
+# [141] &quot;categoryIDs_premiumProduct_Twice&quot;                    &quot;categoryIDs_prob&quot;                                   
+# [143] &quot;categoryIDs_ratio_bp_p_round_nUser&quot;                  &quot;categoryIDs_ratio_bp_p_round_nUserUsed&quot;             
+# [145] &quot;categoryIDs_ratio_bp_p_round_prob&quot;                   &quot;categoryIDs_ratio_bp_p_round_Twice&quot;                 
+# [147] &quot;categoryIDs_Twice&quot;                                   &quot;couponID_couponsReceivedDoW_nUser&quot;                  
+# [149] &quot;couponID_couponsReceivedDoW_nUserUsed&quot;               &quot;couponID_couponsReceivedDoW_prob&quot;                   
+# [151] &quot;couponID_couponsReceivedDoW_Twice&quot;                   &quot;couponID_couponsReceivedTime_nUser&quot;                 
+# [153] &quot;couponID_couponsReceivedTime_nUserUsed&quot;              &quot;couponID_couponsReceivedTime_prob&quot;                  
+# [155] &quot;couponID_couponsReceivedTime_Twice&quot;                  &quot;couponID_nUser&quot;                                     
+# [157] &quot;couponID_nUserUsed&quot;                                  &quot;couponID_orderTimeDoW_nUser&quot;                        
+# [159] &quot;couponID_orderTimeDoW_nUserUsed&quot;                     &quot;couponID_orderTimeDoW_prob&quot;                         
+# [161] &quot;couponID_orderTimeDoW_Twice&quot;                         &quot;couponID_orderTimeTime_nUser&quot;                       
+# [163] &quot;couponID_orderTimeTime_nUserUsed&quot;                    &quot;couponID_orderTimeTime_prob&quot;                        
+# [165] &quot;couponID_prob&quot;                                       &quot;couponID_TimeBtwnRecOrder_disc_nUser&quot;               
+# [167] &quot;couponID_TimeBtwnRecOrder_disc_nUserUsed&quot;            &quot;couponID_TimeBtwnRecOrder_disc_prob&quot;                
+# [169] &quot;couponID_TimeBtwnRecOrder_disc_Twice&quot;                &quot;couponID_Twice&quot;                                     
+# [171] &quot;couponsReceivedDoW_basePrice_nUser&quot;                  &quot;couponsReceivedDoW_basePrice_nUserUsed&quot;             
+# [173] &quot;couponsReceivedDoW_basePrice_prob&quot;                   &quot;couponsReceivedDoW_basePrice_Twice&quot;                 
+# [175] &quot;couponsReceivedDoW_brand_nUser&quot;                      &quot;couponsReceivedDoW_brand_nUserUsed&quot;                 
+# [177] &quot;couponsReceivedDoW_brand_prob&quot;                       &quot;couponsReceivedDoW_brand_Twice&quot;                     
+# [179] &quot;couponsReceivedDoW_categoryIDs_nUser&quot;                &quot;couponsReceivedDoW_categoryIDs_nUserUsed&quot;           
+# [181] &quot;couponsReceivedDoW_categoryIDs_prob&quot;                 &quot;couponsReceivedDoW_categoryIDs_Twice&quot;               
+# [183] &quot;couponsReceivedDoW_nUser&quot;                            &quot;couponsReceivedDoW_nUserUsed&quot;                       
+# [185] &quot;couponsReceivedDoW_orderTimeDoW_nUser&quot;               &quot;couponsReceivedDoW_orderTimeDoW_nUserUsed&quot;          
+# [187] &quot;couponsReceivedDoW_orderTimeDoW_prob&quot;                &quot;couponsReceivedDoW_orderTimeDoW_Twice&quot;              
+# [189] &quot;couponsReceivedDoW_orderTimeTime_nUser&quot;              &quot;couponsReceivedDoW_orderTimeTime_nUserUsed&quot;         
+# [191] &quot;couponsReceivedDoW_orderTimeTime_prob&quot;               &quot;couponsReceivedDoW_orderTimeTime_Twice&quot;             
+# [193] &quot;couponsReceivedDoW_premiumProduct_nUser&quot;             &quot;couponsReceivedDoW_premiumProduct_nUserUsed&quot;      
 # [171] &quot;couponsReceivedDoW_premiumProduct_prob&quot;              &quot;couponsReceivedDoW_price_nUser&quot;                     
 # [173] &quot;couponsReceivedDoW_price_nUserUsed&quot;                  &quot;couponsReceivedDoW_price_prob&quot;                      
 # [175] &quot;couponsReceivedDoW_price_Twice&quot;                      &quot;couponsReceivedDoW_prob&quot;                            
@@ -712,10 +722,9 @@ colnames(cw31)[i]
 # [445] &quot;TimeBtwnRecOrder_disc_productGroup_nUserUsed&quot;        &quot;TimeBtwnRecOrder_disc_productGroup_prob&quot;            
 # [447] &quot;TimeBtwnRecOrder_disc_productGroup_Twice&quot;            &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_nUser&quot;       
 # [449] &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_nUserUsed&quot;    &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_prob&quot;        
-# [451] &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_Twice&quot;        &quot;weichengProb&quot;                                       
-# [453] &quot;orderID&quot;                                             &quot;couponUsed&quot;                                         
-# [455] &quot;basketValue&quot;  
-# 
+# [475] &quot;TimeBtwnRecOrder_disc_ratio_bp_p_round_Twice&quot;        
+
+# [938] &quot;weichengProb&quot;                                       
 </code></pre>
 
 </body>
