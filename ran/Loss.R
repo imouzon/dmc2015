@@ -1,3 +1,6 @@
+source("//Users/Ran/Google Drive/ISU/dmc2015/yihua/Loss_caculator.R")
+library(e1071)
+
 # features selected by random forest
 imp_rf <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_col.rds")
 imp_rf1 <- as.character(imp_rf$col_name)
@@ -18,7 +21,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_rf1
+col_pred_name <- imp_rf2
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
@@ -33,19 +36,6 @@ dat_y_te <- as.factor(dat_te_y$couponUsed)
 
 
 ### SVM ###
-
-# linear kernel
-svmfit_linear <- svm(x = dat_x_tr, y = dat_y_tr, 
-                     kernel = "linear", probability = TRUE)
-# validation error
-pred_linear <- predict(svmfit_linear, dat_x_te, probability = TRUE)
-table_linear <- table(pred_linear, dat_y_te)
-1 - sum(diag(table_linear)) / sum(table_linear)  # 0.1896
-# probability loss
-prob_linear <- attr(pred_linear, "probabilities")[, 2]
-sum(Loss_calculator(prob_linear[col1],dat_te_y$couponUsed[col1],
-                    prob_linear[col2],dat_te_y$couponUsed[col2],
-                    prob_linear[col3],dat_te_y$couponUsed[col3]))
 
 # polynomial kernel with default order 3
 svmfit_polynomial <- svm(x = dat_x_tr, y = dat_y_tr, 
