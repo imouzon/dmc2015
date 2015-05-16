@@ -1,5 +1,10 @@
 ## Pete's folder
 
+### Conditional Random Forest Performance so far
+>Historical set 1
+
+>![img](figures/cforest_h1_0.3.jpg)
+
 ### What needs to be done
 
 - Split training data into three different sets: ```historical```, ```train```, and ```validation```.
