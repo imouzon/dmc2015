@@ -1,21 +1,10 @@
 ---
-title: Reducing the features
+title: Curation and Cross Validation to Reduce Features
 titleshort: Too many features
 instructions: 
-author: Ian Mouzon
-authorshort: imouzon
-contact: imouzon@iastate.edu
-grouplong: Iowa State University's 2015 Data Mining Cup Team
-groupshort: DMC@ISU
-leader: One Week Left 
-leadershort: One Week Left
-semester: Spring 2015
-assignment: 
-duedate: May 13, 2015
 output:
-  usefulR::hw_format
+  usefulR::DMC_format
 ---
-
 
 <!--- # (R code (No Results in Document)) -->
 ```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
@@ -49,60 +38,131 @@ I am using the following packages:
    library(utils)
    source("~/dmc2015/ian/R/renm.R")
 ```
+My working directory is set to \verb!~/dmc2015/ian/!.
 
+# Curating and Cross Validating
+
+The reason features should be removed from an "large data" approach to a problem
+is if they are dominated by better features.
+
+However, when you have as many features as we do at the moment it can be difficult to 
+
+I am starting with **set 1**
 
 # Load feature matrix
 <!--- dgg: R code (No Results in Document) -->
 ```{r dgg,cache=FALSE}
-   f1 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.2.rds")
-   f2 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset2_LONG_ver0.2.rds")
-   f3 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.2.rds")
+   ## long 
+   f1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 
-   d1 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.2.rds")
-   d2 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset2_WIDE_ver0.2.rds")
-   d3 = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_WIDE_ver0.2.rds")
+   ## wide
+   d1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
 ```
 
 # Check the data
 <!--- chkh: R code (No Results in Document) -->
 ```{r chkh,cache=FALSE}
+   ## isolate the X and y for set 1
    Xn = f1$train$X
+   yn = f1$train$y
    
-   #remove the naive columns
+   ## remove the naive columns
    Xn = Xn[,!grepl("naive",names(Xn))]
 
+   ## keep the validation sets
    Xv = f1$validation$X
-   y = f1$validation$y$couponUsed
+   yv = f1$validation$y
 ```
 
+And this is our loss function:
+<!--- loss: R code (No Results in Document) -->
+```{r loss,cache=FALSE}
+   lossFunMethod = function(yval,Xval,method){
+      hatmat = as.matrix(matrix(predict(method,newdata = Xval),ncol=3,byrow=TRUE))
+      ymat = matrix(yval,ncol=3,byrow=TRUE)
+
+      error = colSums((ymat - hatmat)^2)
+      wt = colMeans(ymat)^2
+      cat("The coupon error is:  ",sum(error/wt),"\n")
+      cat("By column error:      ",error,"\n")
+      cat("By column weight:     ",error,"\n\n")
+      return(sum(error/wt))
+   }
+```
+
+The following functions will help me in this process:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+## I will use cross validation to estimate an error instead of checking the validation set
+RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50){
+   row.order = sample(1:nrow(Xrf))
+   CVk = 40
+   CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
+   OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
+
+   #Fit a random forest for couponUsed
+   cvRF = function(rows) randomForest(Xrf[rows,], y=yrf[rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
+   rf_cvs = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
+   return(rf_cvs)
+}
+
+##CV to get the mean importance
+RFxVal_imp = function(RFs){
+   RFimp = RFs[[1]]
+   for(i in 2:length(RFs)){
+
+
+```
+
+
+
+
+
+#I am going to start with a simple random forest
 <!--- rf: R code (No Results in Document) -->
 ```{r rf,cache=FALSE}
+   set.seed = 1999
+   ## lets try a small random forest
    library(randomForest)
+   
+   ## get the similarity columns
+   sim_columns = c(3,grep("sim_", names(Xn)))
 
-   Xrf = Xn[,c(3,grep("sim_", names(Xn)))]
+   ## get single way llrs:
+   llr1_columns = which(grepl("llr", names(Xn)) & !grepl("X",names(Xn)))
 
-   names(Xrf)
-   rf_cpn = randomForest(Xrf, y=f1$train$y$couponUsed,  ntree=1000, mtry=4, replace=TRUE, keep.forest = TRUE, maxnodes = 50)
+   #The predictor and response columns
+   Xrf = Xn[,c(sim_columns,llr1_columns)]
 
+   ## I will use cross validation to estimate an error instead of checking the validation set
+   set.seed = 1999
+   row.order = sample(1:nrow(Xrf))
+   CVk = 40
+   CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
+   OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
+
+   #Fit a random forest for couponUsed
+   cvRF = function(rows) randomForest(Xrf[rows,], y=yrf[rows], ntree=1000, mtry=8, replace=TRUE, maxnodes = 50)
+   rf_cpn = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
+
+   rf_cpn_imp = function(
+   names(
+         rf_cpn[[1]]$importance
+         )
    ## print
    print(rf_cpn)
 
    ## plots
-   varImpPlot(rf_cpn)
-   qplot(Xrf[,16],Xrf[,15],color= rf_cpn$predicted)
+   varImpPlot(rf_cpn,n.var=11)
    qplot(Xrf$order_match_class,rf_cpn$predicted,geom="boxplot",fill=as.factor(f1$train$y$couponUsed))
+   lossFun(rf_cpn, d1, Xv[,which(names(Xv) %in% names(Xrf))])
    #write.csv(matrix(c(Xn$orderID, rf_cpn$predicted),ncol=2),row.names=FALSE,quote=FALSE,file="./written_data/rf_prediction.csv")
 
-   d1$validation$y %>% select(orderID,coupon1Used,coupon2Used,coupon3Used,basketValue)
-   mutate(couponCol = rep(1:3,nrow(f1$validation$y)/3)) %>%
-      mutate(pred = predict(rf_cpn,newdata=Xv[,c(3,grep("sim_", names(Xv)))]), err = (couponUsed - pred)^2) %>%
-      group_by(couponCol) %>%
-      summarize(errnum = sum(err), meansq = mean(couponCol)^2) %>% with(sum(errnum/meansq))
-
-   names(f1$train$X)
+   #
+   lossFunMethod(yv$couponUsed,Xv[,which(names(Xv) %in% names(Xrf))],rf_cpn)
 
    rf_bval = randomForest(Xrf, y=f1$train$y$basketValue,  ntree=1000, mtry=10, replace=TRUE, keep.forest = TRUE, maxnodes = 100)
-   print(rfmod)
+   print(rf_bval)
    keepercols = names(Xn[,17:20])
    dropercols = names(Xn[,c(13:16,21:30)])
 ```
