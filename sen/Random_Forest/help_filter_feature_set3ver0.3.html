@@ -203,13 +203,18 @@ colnames(cw31)[i]
 
 <h2>Bad numbers (corresponding names) we excluded</h2>
 
-<pre><code class="r"># badnum = -c(1,7,8,9,50,   94:103,   476:937)
+<pre><code class="r"># badnum = -c(1,7,8,9,39:44, 50,   94:103,   476:937)
 # 
 # [1] &quot;orderID&quot;                                             
 # 
 # [7] &quot;firstTimeCoup1Rec&quot;                                   &quot;firstTimeCoup2Rec&quot;                                  
 # [9] &quot;firstTimeCoup3Rec&quot;                                                
 # 
+# [39] &quot;time_lastVisit&quot;                                      &quot;avgTime_visit&quot;                                      
+# [41] &quot;var_visit&quot;                                           &quot;medianTime_visit&quot;                                   
+# [43] &quot;maxTime_visit&quot;                                       &quot;minTime_visit&quot;                                      
+
+
 # [49]                                                       &quot;bPr2pr_approx_ratio&quot; 
 # 
 # [93]                                                       &quot;sim_ftd_invmax_cosSim_to1Col&quot;                       
@@ -479,7 +484,8 @@ colnames(cw31)[i]
 # 
 # 4 5 6  
 # 11:30
-# 32:48
+# 32:38
+# 45:48
 # 51:86  
 # 91:93 
 # 104:475 
@@ -508,10 +514,8 @@ colnames(cw31)[i]
 # [33] &quot;couponRec.FriSat&quot;                                    &quot;couponRec.weekday&quot;                                  
 # [35] &quot;orderMaxPerWeek&quot;                                     &quot;orderMinPerWeek&quot;                                    
 # [37] &quot;ActiveWeek&quot;                                          &quot;tot_visitOrder&quot;                                     
-# [39] &quot;time_lastVisit&quot;                                      &quot;avgTime_visit&quot;                                      
-# [41] &quot;var_visit&quot;                                           &quot;medianTime_visit&quot;                                   
-# [43] &quot;maxTime_visit&quot;                                       &quot;minTime_visit&quot;                                      
-# [45] &quot;avgTime_recd_order&quot;                                  &quot;avgTime_order&quot;                                      
+
+# [45] &quot;avgTime_recd_order&quot;                                  &quot;avgTime_order&quot; 
 # [47] &quot;batch_visits&quot;                                        &quot;batch_visitOrder&quot;                                   
 
 # [51] &quot;sim_ftd_invmax_cosSim_to2Col&quot;                        &quot;sim_ftd_invmax_cosSim_to3Col&quot;                       

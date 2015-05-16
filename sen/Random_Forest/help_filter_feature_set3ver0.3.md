@@ -29,13 +29,18 @@ colnames(cw31)[i]
 
 
 ```r
-# badnum = -c(1,7,8,9,50,   94:103,   476:937)
+# badnum = -c(1,7,8,9,39:44, 50,   94:103,   476:937)
 # 
 # [1] "orderID"                                             
 # 
 # [7] "firstTimeCoup1Rec"                                   "firstTimeCoup2Rec"                                  
 # [9] "firstTimeCoup3Rec"                                                
 # 
+# [39] "time_lastVisit"                                      "avgTime_visit"                                      
+# [41] "var_visit"                                           "medianTime_visit"                                   
+# [43] "maxTime_visit"                                       "minTime_visit"                                      
+
+
 # [49]                                                       "bPr2pr_approx_ratio" 
 # 
 # [93]                                                       "sim_ftd_invmax_cosSim_to1Col"                       
@@ -309,7 +314,8 @@ colnames(cw31)[i]
 # 
 # 4 5 6  
 # 11:30
-# 32:48
+# 32:38
+# 45:48
 # 51:86  
 # 91:93 
 # 104:475 
@@ -338,10 +344,8 @@ colnames(cw31)[i]
 # [33] "couponRec.FriSat"                                    "couponRec.weekday"                                  
 # [35] "orderMaxPerWeek"                                     "orderMinPerWeek"                                    
 # [37] "ActiveWeek"                                          "tot_visitOrder"                                     
-# [39] "time_lastVisit"                                      "avgTime_visit"                                      
-# [41] "var_visit"                                           "medianTime_visit"                                   
-# [43] "maxTime_visit"                                       "minTime_visit"                                      
-# [45] "avgTime_recd_order"                                  "avgTime_order"                                      
+                                      
+# [45] "avgTime_recd_order"                                  "avgTime_order" 
 # [47] "batch_visits"                                        "batch_visitOrder"                                   
 
 # [51] "sim_ftd_invmax_cosSim_to2Col"                        "sim_ftd_invmax_cosSim_to3Col"                       
