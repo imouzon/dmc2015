@@ -1,6 +1,6 @@
 ## Pete's folder
 
-### Conditional Random Forest Performance so far
+### Conditional Random Forest Performance for Classification
 > Historical set 1
 
 > ![img](figures/cforest_h1_0.3.jpg)

@@ -2,13 +2,12 @@ source("//Users/Ran/Google Drive/ISU/dmc2015/yihua/Loss_caculator.R")
 library(e1071)
 
 # features selected by random forest
-imp_rf <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_col.rds")
-imp_rf1 <- as.character(imp_rf$col_name)
+imp_rf1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_SET3.rds")
 imp_rf2 <- imp_rf1[1:100]
 # features selected by lasso
-imp_lasso <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name.rds")
+imp_lasso <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name_set3.rds")
 # features selected by C5.0
-imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name.rds")
+imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name_set3.rds")
 # features selected by adaboost
 imp_ada <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_ada.rds")
 imp_ada <- names(imp_ada)
@@ -24,7 +23,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_ada
+col_pred_name <- imp_lasso
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
@@ -33,8 +32,9 @@ col3 <- which(dat_te_x$couponCol==3)
 
 dat_x_tr <- dat_tr_x[,col_pred]
 dat_x_te <- dat_te_x[,col_pred]
-dat_x_tr <- dat_x_tr[, as.numeric(which(apply(dat_x_tr, 2, function(x){length(unique(as.factor(x))) > 1})))]
-dat_x_te <- dat_x_te[, as.numeric(which(apply(dat_x_tr, 2, function(x){length(unique(as.factor(x))) > 1})))]
+a <- as.numeric(which(apply(dat_x_tr, 2, function(x){length(unique(as.factor(x))) > 1})))
+dat_x_tr <- dat_x_tr[, a]
+dat_x_te <- dat_x_te[, a]
 
 dat_y_tr <- as.factor(dat_tr_y$couponUsed)
 dat_y_te <- as.factor(dat_te_y$couponUsed)
