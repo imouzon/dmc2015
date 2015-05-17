@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 15-05-2015
-# Last Modified: Sat May 16 22:28:15 2015
+# Last Modified: Sat May 16 22:32:32 2015
 #
 # Purpose: Measure variable importance with regard to conditional random
 # forests. To do this we will randomly group variables and fit conditional
@@ -218,4 +218,4 @@ imp$m_imp <- rowMeans(imp[,2:4], na.rm=T)
 
 imp <- imp[order(imp$m_imp, decreasing = T),]
 rownames(imp) <- 1:nrow(imp)
-saveRDS(imp, "~/GitHub/dmc2015/pete/predictions/importance_reg.rds")
+saveRDS(imp, "~/GitHub/dmc2015/pete/predictions/importance_BV.rds")
