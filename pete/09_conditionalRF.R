@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Sat May 16 21:22:11 2015
+# Last Modified: Sat May 16 21:42:36 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -32,7 +32,7 @@ h1_cf <- cforest(couponUsed~., data = h1_t,
 h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
               h1$validation$X[as.character(imp$var[1:100])])
 h1_v_p <- predict(h1_cf, newdata = h1_v)
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_h1_0.3.jpg")
+jpeg("~/GitHub/dmc2015/pete/figures/cforest_h1_0.3.jpg", width = 480, height = 480)
 roc(h1_v_p, h1_v$couponUsed)
 dev.off()
 
@@ -48,7 +48,7 @@ h2_cf <- cforest(couponUsed~., data = h2_t,
 h2_v <- cbind(couponUsed = h2$validation$y$couponUsed, 
               h2$validation$X[names(h2$train$X) %in% as.character(imp$var[1:100])])
 h2_v_p <- predict(h2_cf, newdata = h2_v)
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_h2_0.3.jpg")
+jpeg("~/GitHub/dmc2015/pete/figures/cforest_h2_0.3.jpg", width = 480, height = 480)
 roc(h2_v_p, h2_v$couponUsed)
 dev.off()
 
@@ -62,7 +62,7 @@ h3_cf <- cforest(couponUsed~., data = h3_t,
 h3_v <- cbind(couponUsed = h3$validation$y$couponUsed, 
               h3$validation$X[names(h3$train$X) %in% as.character(imp$var[1:100])])
 h3_v_p <- predict(h3_cf, newdata = h3_v)
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_h3_0.3.jpg")
+jpeg("~/GitHub/dmc2015/pete/figures/cforest_h3_0.3.jpg", width = 480, height = 480)
 roc(h3_v_p, h3_v$couponUsed)
 dev.off()
 
@@ -74,7 +74,11 @@ set2 <- roc_dat(h2_v_p, h2_v$couponUsed)
 set2$set <- "HTV2"
 set3 <- roc_dat(h3_v_p, h3_v$couponUsed)
 set3$set <- "HTV3"
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_all_0.3.jpg")
+jpeg("~/GitHub/dmc2015/pete/figures/cforest_all_0.3.jpg", width = 480, height = 480) 
 rbind(set1, set2, set3) %>% ggplot(aes(x = fpr, y = tpr)) + 
-  geom_step(aes(colour = set)) + theme_bw()
+  geom_step(aes(colour = set)) + theme_bw() + 
+  xlab("False Positive Rate") + ylab("True Positive Rate")
 dev.off()
+
+
+d <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
