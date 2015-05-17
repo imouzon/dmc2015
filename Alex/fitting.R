@@ -134,8 +134,7 @@ run_set2_trials = function(method, colset = 1, ...) {
 
 	return(m)
 }
-run_set2_trials(gbm, colset = 1, n.trees = 1000, distribution = "adaboost")
-
+run_set2_trials(gbm, colset = 1, n.trees = 10000, distribution = "adaboost")
 
 
 
