@@ -181,6 +181,11 @@ The following functions will help me in this process:
    mnodes = 5:14
    nodesCV = sapply(mnodes, function(x) RFxVal(10,Xrf,yn[,"couponUsed"],mtry=mnodes,ntree=5000,maxnodes=100,returnERR=TRUE))
 
+   ## How many nodes to play???
+   qplot(5:14,colMeans(nodesCV))
+
+   ## looks like 11
+   RFfit = RFxVal(10,Xrf,yn[,"couponUsed"],mtry=11,ntree=8000,maxnodes=100,returnERR=FALSE)
 
    CVrf = 
 

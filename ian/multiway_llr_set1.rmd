@@ -1,19 +1,9 @@
 ---
-title: Multiway Comparisons 
-titleshort: Multiway LLR
+title: Creating better LLRs
+titleshort: We can maybe get these for 
 instructions: 
-author: Pete and Ian
-authorshort: imouzon
-contact: imouzon@iastate.edu
-grouplong: Iowa State University's 2015 Data Mining Cup Team
-groupshort: DMC@ISU
-leader: One Week Left 
-leadershort: One Week Left
-semester: Spring 2015
-assignment: 
-duedate: May 13, 2015
 output:
-  usefulR::hw_format
+  usefulR::DMC_format
 ---
 
 <!--- # (R code (No Results in Document)) -->
@@ -28,7 +18,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("/Users/user/dmc2015/ian/3way_llr.rmd")
+      rmarkdown::render("/Users/user/dmc2015/ian/multiway_llr_set1.rmd")
 ```
 
 I am using the following packages:
@@ -36,9 +26,11 @@ I am using the following packages:
 ```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
    library(magrittr)
    library(dplyr)
+   library(reshape2)
    library(tidyr)
    library(lubridate)
    library(ggplot2)
+   library(directlabels)
    library(rCharts)
    library(xtable)
    library(foreach)
@@ -47,102 +39,9 @@ I am using the following packages:
    library(utils)
    source("~/dmc2015/ian/R/renm.R")
 ```
+My working directory is set to \verb!~/dmc2015/ian/!.
 
-
-# Loglikelihood statistics
-
-<!--- xx: R code (No Results in Document) -->
-```{r xx,cache=FALSE}
-llr_multiway = function(dsn,hst,comparecols){
-   #we need the data to be in long form: see 
-   hst.ids = hst$orderID
-
-   dsn.llr = dsn
-   for(i in comparecols) dsn.llr[,i] = as.character(dsn.llr[,i])
-   dsn.llr = dsn.llr[,c("orderID","couponCol","couponUsed",names(dsn)[comparecols])]
-
-   dsn.llr$compID = sapply(1:nrow(dsn.llr),function(i) paste(dsn.llr[i,4:ncol(dsn.llr)],collapse="|"))
-
-   #estimate priors
-   prior.est.llr = dsn.llr %>% select(orderID,couponCol,couponUsed,compID) %>% 
-      group_by(compID) %>%
-      summarize(ntimes = n(), timesUsed = sum(couponUsed), timesNotUsed = ntimes - timesUsed, propUsed = timesUsed/ntimes) %>%
-      filter(ntimes != 1) 
-
-      M = mean(prior.est.llr$propUsed,na.rm=T)
-      M2 = mean(prior.est.llr$propUsed^2,na.rm=T)
-
-      alpha.est = M * (M - M2) / ( M2 - M*M ) 
-      beta.est = ( 1 - M) * ( M - M2 ) / (M2 - M*M)
-
-   #get posterior information
-   post.est.llr = dsn.llr %>% select(orderID,couponCol,couponUsed,compID) %>% 
-      filter(orderID %in% hst.ids) %>%
-      group_by(compID) %>%
-      mutate(ntimes = n(), 
-                timesUsed = sum(couponUsed), 
-                timesNotUsed = ntimes - timesUsed, 
-                llr_est = log((timesUsed + alpha.est)/(timesNotUsed + beta.est)),
-                llr_naive = log((timesUsed + 1)/(timesNotUsed + 1))) %>% 
-      select(orderID,couponCol,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive)
-
-   dsn.res = dsn.llr %>% left_join(post.est.llr,by=c("orderID","couponCol")) %>% 
-      select(orderID,couponCol,ntimes,timesUsed,timesNotUsed,llr_est,llr_naive)
-
-
-   dsn.res$ntimes[is.na(dsn.res$ntimes)] = -1  
-   dsn.res$timesUsed[is.na(dsn.res$timesUsed)] = -1 
-   dsn.res$timesNotUsed[is.na(dsn.res$timesNotUsed)] = -1  
-
-   dsn.res$llr_est[is.na(dsn.res$llr_est)] = alpha.est/beta.est
-   dsn.res$llr_naive[is.na(dsn.res$llr_naive)] = 0
-
-   abbrv = paste(names(dsn)[comparecols],collapse="X")
-   abbrv = gsub("productGroup","prod",abbrv)
-   abbrv = gsub("brand","brd",abbrv)
-   abbrv = gsub("reward","rwd",abbrv)
-   abbrv = gsub("couponseReceived","cpnrec",abbrv)
-   abbrv = gsub("orderTime","ort",abbrv)
-   abbrv = gsub("premiumProduct","lux",abbrv)
-   abbrv = gsub("categoryIDs","catids",abbrv)
-   abbrv = gsub("categoryIDs1","catid1",abbrv)
-   abbrv = gsub("categoryIDs2","catid2",abbrv)
-   abbrv = gsub("categoryIDs3","catid3",abbrv)
-   abbrv = gsub("categoryIDs4","catid4",abbrv)
-   abbrv = gsub("categoryIDs5","catid5",abbrv)
-   abbrv = gsub("couponID","cpn",abbrv)
-
-   dsn.res_long = dsn.res
-   names(dsn.res_long)[3:ncol(dsn.res_long)] = paste(names(dsn.res_long)[3:ncol(dsn.res_long)],abbrv,sep="_")
-
-   dsn.res_wide1 = dsn.res %>% select(orderID,couponCol,ntimes) %>% spread(couponCol,ntimes) 
-   names(dsn.res_wide1)[2:4] = paste0(paste("ntimes",abbrv,"col",sep="_"), names(dsn.res_wide1)[2:4])
-
-   dsn.res_wide2 = dsn.res %>% select(orderID,couponCol,timesUsed) %>% spread(couponCol,timesUsed)
-   names(dsn.res_wide2)[2:4] = paste0(paste("timesUsed",abbrv,"col",sep="_"), names(dsn.res_wide2)[2:4]) 
-
-   dsn.res_wide3 = dsn.res %>% select(orderID,couponCol,timesNotUsed) %>% spread(couponCol,timesNotUsed)
-   names(dsn.res_wide3)[2:4] = paste0(paste("timesNotUsed",abbrv,"col",sep="_"), names(dsn.res_wide3)[2:4])
-   
-   dsn.res_wide4 = dsn.res %>% select(orderID,couponCol,llr_est) %>% spread(couponCol,llr_est)
-   names(dsn.res_wide4)[2:4] = paste0(paste("llr_est",abbrv,"col",sep="_"), names(dsn.res_wide4)[2:4])
-
-   dsn.res_wide5 = dsn.res %>% select(orderID,couponCol,llr_naive) %>% spread(couponCol,llr_naive)
-   names(dsn.res_wide5)[2:4] = paste0(paste("llr_naive",abbrv,"col",sep="_"), names(dsn.res_wide5)[2:4])
-
-   dsn.res_wide = dsn.res_wide1 %>% 
-      full_join(dsn.res_wide2,by="orderID") %>%
-      full_join(dsn.res_wide3,by="orderID") %>%
-      full_join(dsn.res_wide4,by="orderID") %>%
-      full_join(dsn.res_wide5,by="orderID")
-
-   ret = list("long" = dsn.res_long,"wide" = dsn.res_wide)
-   return(ret)
-}
-   
-```
-
-# Getting Tranthe Data and Manipulations 
+# Bayesian Basket Values
 I am using our new clean data - so should you
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r cache=FALSE}
@@ -197,13 +96,14 @@ I and can split the columns of product group using:
       arrange(orderID,couponCol,categoryEntry)
 ```
 
-
-# Based on Historical Set 1
+## Based on Historical Set 1
 <!--- readHist1: R code (No Results in Document) -->
 ```{r readHist1,cache=FALSE}
    HTVset1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
    names(dm)
 ```
+
+#
 
 
 ## Making comparisons
@@ -255,30 +155,55 @@ groupC2 = "couponID"
 
 groupD1 = c("ShopFast", "EarlyRec")
 groupD2 = c("premiumProduct", "brand", "productGroup", "categoryIDs","reward")
+```
 
+
+# One way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
 # one way
 oneway = c(groupA,groupB,groupC1,groupC2,groupD1,groupD2)
 sapply(oneway, function(i) CreateSets(i)) 
+```
 
+
+# Two Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
 ## two way
 twoway = combn(c(groupC1,groupB,groupD1,groupD2),2) %>% 
          cbind(combn(c(groupC1,groupC2),2)) %>%           # group C is OK for internal 2 way
          cbind(combn(c(groupC2,groupD1),2))               # group D is OK for internal 2 way
 
 sapply(1:ncol(twoway), function(i) CreateSets(twoway[,i]))
+```
 
+
+# Three Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
 ## three way 
 threeway = combn(c(groupB,groupC1),3) %>%                                                     # group B = 2 and userID is OK 
    cbind(do.call("cbind", lapply(groupB, function(x) combn(c(x,groupD1,groupD2),3)))) %>%      # group B = 1 and group D = 2 is OK
    cbind(do.call("cbind",lapply(c(groupD1,groupD2), function(x) combn(c(x,groupB),3)))) %>%   # group B = 2 and group D = 1 is OK
-   combn(c(groupC1,groupD1,groupD2),3)
+   cbind(combn(c(groupC1,groupD1,groupD2),3))
 
 sapply(1:ncol(threeway), function(i) CreateSets(threeway[,i]))
+```
 
+
+# Four Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
 ## four way
 fourway = combn(c(groupD1,groupD2),4)
 sapply(1:ncol(fourway), function(i) CreateSets(fourway[,i]))
+```
 
+
+# Five Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
 ## five way only for groupD and internal
 fiveway = combn(c(groupD1,groupD2),5)
 sapply(1:ncol(fiveway), function(i) CreateSets(fiveway[,i]))
