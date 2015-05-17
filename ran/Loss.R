@@ -9,6 +9,8 @@ imp_rf2 <- imp_rf1[1:100]
 imp_lasso <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name.rds")
 # features selected by C5.0
 imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name.rds")
+# features selected by adaboost
+imp_ada <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_ada.rds")
 
 # features
 dat = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
@@ -21,7 +23,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_rf2
+col_pred_name <- imp_ada
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
