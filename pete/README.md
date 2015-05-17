@@ -1,9 +1,21 @@
 ## Pete's folder
 
 ### Conditional Random Forest Performance so far
->Historical set 1
+> Historical set 1
 
->![img](figures/cforest_h1_0.3.jpg)
+> ![img](figures/cforest_h1_0.3.jpg)
+
+> Historical set 2
+
+> ![img](figures/cforest_h2_0.3.jpg)
+
+> Historical set 3
+
+> ![img](figures/cforest_h3_0.3.jpg)
+
+> All together...
+
+> ![img](figures/cforest_all_0.3.jpg)
 
 ### What needs to be done
 

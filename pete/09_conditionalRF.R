@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Sat May 16 18:28:29 2015
+# Last Modified: Sat May 16 21:22:11 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -66,3 +66,15 @@ jpeg("~/GitHub/dmc2015/pete/figures/cforest_h3_0.3.jpg")
 roc(h3_v_p, h3_v$couponUsed)
 dev.off()
 
+# Compare ROC curves of each set 
+# ============================================================================
+set1 <- roc_dat(h1_v_p, h1_v$couponUsed)
+set1$set <- "HTV1"
+set2 <- roc_dat(h2_v_p, h2_v$couponUsed)
+set2$set <- "HTV2"
+set3 <- roc_dat(h3_v_p, h3_v$couponUsed)
+set3$set <- "HTV3"
+jpeg("~/GitHub/dmc2015/pete/figures/cforest_all_0.3.jpg")
+rbind(set1, set2, set3) %>% ggplot(aes(x = fpr, y = tpr)) + 
+  geom_step(aes(colour = set)) + theme_bw()
+dev.off()
