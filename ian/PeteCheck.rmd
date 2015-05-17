@@ -1,0 +1,66 @@
+---
+title: Curation and Cross Validation to Reduce Features
+titleshort: Too many features
+instructions: 
+output:
+  usefulR::DMC_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/PeteCheck.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(reshape2)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(directlabels)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+My working directory is set to \verb!~/dmc2015/ian/!.
+
+# Pete Check
+Pete's in MN right now by he's soldiering through:
+
+## Reading in Pete's Work
+
+A few notes - there is definetly an interesting set of variables in this mix (particularly set 2's variables). 
+I 
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   PeteImp = readRDS("../pete/predictions/importance.rds")
+
+   ## 20 most important features in Set 1
+   PeteImp %>% arrange(-h1_imp) %>% select(var,h1_imp) %>% head(10)
+
+   ## 20 most important features in Set 2
+   PeteImp %>% arrange(-h2_imp) %>% select(var,h2_imp) %>% head(10)
+
+   ## 20 most important features in Set 3
+   PeteImp %>% arrange(-h3_imp) %>% select(var,h3_imp) %>% head(10)
+```
+
+Alex is adapting these importance levels have been adapted to our variable selection set. Thanks Pete!
+

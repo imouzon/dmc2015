@@ -87,18 +87,7 @@ And this is our loss function:
 
       cat("The coupon error is:  ",sum(error/wt),"\n")
       cat("By column error:      ",error,"\n")
-      cat("By column weight:     ",error,"\n\n")
-      return(sum(error/wt))
-   }
-
-   lossFunCV = function(yval,Xval,method){
-
-      hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response"),ncol=3,byrow=TRUE))
-      ymat = matrix(yval,ncol=3,byrow=TRUE)
-
-      cat("The coupon error is:  ",sum(error/wt),"\n")
-      cat("By column error:      ",error,"\n")
-      cat("By column weight:     ",error,"\n\n")
+      cat("By column weight:     ",wt,"\n\n")
       return(sum(error/wt))
    }
 ```
@@ -107,16 +96,27 @@ The following functions will help me in this process:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
    ## I will use cross validation to estimate an error instead of checking the validation set
-   RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50){
+   RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50,returnERR = FALSE){
       row.order = sample(1:nrow(Xrf))
       CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
       OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
 
       #Fit a random forest for couponUsed
       cvRF = function(rows) randomForest(Xrf[-rows,], y=yrf[-rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
+
       message("Fitting randomForest")
       rf_cvs = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
-      return(rf_cvs)
+
+      message("Calculating Loss")
+      lossFunction = sapply(1:CVk, function(i) lossFunMethod(yrf[OOBset[[i]]],Xrf[OOBset[[i]],],rf_cvs[[i]]))
+
+      cat("The mean CV coupon error is:  ",mean(unlist(lossFunction)),"\n")
+      if(returnERR){
+         return(unlist(lossFunction))
+      }else{
+         return(rf_cvs)
+      }
+
    }
 
    ## CV to get the mean importance
@@ -146,7 +146,7 @@ The following functions will help me in this process:
                      theme(legend.position = "none") + 
                      geom_text(data = RFimplong[RFimplong$CViteration == 1,],
                                aes(label = feature), hjust=1,size=.1)
-         CVplot = direct.label(CVplot+xlim(0,44),"last.qp")
+         CVplot = direct.label(CVplot+xlim(0,length(RFs) + 10),"last.qp")
          return(CVplot)
       }
 
@@ -178,14 +178,23 @@ The following functions will help me in this process:
 
    ## I will use cross validation to estimate an error instead of checking the validation set
    set.seed = 1999
-   CVrf = RFxVal(5,Xrf,yn[,"couponUsed"],mtry=8,ntree=1000,maxnodes=50)
+   mnodes = 5:14
+   nodesCV = sapply(mnodes, function(x) RFxVal(10,Xrf,yn[,"couponUsed"],mtry=mnodes,ntree=5000,maxnodes=100,returnERR=TRUE))
+
+
+   CVrf = 
+
+
+   CVrf = RFxVal(5,Xrf,yn[,"couponUsed"],mtry=4,ntree=1000,maxnodes=50,returnERR=TRUE)
    CVimp = RFxVal_imp(CVrf)
 
    CVimp$plot
 
    CVimp$makeplot(CVimp$iteration[which(CVimp$iteration$IncNodePurity > 1),])
 
-   #Loss function
-   message("Calculating Loss")
-   lossFunction = lapply(rf_cvs, function(fit) lossFunMethod(yrf[rows],Xv[rows,which(names(Xv) %in% names(Xrf))],fit))
+   #fit full data
+   rf1 = randomForest(Xrf, y=yn$couponUsed, ntree=1000, mtry=8, replace=TRUE, maxnodes = 50)
+
+   #get the output
+   lossFunMethod(yv$couponUsed,Xv[,which(names(Xv) %in% names(Xrf))],rf1)
 ```
