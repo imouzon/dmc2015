@@ -23,7 +23,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_c50
+col_pred_name <- imp_lasso
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
