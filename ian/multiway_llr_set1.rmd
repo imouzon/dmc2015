@@ -156,7 +156,10 @@ Consider the (trimmed) density of basketValue:
 
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   qplot(couponsReceived,orderTime,color=basketGroup,data=d) + facet_wrap(~basketGroup)
+   dtmp = d
+   dtmp$cash185 = c("cash185","no")[(dtmp$basketValue < 186 & dtmp$basketValue > 185) + 1]
+   dtmp %>% filter(!is.na(cash185)) %>% group_by(cash185,couponID1) %>% summarize(prop = sum(coupon1Used)/n()) %>%  arrange(cash185,-prop)
+   qplot(couponsReceived,orderTime,facets=reward1~cash185,alpha=I(1),data=dtmp) 
 ```
 
 
@@ -219,9 +222,9 @@ If we conisder a customers basketValues as being draws from some unknown disprio
 This means that we can get posterior estimates of the per column probability using the following:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-pi1 = (sum(HTVset1$H$coupon1Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
-pi2 = (sum(HTVset1$H$coupon2Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
-pi3 = (sum(HTVset1$H$coupon3Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+   p1 = (sum(HTVset1$H$coupon1Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+   p2 = (sum(HTVset1$H$coupon2Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+   p3 = (sum(HTVset1$H$coupon3Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
 ```
 And we can weight our observations using these proportions:
 <!--- : R code (No Results in Document) -->
