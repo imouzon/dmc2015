@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 13:12:33 2015
+# Last Modified: Mon May 18 14:35:35 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -98,13 +98,19 @@ h3_c <- cbind(couponUsed = h3$class$y$couponUsed,
               h3$class$X[as.character(imp$var[1:nvars])])
 h3_c_p <- predict(h3_cf, newdata = h3_c)
 h3_c_p <- cbind(orderID = h3$class$y$orderID, couponUsed = h3_c_p)
+# Importance 
+h3_imp <- varimp(h3_cf)
+h3_imp <- data.frame(var = names(h3_imp), imp = as.numeric(h3_imp))
+h3_imp <- h3_imp[order(h3_imp$imp, decreasing = T),]
+h3_imp$imp <- h3_imp$imp * 10000
 # Save model and predictions
 h3_mod <- list(val_predictions = h3_v_p,
-               class_predictions = h3_c_p,
-               error = error,
-               details = list(nvars = nvars,
-                              ntrees = ntrees,
-                              mtry = 50))
+              class_predictions = h3_c_p,
+              error = error,
+              importance = h3_imp,
+              details = list(nvars = nvars,
+                             ntrees = ntrees,
+                             mtry = 50))
 
 saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.3_coup.rds")
 
