@@ -44,9 +44,9 @@ rf1 <- wsrf(couponUsed~., data=train, ntrees=1000)
 rf1.pred <- predict(rf1, newdata=valid[,-ncol(valid)], 
                     type="prob")
 loss <- Loss_calculator(coupon1pred=rf1.pred[seq(1,nrow(valid),by=3)], 
-                        coupon1true=valid$couponUsed[seq(1,nrow(valid),by=3)],
+                        coupon1true=as.numeric(valid$couponUsed[seq(1,nrow(valid),by=3)])-1,
                         coupon2pred=rf1.pred[seq(2,nrow(valid),by=3)], 
-                        coupon2true=valid$couponUsed[seq(2,nrow(valid),by=3)],
+                        coupon2true=as.numeric(valid$couponUsed[seq(2,nrow(valid),by=3)])-1,
                         coupon3pred=rf1.pred[seq(3,nrow(valid),by=3)], 
-                        coupon3true=valid$couponUsed[seq(3,nrow(valid),by=3)])
+                        coupon3true=as.numeric(valid$couponUsed[seq(3,nrow(valid),by=3)])-1)
 sum(loss)
