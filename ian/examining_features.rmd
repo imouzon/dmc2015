@@ -37,6 +37,7 @@ I am using the following packages:
    library(gtools)
    library(knitr)
    library(utils)
+   library(GGally)
    source("~/dmc2015/ian/R/renm.R")
 ```
 My working directory is set to \verb!~/dmc2015/ian/!.
@@ -54,10 +55,10 @@ I am starting with **set 1**
 <!--- dgg: R code (No Results in Document) -->
 ```{r dgg,cache=FALSE}
    ## long 
-   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
 
    ## wide
-   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.4.rds")
 
    #estimate weights from the historical data:
    HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
@@ -70,31 +71,87 @@ I am starting with **set 1**
    source("./load_data.r")
     
    ## Baseline basketValue
-   sum((d1$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(d1$validation$y$basketValue)^2
+   sum((fmw$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(fmw$validation$y$basketValue)^2
 
    ## baseline coupons 1
-   sum((d1$validation$y$coupon1Used - mean(HTVset$H$coupon1Used))^2)/mean(d1$validation$y$coupon1Used)^2
+   sum((fmw$validation$y$coupon1Used - mean(HTVset$H$coupon1Used))^2)/mean(fmw$validation$y$coupon1Used)^2
    
    ## baseline coupons 2
-   sum((d1$validation$y$coupon2Used - mean(HTVset$H$coupon2Used))^2)/mean(d1$validation$y$coupon2Used)^2
+   sum((fmw$validation$y$coupon2Used - mean(HTVset$H$coupon2Used))^2)/mean(fmw$validation$y$coupon2Used)^2
 
    ## baseline coupons 3
-   sum((d1$validation$y$coupon3Used - mean(HTVset$H$coupon3Used))^2)/mean(d1$validation$y$coupon3Used)^2
+   sum((fmw$validation$y$coupon3Used - mean(HTVset$H$coupon3Used))^2)/mean(fmw$validation$y$coupon3Used)^2
+```
+
+## Estimating the proportion of coupons used in each column by bootstrapping the historical set
+<!--- rf: R code (No Results in Document) -->
+```{r rf,cache=FALSE}
+   B = 100000
+   n = nrow(fmw$validation$y)
+   boot.samples = sample(1:nrow(HTVset$H), size = B * n, replace = TRUE)
+   cpn1.boots = rowMeans(matrix(HTVset$H$coupon1Used[boot.samples], B, n))
+   cpn2.boots = rowMeans(matrix(HTVset$H$coupon2Used[boot.samples], B, n))
+   cpn3.boots = rowMeans(matrix(HTVset$H$coupon3Used[boot.samples], B, n))
+
+   boots.df = data.frame(iter = 1:B, "coupon1" = cpn1.boots, "coupon2" = cpn2.boots, "coupon3" = cpn3.boots)
+
+   boots.melt = boots.df %>% gather(coupon, proportion,-iter) 
+
+   chk = fmw$validation$y %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
+
+   boots.melt %>% ggplot(aes(x=proportion,fill=coupon)) + geom_density() + facet_grid(~coupon) + geom_vline(data=chk,aes(xintercept = proportion, color=coupon))
+
+   ggpairs(boots.df[,2:4],alpha=.01)
+
+   B = 100000
+   n = nrow(fmw$validation$y)
+   boot.samples = sample(1:nrow(HTVset$H), size = B * n, replace = TRUE)
+   cpn1.boots = rowMeans(matrix(HTVset$H$coupon1Used[boot.samples], B, n))
+   cpn2.boots = rowMeans(matrix(HTVset$H$coupon2Used[boot.samples], B, n))
+   cpn3.boots = rowMeans(matrix(HTVset$H$coupon3Used[boot.samples], B, n))
+
+   boots.df = data.frame(iter = 1:B, "coupon1" = cpn1.boots, "coupon2" = cpn2.boots, "coupon3" = cpn3.boots)
+
+   boots.melt = boots.df %>% gather(coupon, proportion,-iter) 
+
+   chk = fmw$validation$y %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
+
+   boots.melt %>% ggplot(aes(x=proportion,fill=coupon)) + geom_density() + facet_grid(~coupon) + geom_vline(data=chk,aes(xintercept = proportion, color=coupon))
+
+   ggpairs(boots.df[,2:4],alpha=.01)
+
+
+
+
+   set.seed = 1999
+   #prior estimates: mean of coupon use at .2, F(.025) = .1337, F(.975) = .2758
+   alpha.est = 24
+   beta.est = 4*alpha.est
+   qbeta(.025,alpha.est,beta.est)
+   qbeta(.975,alpha.est,beta.est)
+```
+This gives us the following posterior for $p_1, p_2, p_3$:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   nrow(HTVset$H)
+   p1 = (sum(HTVset$H$coupon1Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p2 = (sum(HTVset$H$coupon2Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p3 = (sum(HTVset$H$coupon3Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
 ```
 
 # Check the data
 <!--- chkh: R code (No Results in Document) -->
 ```{r chkh,cache=FALSE}
    ## isolate the X and y for set 1
-   Xn = f1$train$X
-   yn = f1$train$y
+   Xtrn = fml$train$X
+   ytrn = fml$train$y
    
    ## remove the naive columns
-   Xn = Xn[,!grepl("naive",names(Xn))]
+   Xtrn = Xtrn[,!grepl("naive",names(Xtrn))]
 
    ## keep the validation sets
-   Xv = f1$validation$X
-   yv = f1$validation$y$couponUsed
+   Xval = fml$validation$X
+   yval = fml$validation$y$couponUsed
 ```
 
 And this is our loss function:
@@ -212,22 +269,6 @@ The following functions will help me in this process:
 ```
 
 #I am going to start with a simple random forest
-<!--- rf: R code (No Results in Document) -->
-```{r rf,cache=FALSE}
-   set.seed = 1999
-   #prior estimates: mean of coupon use at .2, F(.025) = .1337, F(.975) = .2758
-   alpha.est = 24
-   beta.est = 4*alpha.est
-   qbeta(.025,alpha.est,beta.est)
-   qbeta(.975,alpha.est,beta.est)
-```
-This gives us the following posterior for $p_1, p_2, p_3$:
-<!--- : R code (No Results in Document) -->
-```{r cache=FALSE}
-   p1 = (sum(HTVset$H$coupon1Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
-   p2 = (sum(HTVset$H$coupon2Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
-   p3 = (sum(HTVset$H$coupon3Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
-```
 We can weight our responses and hopefully use this to get better estimates by unweighting 
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}

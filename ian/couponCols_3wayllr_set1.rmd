@@ -115,7 +115,7 @@ I and can split the columns of product group using:
 # Based on Historical Set 1
 <!--- readHist1: R code (No Results in Document) -->
 ```{r readHist1,cache=FALSE}
-   HTVset1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+   HTVset2 = readRDS("~/dmc2015/data/featureMatrix/HTVset2.rds")
    names(dm)
 ```
 
