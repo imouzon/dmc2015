@@ -64,11 +64,3 @@ names(y)=rownames(rf$importance)
 y <- sort(y, decreasing=TRUE)
 v <- names(y[1:100])
 saveRDS(names(y), './penglh/imp_rf_SET3.rds')
-
-train <- cbind(train.x[,feature], as.factor(train.y$couponUsed))
-names(train)[ncol(train)] <- 'couponUsed'
-valid <- cbind(valid.x[,feature], as.factor(valid.y$couponUsed))
-names(valid)[ncol(valid)] <- 'couponUsed'
-
-library(wsrf)
-rf1 <- wsrf(couponUsed~., data=train, ntrees=1000)
