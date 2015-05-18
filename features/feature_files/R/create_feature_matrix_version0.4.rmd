@@ -137,6 +137,10 @@ I am using the following packages:
 ```{r cache=FALSE}
    #previous features
    fml = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.3.rds")
+   class_add = readRDS("../../../yihua/HTVCmelt3_Combn_UniqueUser.rds")
+   names(fml)
+   
+   fml$
 
    long.files = files[grep("long",files)]
    featureslong = lapply(long.files, function(x) readRDS(x))
@@ -174,6 +178,8 @@ I am using the following packages:
       fmw$validation$X = fmw$validation$X %>% left_join(features,by=c("orderID"))
       fmw$class$X = fmw$class$X %>% left_join(features,by=c("orderID"))
    }
+
+   fmw$class$X %>% gather(colname,colval) %>% mutate(colval = is.na(colval)) %>% group_by(colname) %>% summarize(freqna = sum(colval)) %>% filter(freqna > 0) %>% arrange(-freqna)
 ```
 
 ## save them

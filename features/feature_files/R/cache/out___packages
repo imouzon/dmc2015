@@ -22,3 +22,6 @@ gsubfn
 DBI
 RSQLite
 sqldf
+quadprog
+directlabels
+GGally
