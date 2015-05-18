@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 14:35:35 2015
+# Last Modified: Mon May 18 16:06:59 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -24,12 +24,12 @@ library(party)
 source("~/GitHub/dmc2015/pete/10_roc.R")
 source("~/GitHub/dmc2015/pete/loss_function.R")
 
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_0.3.rds")
 
 # Classification
 # ============================================================================
 
-ntrees = 2000
+ntrees = 500
 nvars = 150
 
 # Historical set 1
@@ -41,7 +41,7 @@ h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
               h1$train$X[names(h1$train$X) %in% as.character(imp$var[1:nvars])])
 h1_cf <- cforest(couponUsed~., data = h1_t,
-                 control = cforest_unbiased(mtry = 50, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
 # Validation set 
 h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
               h1$validation$X[as.character(imp$var[1:nvars])])
@@ -63,11 +63,11 @@ rownames(h1_imp) <- 1:nrow(h1_imp)
 # Save model and predictions
 h1_mod <- list(val_predictions = h1_v_p,
                class_predictions = h1_c_p,
-               importance = h1_imp,
+               #                importance = h1_imp,
                error = error,
                details = list(nvars = nvars,
                               ntrees = ntrees,
-                              mtry = 50))
+                              mtry = 10))
 
 saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_coup.rds")
 
@@ -85,7 +85,7 @@ h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG
 h3_t <- cbind(couponUsed = h3$train$y$couponUsed, 
               h3$train$X[as.character(imp$var[1:nvars])])
 h3_cf <- cforest(couponUsed~., data = h3_t,
-                 control = cforest_unbiased(mtry = 50, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
 # Validation set
 h3_v <- cbind(couponUsed = h3$validation$y$couponUsed, 
               h3$validation$X[as.character(imp$var[1:nvars])])
@@ -144,20 +144,20 @@ h1_v <- cbind(couponUsed = h1$validation$y$couponUsed,
               h1$validation$X[as.character(imp_rf$col_name[1:100])])
 h1_v_p <- predict(h1_cf, newdata = h1_v)
 # Validation error
-lossFun(h1_v$couponUsed, h1_v_p)
 error = lossFun(h1_v$couponUsed, h1_v_p)
 # Classification set predictions
 h1_c <- cbind(couponUsed = h1$class$y$couponUsed,
-              h1$class$X[as.character(imp$var[1:nvars])])
+              h1$class$X[as.character(imp_rf$col_name[1:100])])
 h1_c_p <- predict(h1_cf, newdata = h1_c)
 h1_c_p <- cbind(orderID = h1$class$y$orderID, couponUsed = h1_c_p)
 # Save model and predictions
 h1_mod <- list(val_predictions = h1_v_p,
                class_predictions = h1_c_p,
                error = error,
-               details = list(nvars = nvars,
+               details = list(vars = "Random forest top 100",
+                              nvars = 100,
                               ntrees = ntrees,
-                              mtry = 50))
+                              mtry = 10))
 saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_coup_rf.rds")
 
 # Regression

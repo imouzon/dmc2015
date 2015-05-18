@@ -11,9 +11,11 @@ imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name
 # features selected by adaboost
 imp_ada <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_ada.rds")
 imp_ada <- names(imp_ada)
+# features selected by correlation
+imp_corr <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_corr_v4.rds")
 
 # features
-dat = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.3.rds")
+dat = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
 
 dat_tr_x <- dat$train$X
 dat_tr_y <- dat$train$y
@@ -23,7 +25,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_lasso
+col_pred_name <- imp_corr
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
