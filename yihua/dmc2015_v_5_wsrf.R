@@ -40,5 +40,4 @@ names(train)[ncol(train)] <- 'couponUsed'
 valid <- cbind(valid.x[,feature], as.factor(valid.y$couponUsed))
 names(valid)[ncol(valid)] <- 'couponUsed'
 
-library(wsrf)
 rf1 <- wsrf(couponUsed~., data=train, ntrees=1000)
