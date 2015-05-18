@@ -55,10 +55,10 @@ I am starting with **set 1**
 <!--- dgg: R code (No Results in Document) -->
 ```{r dgg,cache=FALSE}
    ## long 
-   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
+   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
 
    ## wide
-   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.4.rds")
+   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.5.rds")
 
    #estimate weights from the historical data:
    HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
