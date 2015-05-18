@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 16:28:27 2015
+# Last Modified: Mon May 18 17:12:40 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -133,32 +133,32 @@ dev.off()
 
 # Fit CRF on variables selected by other methods
 # ----------------------------------------------------------------------------
-imp_rf <- readRDS("~/GitHub/dmc2015/penglh/imp_rf_col.rds")
+imp <- readRDS("~/GitHub/dmc2015/penglh/imp_ada.rds")
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
-              h1$train$X[as.character(imp_rf$col_name[1:100])])
+              h1$train$X[names(imp)])
 h1_cf <- cforest(couponUsed~., data = h1_t,
                  control = cforest_unbiased(mtry = 10, ntree = ntrees))
 # Validation set 
 h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
-              h1$validation$X[as.character(imp_rf$col_name[1:100])])
+              h1$validation$X[names(imp)])
 h1_v_p <- predict(h1_cf, newdata = h1_v)
 # Validation error
 error = lossFun(h1_v$couponUsed, h1_v_p)
 # Classification set predictions
 h1_c <- cbind(couponUsed = h1$class$y$couponUsed,
-              h1$class$X[as.character(imp_rf$col_name[1:100])])
+              h1$class$X[names(imp)])
 h1_c_p <- predict(h1_cf, newdata = h1_c)
 h1_c_p <- cbind(orderID = h1$class$y$orderID, couponUsed = h1_c_p)
 # Save model and predictions
 h1_mod <- list(val_predictions = h1_v_p,
                class_predictions = h1_c_p,
                error = error,
-               details = list(vars = "Random forest top 100",
-                              nvars = 100,
+               details = list(vars = "Ada top 206",
+                              nvars = 86,
                               ntrees = ntrees,
                               mtry = 10))
-saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_coup_rf.rds")
+saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_coup_ada.rds")
 
 # Regression
 # ============================================================================
