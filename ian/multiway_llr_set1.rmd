@@ -103,7 +103,138 @@ I and can split the columns of product group using:
    names(dm)
 ```
 
-#
+#basket Bayes
+Consider the (trimmed) density of basketValue:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d.tmp = d %>% mutate(couponUse = paste0(coupon1Used,coupon2Used,coupon3Used))
+   qplot(basketValue,xlim=c(0,1000),binwidth=3,data=d.tmp,color=couponUse)
+
+   qplot(floor(basketValue/10),xlim=c(0,200),binwidth=1,data=d.tmp,color=couponUse)
+
+   d.tmp %>% mutate(newval= floor(basketValue/10)) %>% group_by(newval) %>% summarize(freq = n()) %>% arrange(-freq) %>% head(10)
+   d.tmp %>% mutate(newval= floor(basketValue/10)) %>% filter(newval == 18) %>% group_by(basketValue) %>% summarize(freq = n()) %>% arrange(-freq) %>% head(10)
+
+   plot.d = d.tmp %>% mutate(basketGroup = (1*(basketValue > 185) + 
+                                         1*(basketValue > 137) +
+                                         1*(basketValue > 92)),newval= as.character(floor(basketValue/10)),
+                             couponsUsed = (1*(coupon1Used == 1) + 
+                                            1*(coupon2Used == 1) + 
+                                            1*(coupon3Used == 1)))
+
+   ## these plots illustrate the distribution
+   qplot(basketValue,xlim=c(0,1000),binwidth=1,data=plot.d,fill=factor(basketGroup))
+   qplot(basketValue,xlim=c(0,1000),binwidth=1,data=plot.d,facets=couponsUsed~.,fill=factor(basketGroup))
+
+   ## add this grouping to the data
+   d = d %>% mutate(basketGroup = (1*(basketValue > 185) + 1*(basketValue > 137) + 1*(basketValue > 92)))
+   dm = dm %>% mutate(basketGroup = (1*(basketValue > 185) + 1*(basketValue > 137) + 1*(basketValue > 92))) %>% head
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r diffbygroup,cache=FALSE}
+   ## behavior by categorical data
+   bygroupPlot = function(catvar,dsn=d){
+      dsn$catvar = sapply(1:nrow(dsn), function(i) paste0(sapply(catvar, function(x) as.character(dsn[i,x])),collapse=":"))
+      dsn = dsn[,c("basketGroup","catvar")]
+      p = dsn %>% group_by(basketGroup,catvar) %>% 
+         mutate(catXgroup_freq=n()) %>%
+         group_by(basketGroup) %>% 
+         mutate(cat_in_group_prop = catXgroup_freq/n()) %>%
+         unique %>%
+         arrange(basketGroup,catvar) %>%
+         ggplot(aes(factor(basketGroup),catvar,size=cat_in_group_prop,color=factor(catvar)))+geom_point()
+      return(p)
+   }
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   bygroupPlot(c("coupon1Used","coupon2Used","coupon3Used"))
+   bygroupPlot(c("userID"))
+```
+
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   qplot(couponsReceived,orderTime,color=basketGroup,data=d) + facet_wrap(~basketGroup)
+```
+
+
+## She's Losing It: Bayesian Expectation
+From the form of our loss function on basketValues, we know that the **best** estimator, 
+the one that minimizes our expected loss function for some given feature values $x_1, x_2, ..., x_p$, 
+is going to be the expected basket value based on those features, i.e., to minimize
+$$
+   \mathbb{E} \left( (b_i - \hat{b}_i)^2 | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$$
+is 
+$$
+\mathbb{E} \left( \hat{b}_i | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$$
+Since we don't know 
+$
+\mathbb{E} \left( \hat{b}_i | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$
+our best bet minimize our expected loss on basketValue is to estimate that loss.
+We can do this in the same way we used our historical data to estimate coupon use.
+
+Consider for a given user, $u_i$, with basketValues $b_1$, $b_2$, ..., $b_k$ 
+and believe the following: 
+\begin{align}
+b_i          &\sim f(b | \theta_{u_i} ) \tag{data model} \\
+\theta_{u_i} &\sim \pi(\theta) \tag{prior} \\
+\end{align}
+we can say that seeing $b_1, b_2, ..., b_k$ has updated our "prior" belief about $\theta$'s distribution.
+If we can connect that updated (posterior) estimate of $\theta$ to $\mathbb{E}(b | u_i)$ (for instance if 
+$\theta$ represents the mean of $b$ for user $u_i$), 
+then we have an aspect of the estimate we are looking for.
+
+We can do this for multiple combinations of these features. 
+Notice that the basket values have some sort of "mixed" exponential distribution. We can consider
+the mixed exponential as have the following mixing proportions (estiamted on the entire data):
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d %>% filter(!is.na(basketValue)) %>% group_by(basketGroup) %>% summarize(pi_est = n()/nrow(d))
+```
+so we have $\pi_1 = 0.00193$, $\pi_2 = 0.084747$, $\pi_3 = 0.09119$, and $\pi_4 = 0.7199$.
+Also we can consider a very rough estimate of each curve using the following:
+
+$$
+x \sim 
+\begin{cases}
+\lambda_1 e ^ {-\lambda_1 (x - 185) & x \ge 185 \\
+\lambda_2 e ^ {-\lambda_2 (x - 137) & x \ge 185 \\
+\lambda_3 e ^ {-\lambda_3 (x - 92) & x \ge 185 \\
+\lambda_4 e ^ {-\lambda_4 (x - 185) & x \ge 185 \\
+\end{cases}
+$$
+If we conisder a customers basketValues as being draws from some unknown disprior unkn 
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   alpha.est = 24
+   beta.est = 4*alpha.est 
+   qbeta(.025,alpha.est,beta.est)
+   qbeta(.975,alpha.est,beta.est)
+```
+This means that we can get posterior estimates of the per column probability using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+pi1 = (sum(HTVset1$H$coupon1Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+pi2 = (sum(HTVset1$H$coupon2Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+pi3 = (sum(HTVset1$H$coupon3Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+```
+And we can weight our observations using these proportions:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+yrf = 
+   
+
+```
+
+
+
+
+
 
 
 ## Making comparisons

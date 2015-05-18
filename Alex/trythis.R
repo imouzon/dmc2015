@@ -20,8 +20,8 @@ pred_set = function(dat, columns) {
 }
 
 run_set1_trials = function(method, ...) {
-	a = readRDS("/Users/MKULTRA/Documents/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
-	set = readRDS("/Users/MKULTRA/Documents/dmc2015/penglh/imp_rf_col.rds")$col_name
+	a = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+	set = readRDS("~/dmc2015/penglh/imp_rf_col.rds")$col_name
 	df = get_set(a, set)
 	df2 = pred_set(a, set)
 

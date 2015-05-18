@@ -58,6 +58,21 @@ I am starting with **set 1**
 
    ## wide
    d1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+
+   #estimate weights from the historical data:
+   HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+
+   ## Baseline basketValue
+   sum((d1$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(d1$validation$y$basketValue)^2
+
+   ## baseline coupons 1
+   sum((d1$validation$y$coupon1Used - mean(HTVset$H$coupon1Used))^2)/mean(d1$validation$y$coupon1Used)^2
+   
+   ## baseline coupons 2
+   sum((d1$validation$y$coupon2Used - mean(HTVset$H$coupon2Used))^2)/mean(d1$validation$y$coupon2Used)^2
+
+   ## baseline coupons 3
+   sum((d1$validation$y$coupon3Used - mean(HTVset$H$coupon3Used))^2)/mean(d1$validation$y$coupon3Used)^2
 ```
 
 # Check the data
@@ -78,12 +93,20 @@ I am starting with **set 1**
 And this is our loss function:
 <!--- loss: R code (No Results in Document) -->
 ```{r loss,cache=FALSE}
-   lossFunMethod = function(yval,Xval,method){
-      hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response"),ncol=3,byrow=TRUE))
-      ymat = matrix(yval,ncol=3,byrow=TRUE)
-
-      error = colSums((ymat - hatmat)^2)
-      wt = colMeans(ymat)^2
+   lossFunMethod = function(yval,Xval,method,cpncols=NULL,wts=1){
+      if(is.null(cpncols)){
+         hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response")/wts,ncol=3,byrow=TRUE))
+         ymat = matrix(yval,ncol=3,byrow=TRUE)
+         error = colSums((ymat - hatmat)^2)
+         wt = colMeans(ymat)^2
+      }else{
+         yhat = predict(method,newdata = Xval,type="response")
+         err1 = sum(((yhat/wts - yval)[which(cpncols == 1)])^2)
+         err2 = sum(((yhat/wts - yval)[which(cpncols == 2)])^2)
+         err3 = sum(((yhat/wts - yval)[which(cpncols == 3)])^2)
+         error = c(err1,err2,err3)
+         wt = sapply(1:3, function(i) (mean(yval[which(cpncols == i)])^2))
+      }
 
       cat("The coupon error is:  ",sum(error/wt),"\n")
       cat("By column error:      ",error,"\n")
@@ -96,19 +119,25 @@ The following functions will help me in this process:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
    ## I will use cross validation to estimate an error instead of checking the validation set
-   RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50,returnERR = FALSE){
+   RFxVal = function(CVk,Xrf,yrf,mtry=8,ntree=1000,maxnodes=50,returnERR = FALSE,wts=1){
+      couponCol = rep(1:3,nrow(Xrf)/3)
+
+      #yrf_fit
+      yrf_fit = yrf*wts
+
       row.order = sample(1:nrow(Xrf))
       CV.bounds = round(seq.int(1, nrow(Xrf), length=(CVk+1)))
-      OOBset = lapply(1:CVk,function(i) row.order[CV.bounds[1]:(CV.bounds[2]-1)])
+      CV.bounds[CVk] = CV.bounds[CVk] + 1
+      OOBset = lapply(1:CVk,function(i) (row.order[CV.bounds[i]:(CV.bounds[i+1]-1)]))
 
       #Fit a random forest for couponUsed
-      cvRF = function(rows) randomForest(Xrf[-rows,], y=yrf[-rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
+      cvRF = function(rows) randomForest(Xrf[-rows,], y=yrf_fit[-rows], ntree=ntree, mtry=mtry, replace=TRUE, maxnodes = maxnodes)
 
       message("Fitting randomForest")
       rf_cvs = lapply(1:CVk, function(i) cvRF(OOBset[[i]]))
 
       message("Calculating Loss")
-      lossFunction = sapply(1:CVk, function(i) lossFunMethod(yrf[OOBset[[i]]],Xrf[OOBset[[i]],],rf_cvs[[i]]))
+      lossFunction = lapply(1:CVk, function(i) lossFunMethod(yrf[OOBset[[i]]],Xrf[OOBset[[i]],],rf_cvs[[i]],cpncols=couponCol[OOBset[[i]]],wts=wts))
 
       cat("The mean CV coupon error is:  ",mean(unlist(lossFunction)),"\n")
       if(returnERR){
@@ -116,7 +145,6 @@ The following functions will help me in this process:
       }else{
          return(rf_cvs)
       }
-
    }
 
    ## CV to get the mean importance
@@ -164,6 +192,23 @@ The following functions will help me in this process:
 <!--- rf: R code (No Results in Document) -->
 ```{r rf,cache=FALSE}
    set.seed = 1999
+   #prior estimates: mean of coupon use at .2, F(.025) = .1337, F(.975) = .2758
+   alpha.est = 24
+   beta.est = 4*alpha.est
+   qbeta(.025,alpha.est,beta.est)
+   qbeta(.975,alpha.est,beta.est)
+```
+This gives us the following posterior for $p_1, p_2, p_3$:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   ## Historical estimates of p1,p2,p3:
+   p1 = (sum(HTVset$H$coupon1Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p2 = (sum(HTVset$H$coupon2Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p3 = (sum(HTVset$H$coupon3Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+```
+We can weight our responses and hopefully use this to get better estimates by unweighting 
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
    ## lets try a small random forest
    library(randomForest)
    
@@ -175,31 +220,64 @@ The following functions will help me in this process:
 
    #The predictor and response columns
    Xrf = Xn[,c(sim_columns,llr1_columns)]
+   yrf = yn[,"couponUsed"]
+
+   #validation
+   yv = yv$couponUsed
+   Xv = Xv[,which(names(Xv) %in% names(Xrf))]
+
+   #unweighted error
+   Xrf = Xn[,c(sim_columns,llr1_columns)]
+   yrf = yn[,"couponUsed"]
+   unweighted.rf = randomForest(Xrf, y=yrf, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+
+   #mse
+   unweight.fit = predict(unweighted.rf,newdata = Xv,type="response")
+   actualLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(unweight.fit,ncol=3,byrow=TRUE))^2)
+   weightedLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(unweight.fit,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv,ncol=3,byrow=TRUE))^2)
+
+   #weighted error
+   Xrf = Xn[,c(sim_columns,llr1_columns)]
+   yrfw = yn[,"couponUsed"]*rep(c(1/p1,1/p2,1/p3),times=nrow(Xrf)/3)
+   weighted.rf = randomForest(Xrf, y=yrfw, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+
+   #mse
+   weight.fit = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
+   w.actualLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)
+   w.weightedLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv,ncol=3,byrow=TRUE))^2)
+
+   cat("loss unweighted rf (no col weights):",sum(actualLoss))
+   cat("loss unweighted rf (col weights):   ",sum(weightedLoss))
+
+   cat("loss weighted rf (no col weights):",sum(w.actualLoss))
+   cat("loss weighted rf (col weights):   ",sum(w.weightedLoss))
+
+
+   ## validation sets
+   
+   rf1 = randomForest(Xrf, y=yn$couponUsed, ntree=8000, mtry=11, replace=TRUE, maxnodes = 100)
 
    ## I will use cross validation to estimate an error instead of checking the validation set
    set.seed = 1999
    mnodes = 5:14
-   nodesCV = sapply(mnodes, function(x) RFxVal(10,Xrf,yn[,"couponUsed"],mtry=mnodes,ntree=5000,maxnodes=100,returnERR=TRUE))
+   #nodesCV = sapply(mnodes, function(x) RFxVal(5,Xrf,yrf,mtry=6,ntree=5000,maxnodes=100,returnERR=TRUE))
 
    ## How many nodes to play???
+   #colMeans(nodesCV)
    qplot(5:14,colMeans(nodesCV))
 
+   ## Add weights
+   mnodes = 5:14
+   #wtd.nodesCV = sapply(mnodes, function(x) RFxVal(5,Xrf,yrf,mtry=6,ntree=5000,maxnodes=100,returnERR=TRUE,wts=rep(c(1/p1,1/p2,1/p3),times=nrow(Xrf)/3)))
+
    ## looks like 11
-   RFfit = RFxVal(10,Xrf,yn[,"couponUsed"],mtry=11,ntree=8000,maxnodes=100,returnERR=FALSE)
-
-   CVrf = 
-
-
-   CVrf = RFxVal(5,Xrf,yn[,"couponUsed"],mtry=4,ntree=1000,maxnodes=50,returnERR=TRUE)
-   CVimp = RFxVal_imp(CVrf)
-
-   CVimp$plot
-
-   CVimp$makeplot(CVimp$iteration[which(CVimp$iteration$IncNodePurity > 1),])
+   RFfit = RFxVal(10,Xrf,yn[,"couponUsed"],mtry=11,ntree=8000,maxnodes=100,returnERR=FALSE,wts=)
 
    #fit full data
-   rf1 = randomForest(Xrf, y=yn$couponUsed, ntree=1000, mtry=8, replace=TRUE, maxnodes = 50)
+   rf0 = randomForest(Xrf, y=yn$couponUsed, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+   rf1 = randomForest(Xrf, y=yn$couponUsed, ntree=8000, mtry=11, replace=TRUE, maxnodes = 100)
 
+   res =RFxVal_imp(RFfit)
    #get the output
-   lossFunMethod(yv$couponUsed,Xv[,which(names(Xv) %in% names(Xrf))],rf1)
+   lossFunMethod(yv$couponUsed,Xv[,which(names(Xv) %in% names(Xrf))],rf0)
 ```
