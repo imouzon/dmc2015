@@ -1,10 +1,3 @@
-
-cTrue = V.y$couponUsed
-cPredict = dmc.adaboost.pred$prob[,2]
-## imp_ada = sort(dmc.adaboost$importance, TRUE)
-## saveRDS(imp_ada[imp_ada>0], "../penglh/imp_ada.rds")
-lossFun(cTrue, cPredict)
-
 lossFun = function(couponTrue, couponPredict){
     n = length(couponTrue)
     idx1 = seq(1,n, by=3)
