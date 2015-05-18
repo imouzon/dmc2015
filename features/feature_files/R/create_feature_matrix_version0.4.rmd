@@ -55,6 +55,8 @@ I am using the following packages:
    files = list.files("../set1/new_llrs",full.names=TRUE)
 ```
 
+
+# Set 1
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r cache=FALSE}
    #previous features
@@ -103,4 +105,80 @@ I am using the following packages:
    saveRDS(fml,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
 
    saveRDS(fmw,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.4.rds")
+```
+
+
+
+
+
+
+
+
+# Adding new features
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   fmat = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_WIDE_ver0.3.rds")
+   HTV = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
+
+   ## data
+   source("~/dmc2015/ian/universal_clean_data.r")
+   d.list = universal_clean_data()
+   d = d.list$d
+   dm = d.list$dm
+   dmc = d.list$dmc
+   
+   #new features
+   files = list.files("../set3/new_llrs",full.names=TRUE)
+```
+
+
+# Set 3
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   #previous features
+   fml = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.3.rds")
+
+   long.files = files[grep("long",files)]
+   featureslong = lapply(long.files, function(x) readRDS(x))
+
+   fml$train$X = fml$train$X[,!(grepl("timesNotUsed", names(fml$train$X)) | grepl("timesUsed",names(fml$train$X)) | grepl("ntimes",names(fml$train$X)))]
+   fml$validation$X = fml$validation$X[,!(grepl("timesNotUsed", names(fml$validation$X)) | grepl("timesUsed",names(fml$validation$X)) | grepl("ntimes",names(fml$validation$X)))]
+   fml$class$X = fml$class$X[,!(grepl("timesNotUsed", names(fml$class$X)) | grepl("timesUsed",names(fml$class$X)) | grepl("ntimes",names(fml$class$X)))]
+
+   for(i in 1:length(long.files)){
+      cat(i,"\n")
+      features = featureslong[[i]]
+      features$couponCol = as.numeric(features$couponCol) 
+      features = features[,!(grepl("timesNotUsed",names(features)) | grepl("timesUsed",names(features)) | grepl("ntimes",names(features)))]
+      fml$train$X = fml$train$X %>% left_join(features,by=c("orderID","couponCol"))
+      fml$validation$X = fml$validation$X %>% left_join(features,by=c("orderID","couponCol"))
+      fml$class$X = fml$class$X %>% left_join(features,by=c("orderID","couponCol"))
+   }
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   fmw = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_WIDE_ver0.3.rds")
+   wide.files = files[grep("wide",files)]
+   featureswide = lapply(wide.files, function(x) readRDS(x))
+
+   fmw$train$X = fmw$train$X[,!(grepl("timesNotUsed", names(fmw$train$X)) | grepl("timesUsed",names(fmw$train$X)) | grepl("ntimes",names(fmw$train$X)))]
+   fmw$validation$X = fmw$validation$X[,!(grepl("timesNotUsed", names(fmw$validation$X)) | grepl("timesUsed",names(fmw$validation$X)) | grepl("ntimes",names(fmw$validation$X)))]
+   fmw$class$X = fmw$class$X[,!(grepl("timesNotUsed", names(fmw$class$X)) | grepl("timesUsed",names(fmw$class$X)) | grepl("ntimes",names(fmw$class$X)))]
+   
+   for(i in 1:length(wide.files)){
+      cat(i,"\n")
+      features = featureswide[[i]]
+      features = features[,!(grepl("timesNotUsed",names(features)) | grepl("timesUsed",names(features)) | grepl("ntimes",names(features)))]
+      fmw$train$X = fmw$train$X %>% left_join(features,by=c("orderID"))
+      fmw$validation$X = fmw$validation$X %>% left_join(features,by=c("orderID"))
+      fmw$class$X = fmw$class$X %>% left_join(features,by=c("orderID"))
+   }
+```
+
+## save them
+```{r cache=FALSE}
+   saveRDS(fml,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.4.rds")
+
+   saveRDS(fmw,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_WIDE_ver0.4.rds")
 ```

@@ -1,0 +1,344 @@
+---
+title: Creating better LLRs
+titleshort: We can maybe get these for 
+instructions: 
+output:
+  usefulR::DMC_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/multiway_llr_set1.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(reshape2)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(directlabels)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+My working directory is set to \verb!~/dmc2015/ian/!.
+
+# Bayesian Basket Values
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   d = readRDS("../data/clean_data/universalCleanData.rds")
+
+   source("./R/clean_factor.r")
+   d = clean_factor(d,"couponID","cpn")
+   d = clean_factor(d,"brand","brand")
+   d = clean_factor(d,"productGroup","prod")
+   d = clean_factor(d,"categoryIDs")
+```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("./r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49)) 
+```
+
+## Make a few quick features
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dm$ShopFast = 1*(dm$TimeBtwnRecOrder < 28)
+   dm$EarlyRec = 1*(dm$TimeBtwnSentRec < 8)
+
+   dm$Shop60 = floor(dm$orderTimeTime)
+   dm$Shop30 = floor(dm$orderTimeTime * 60/30)*30/60
+   dm$Shop15 = floor(dm$orderTimeTime * 60/15)*15/60
+
+   dm$RecExpire60 = floor(dm$TimeBtwnSentRec)
+   dm$RecOrder60 = floor(dm$TimeBtwnRecOrder)
+   dm$OrderExpire60 = floor(dm$TimeBtwnOrderExpire)
+   dm$basePrice_price_ratio = dm$basePrice/dm$price
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("./r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+   dmc = dmc[,-which(names(dmc) == "categoryIDs")]
+   dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")
+   dmc = dm %>% 
+      left_join(dmc %>%
+            select(orderID,couponCol,categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+            gather(tmp,categoryID,-orderID,-couponCol) %>%
+            mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
+            select(orderID,couponCol,categoryEntry,categoryID) %>%
+            arrange(orderID,couponCol,categoryEntry) %>%
+            filter(!is.na(categoryID)),
+         by = c("orderID","couponCol")) %>%
+      arrange(orderID,couponCol,categoryEntry)
+```
+
+## Based on Historical Set 1
+<!--- readHist1: R code (No Results in Document) -->
+```{r readHist1,cache=FALSE}
+   HTVset1 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
+   names(dm)
+```
+
+#basket Bayes
+Consider the (trimmed) density of basketValue:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d.tmp = d %>% mutate(couponUse = paste0(coupon1Used,coupon2Used,coupon3Used))
+   qplot(basketValue,xlim=c(0,1000),binwidth=3,data=d.tmp,color=couponUse)
+
+   qplot(floor(basketValue/10),xlim=c(0,200),binwidth=1,data=d.tmp,color=couponUse)
+
+   d.tmp %>% mutate(newval= floor(basketValue/10)) %>% group_by(newval) %>% summarize(freq = n()) %>% arrange(-freq) %>% head(10)
+   d.tmp %>% mutate(newval= floor(basketValue/10)) %>% filter(newval == 18) %>% group_by(basketValue) %>% summarize(freq = n()) %>% arrange(-freq) %>% head(10)
+
+   plot.d = d.tmp %>% mutate(basketGroup = (1*(basketValue > 185) + 
+                                         1*(basketValue > 137) +
+                                         1*(basketValue > 92)),newval= as.character(floor(basketValue/10)),
+                             couponsUsed = (1*(coupon1Used == 1) + 
+                                            1*(coupon2Used == 1) + 
+                                            1*(coupon3Used == 1)))
+
+   ## these plots illustrate the distribution
+   qplot(basketValue,xlim=c(0,1000),binwidth=1,data=plot.d,fill=factor(basketGroup))
+   qplot(basketValue,xlim=c(0,1000),binwidth=1,data=plot.d,facets=couponsUsed~.,fill=factor(basketGroup))
+
+   ## add this grouping to the data
+   d = d %>% mutate(basketGroup = (1*(basketValue > 185) + 1*(basketValue > 137) + 1*(basketValue > 92)))
+   dm = dm %>% mutate(basketGroup = (1*(basketValue > 185) + 1*(basketValue > 137) + 1*(basketValue > 92))) %>% head
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r diffbygroup,cache=FALSE}
+   ## behavior by categorical data
+   bygroupPlot = function(catvar,dsn=d){
+      dsn$catvar = sapply(1:nrow(dsn), function(i) paste0(sapply(catvar, function(x) as.character(dsn[i,x])),collapse=":"))
+      dsn = dsn[,c("basketGroup","catvar")]
+      p = dsn %>% group_by(basketGroup,catvar) %>% 
+         mutate(catXgroup_freq=n()) %>%
+         group_by(basketGroup) %>% 
+         mutate(cat_in_group_prop = catXgroup_freq/n()) %>%
+         unique %>%
+         arrange(basketGroup,catvar) %>%
+         ggplot(aes(factor(basketGroup),catvar,size=cat_in_group_prop,color=factor(catvar)))+geom_point()
+      return(p)
+   }
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   bygroupPlot(c("coupon1Used","coupon2Used","coupon3Used"))
+   bygroupPlot(c("userID"))
+```
+
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dtmp = d
+   dtmp$cash185 = c("cash185","no")[(dtmp$basketValue < 186 & dtmp$basketValue > 185) + 1]
+   dtmp %>% filter(!is.na(cash185)) %>% group_by(cash185,couponID1) %>% summarize(prop = sum(coupon1Used)/n()) %>%  arrange(cash185,-prop)
+   qplot(couponsReceived,orderTime,facets=reward1~cash185,alpha=I(1),data=dtmp) 
+```
+
+
+## She's Losing It: Bayesian Expectation
+From the form of our loss function on basketValues, we know that the **best** estimator, 
+the one that minimizes our expected loss function for some given feature values $x_1, x_2, ..., x_p$, 
+is going to be the expected basket value based on those features, i.e., to minimize
+$$
+   \mathbb{E} \left( (b_i - \hat{b}_i)^2 | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$$
+is 
+$$
+\mathbb{E} \left( \hat{b}_i | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$$
+Since we don't know 
+$
+\mathbb{E} \left( \hat{b}_i | x_{1,i}, x_{2,i}, ..., x_{p,i} \right)
+$
+our best bet minimize our expected loss on basketValue is to estimate that loss.
+We can do this in the same way we used our historical data to estimate coupon use.
+
+Consider for a given user, $u_i$, with basketValues $b_1$, $b_2$, ..., $b_k$ 
+and believe the following: 
+\begin{align}
+b_i          &\sim f(b | \theta_{u_i} ) \tag{data model} \\
+\theta_{u_i} &\sim \pi(\theta) \tag{prior} \\
+\end{align}
+we can say that seeing $b_1, b_2, ..., b_k$ has updated our "prior" belief about $\theta$'s distribution.
+If we can connect that updated (posterior) estimate of $\theta$ to $\mathbb{E}(b | u_i)$ (for instance if 
+$\theta$ represents the mean of $b$ for user $u_i$), 
+then we have an aspect of the estimate we are looking for.
+
+We can do this for multiple combinations of these features. 
+Notice that the basket values have some sort of "mixed" exponential distribution. We can consider
+the mixed exponential as have the following mixing proportions (estiamted on the entire data):
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   d %>% filter(!is.na(basketValue)) %>% group_by(basketGroup) %>% summarize(pi_est = n()/nrow(d))
+```
+so we have $\pi_1 = 0.00193$, $\pi_2 = 0.084747$, $\pi_3 = 0.09119$, and $\pi_4 = 0.7199$.
+Also we can consider a very rough estimate of each curve using the following:
+
+$$
+x \sim 
+\begin{cases}
+\lambda_1 e ^ {-\lambda_1 (x - 185) & x \ge 185 \\
+\lambda_2 e ^ {-\lambda_2 (x - 137) & x \ge 185 \\
+\lambda_3 e ^ {-\lambda_3 (x - 92) & x \ge 185 \\
+\lambda_4 e ^ {-\lambda_4 (x - 185) & x \ge 185 \\
+\end{cases}
+$$
+If we conisder a customers basketValues as being draws from some unknown disprior unkn 
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   alpha.est = 24
+   beta.est = 4*alpha.est 
+   qbeta(.025,alpha.est,beta.est)
+   qbeta(.975,alpha.est,beta.est)
+```
+This means that we can get posterior estimates of the per column probability using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   p1 = (sum(HTVset1$H$coupon1Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+   p2 = (sum(HTVset1$H$coupon2Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+   p3 = (sum(HTVset1$H$coupon3Used) + alpha.est)/(nrow(HTVset1$H) + alpha.est + beta.est)
+```
+And we can weight our observations using these proportions:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+yrf = 
+   
+
+```
+
+
+
+
+
+
+
+## Making comparisons
+Using these likelihoods, we can make the following comparisons:
+**basePrice_price_ratio, reward**
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   colsel = which(names(dm) %in% c("basePrice_price_ratio","reward"))
+   result = llr_multiway(dm,HTVset1$H,colsel)
+
+   dm %>% left_join(result$long, by= c("orderID","couponCol")) %>% ggplot(aes(factor(reward),llr_naive_rwdXbasePrice_price_ratio,color=factor(couponUsed),group=couponCol)) + geom_boxplot()
+
+   #show long results
+   tail(result$long) %>% kable
+
+   #show wide results
+   head(result$wide) %>% kable
+```
+
+Make this a function:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+CreateSets = function(varns){
+   filename = paste(varns,collapse="X")
+   colsel = which(names(dm) %in% varns)
+
+   message("Now making llrs for ",filename)
+   result = llr_multiway(dm,HTVset1$H,colsel)
+
+   #save long results
+   result$long %>% saveRDS(file = paste0("~/dmc2015/features/feature_files/set1/llr_",filename,"_long.rds"))
+
+   #save wide results
+   result$wide %>% saveRDS(file = paste0("~/dmc2015/features/feature_files/set1/llr_",filename,"_wide.rds"))
+}
+```
+
+## Choosing comparisons
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+#comparison groups
+groupA = c("Shop60", "Shop30", "Shop15", "RecExpire60", "RecOrder60", "OrderExpire60")
+
+groupB = c("basePrice_price_ratio", "price", "basePrice")
+
+groupC1 = "userID"
+groupC2 = "couponID"
+
+groupD1 = c("ShopFast", "EarlyRec")
+groupD2 = c("premiumProduct", "brand", "productGroup", "categoryIDs","reward")
+```
+
+
+# One way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+# one way
+oneway = c(groupA,groupB,groupC1,groupC2,groupD1,groupD2)
+sapply(oneway, function(i) CreateSets(i)) 
+```
+
+
+# Two Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## two way
+twoway = combn(c(groupC1,groupB,groupD1,groupD2),2) %>% 
+         cbind(combn(c(groupC1,groupC2),2)) %>%           # group C is OK for internal 2 way
+         cbind(combn(c(groupC2,groupD1),2))               # group D is OK for internal 2 way
+
+sapply(1:ncol(twoway), function(i) CreateSets(twoway[,i]))
+```
+
+
+# Three Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## three way 
+threeway = combn(c(groupB,groupC1),3) %>%                                                     # group B = 2 and userID is OK 
+   cbind(do.call("cbind", lapply(groupB, function(x) combn(c(x,groupD1,groupD2),3)))) %>%      # group B = 1 and group D = 2 is OK
+   cbind(do.call("cbind",lapply(c(groupD1,groupD2), function(x) combn(c(x,groupB),3)))) %>%   # group B = 2 and group D = 1 is OK
+   cbind(combn(c(groupC1,groupD1,groupD2),3))
+
+sapply(1:ncol(threeway), function(i) CreateSets(threeway[,i]))
+```
+
+
+# Four Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## four way
+fourway = combn(c(groupD1,groupD2),4)
+sapply(1:ncol(fourway), function(i) CreateSets(fourway[,i]))
+```
+
+
+# Five Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## five way only for groupD and internal
+fiveway = combn(c(groupD1,groupD2),5)
+sapply(1:ncol(fiveway), function(i) CreateSets(fiveway[,i]))
+```
