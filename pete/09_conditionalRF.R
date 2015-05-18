@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 17:12:40 2015
+# Last Modified: Mon May 18 17:13:34 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -24,7 +24,6 @@ library(party)
 source("~/GitHub/dmc2015/pete/10_roc.R")
 source("~/GitHub/dmc2015/pete/loss_function.R")
 
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
 
 # Classification
 # ============================================================================
@@ -36,6 +35,7 @@ nvars = 150
 # ----------------------------------------------------------------------------
 # Sort variables by importance in set 1
 # imp <- imp[order(imp$h1_imp, decreasing = T),]
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
 
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
@@ -69,7 +69,7 @@ h1_mod <- list(val_predictions = h1_v_p,
                               ntrees = ntrees,
                               mtry = 10))
 
-saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.4_coup.rds")
+saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.5_coup.rds")
 
 # Plot ROC
 # jpeg("~/GitHub/dmc2015/pete/figures/cforest_h1_0.3.jpg", width = 480, height = 480)
@@ -79,9 +79,10 @@ saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.4_coup.rds")
 
 # Historical set 3
 # ----------------------------------------------------------------------------
-imp <- imp[order(imp$h3_imp, decreasing = T),]
+# imp <- imp[order(imp$h3_imp, decreasing = T),]
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H3_0.4.rds")
 
-h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.3.rds")
+h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.5.rds")
 h3_t <- cbind(couponUsed = h3$train$y$couponUsed, 
               h3$train$X[as.character(imp$var[1:nvars])])
 h3_cf <- cforest(couponUsed~., data = h3_t,
@@ -112,12 +113,12 @@ h3_mod <- list(val_predictions = h3_v_p,
                              ntrees = ntrees,
                              mtry = 50))
 
-saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.3_coup.rds")
+saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.5_coup.rds")
 
 # Save ROC curve
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_h3_0.3.jpg", width = 480, height = 480)
-roc(h3_v_p, h3_v$couponUsed)
-dev.off()
+# jpeg("~/GitHub/dmc2015/pete/figures/cforest_h3_0.3.jpg", width = 480, height = 480)
+# roc(h3_v_p, h3_v$couponUsed)
+# dev.off()
 
 # Compare ROC curves of each set 
 # ============================================================================

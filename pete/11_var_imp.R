@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 15-05-2015
-# Last Modified: Mon May 18 16:24:40 2015
+# Last Modified: Mon May 18 17:04:27 2015
 #
 # Purpose: Measure variable importance with regard to conditional random
 # forests. To do this we will randomly group variables and fit conditional
@@ -36,21 +36,21 @@ source("~/GitHub/dmc2015/pete/10_roc.R")
 # Var importance on new feature matrix with 1000+ vars for classification.
 # Only do this for numeric variables. Factors will take too long.
 # ============================================================================
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
 vars <- names(h1$train$X[sapply(h1$train$X, is.numeric)])
 vars <- vars[vars != "orderID"]
-sizes <- getGroupSize(100, length(vars))
+sizes <- getGroupSize(80, length(vars))
 importance <- data.frame(var = NULL, imp = NULL)
 
 for (s in sizes) {
   samp <- sample(vars[!(vars %in% importance$var)], s)
   train <- cbind(couponUsed = h1$train$y$couponUsed, h1$train$X[samp])
   cf <- cforest(couponUsed~., data = train,
-                control = cforest_unbiased(mtry = 3, ntree = 100))
+                control = cforest_unbiased(mtry = 3, ntree = 50))
   vImp <- varimp(cf)
   temp <- data.frame(var = names(vImp), imp = as.numeric(vImp))
   importance <- rbind(importance, temp)
-  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
+  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
   cat(nrow(importance))
   cat("\n")
 }
@@ -58,10 +58,10 @@ for (s in sizes) {
 importance$imp <- importance$imp * 10000
 importance <- importance[order(importance$imp, decreasing = T),]
 rownames(importance) <- 1:nrow(importance)
-saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
+saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
 
 
-h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.4.rds")
+h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.5.rds")
 vars <- names(h3$train$X[sapply(h3$train$X, is.numeric)])
 vars <- vars[vars != "orderID"]
 sizes <- getGroupSize(93, length(vars))
@@ -75,7 +75,7 @@ for (s in sizes) {
   vImp <- varimp(cf)
   temp <- data.frame(var = names(vImp), imp = as.numeric(vImp))
   importance <- rbind(importance, temp)
-  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H3_0.4.rds")
+  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H3_0.5.rds")
   cat(nrow(importance))
   cat("\n")
 }
@@ -83,11 +83,11 @@ for (s in sizes) {
 importance$imp <- importance$imp * 10000
 importance <- importance[order(importance$imp, decreasing = T),]
 rownames(importance) <- 1:nrow(importance)
-saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H3_0.4.rds")
+saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H3_0.5.rds")
 
 # Merge importance measures from all three historical sets
-imp1 <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
-imp3 <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H3_0.4.rds")
+imp1 <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
+imp3 <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H3_0.5.rds")
 
 names(imp1)[2] <- "h1_imp"
 names(imp3)[2] <- "h3_imp"
