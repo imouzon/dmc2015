@@ -1,6 +1,7 @@
 library(dplyr)
 library(gbm)
 library(e1071)
+library(party)
 
 setwd("~/Documents/dmc2015")
 #set1
@@ -121,9 +122,16 @@ run_set3_trials(gbm, colset = 1, n.trees = 5000)
 run_set3_trials(gbm, colset = 2, n.trees = 5000)
 run_set3_trials(gbm, colset = 3, n.trees = 5000)
 run_set3_trials(gbm, colset = 4, n.trees = 5000)
+run_set3_trials(cforest, colset = 4, control = cforest_unbiased(mtry = 10, ntree = 200))
+
+                
 
 run_set2_trials = function(method, colset = 1, ...) {
+	bf1 = readRDS("./alex/important_features_set2_long_adaboost.rds")
+	bf1 = bf1[bf1 > 0]
+	bf1 = names(bf1)
 	if(colset == 1) set = -1
+	if(colset == 2) set = bf1
 
 	df = get_set(b, set)
 	df2 = pred_set(b, set)
@@ -134,8 +142,37 @@ run_set2_trials = function(method, colset = 1, ...) {
 
 	return(m)
 }
-run_set2_trials(gbm, colset = 1, n.trees = 10000, distribution = "adaboost")
+#run_set2_trials(gbm, colset = 1, n.trees = 10000, distribution = "adaboost")
 
+
+
+#cforests
+#set1
+df1 = get_set(a, -1)
+df2 = pred_set(a, -1)
+aa = cforest(couponUsed~., data = df1, control = cforest_unbiased(mtry = 10, ntree = 200))
+lossFunMethod(df2$couponUsed, df2[,-1], aa)
+cforest_imp = varimp(aa)
+
+#set2
+df1 = get_set(b, -1)
+df2 = pred_set(b, -1)
+bb = cforest(couponUsed~., data = df1, control = cforest_unbiased(mtry = 10, ntree = 200))
+lossFunMethod(df2$couponUsed, df2[,-1], bb)
+cforest_imp_b = varimp(bb)
+
+#set3
+df1 = get_set(c, -1)
+df2 = pred_set(c, -1)
+cc = cforest(couponUsed~., data = df1, control = cforest_unbiased(mtry = 10, ntree = 200))
+lossFunMethod(df2$couponUsed, df2[,-1], cc)
+cforest_imp_c = varimp(cc)
+
+
+#save these:
+#saveRDS(cforest_imp, "important_features_set1_long_cforest.rds")
+#saveRDS(cforest_imp_b, "important_features_set2_long_cforest.rds")
+#saveRDS(cforest_imp_c, "important_features_set3_long_cforest.rds")
 
 
 
