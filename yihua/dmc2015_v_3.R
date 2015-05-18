@@ -14,13 +14,20 @@ library(e1071)
 
 setwd('/Users/yihuali/Documents/dmc2015')
 
-dat <- readRDS('./data//featureMatrix//featMat_based-on-HTVset1_LONG_ver0.3.rds')
+dat <- readRDS('./data//featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds')
 train.x <- dat$train$X
 train.y <- dat$train$y
 class.x <- dat$class$X
 class.y <- dat$class$y
 valid.x <- dat$validation$X
 valid.y <- dat$validation$y
+na.col.train <- unique(which(is.na(train.x), arr.ind=TRUE)[,2])
+na.col.valid <- unique(which(is.na(valid.x), arr.ind=TRUE)[,2])
+train.x <- train.x[,-c(na.col.train, na.col.valid)]
+valid.x <- valid.x[,-c(na.col.train, na.col.valid)]
+
+na.col.class <- unique(which(is.na(class.x), arr.ind=TRUE)[,2])
+names(class.x[na.col.class])
 
 feature.318 <- readRDS('./penglh/imp_rf_col.rds')
 feature.318 <- as.character(feature.318$col_name)
@@ -32,14 +39,25 @@ feature.ada <- names(feature.ada)
 feature.305 <- readRDS('./penglh/imp_rf_SET3.rds')
 feature.lasso.set3 <- readRDS('./penglh/imp_lasso_col_name_set3.rds')
 feature.c50.set3 <- readRDS('./penglh/imp_c50_col_name_set3.rds')
+feature.gbm.set1 <- readRDS('./weicheng/data/imp_gbm_set1.rds')
+feature.gbm.set3 <- readRDS('./weicheng/data/imp_gbm_set3.rds')
+feature.crf <- readRDS('./pete/predictions/importance.rds')
+feature.crf <- feature.crf[order(-feature.crf$h1_imp),]
+feature.crf.set1 <- as.character(feature.crf$var[1:150])
+feature.v4.set1 <- readRDS('./penglh/imp_corr_v4.rds')
+feature.rf.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_rf_set1_v4.rds')
+feature.lasso.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_lasso_set1_v4.rds')
+feature.c50.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_c50_set1_v4.rds')
 
-feature <- intersect(feature.318, names(train.x))
+feature <- intersect(rownames(feature.c50.v4.set1)[1:150], names(train.x))
+
 length(feature)
+
 rf <- randomForest(x=train.x[,feature],
                    y=as.factor(train.y$couponUsed),
                    xtest=valid.x[,feature],
                    ytest=as.factor(valid.y$couponUsed),
-                   keep.forest=TRUE)
+                   keep.forest=TRUE, ntree=2000)
 rf.pred <- predict(rf, valid.x[,feature], type="prob")
 
 result <- data.frame(orderID=valid.y$orderID,
