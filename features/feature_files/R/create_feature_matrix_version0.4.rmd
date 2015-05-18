@@ -100,13 +100,7 @@ I am using the following packages:
 
 ## save them
 ```{r cache=FALSE}
-   fml$train$X = fml$train$X[,!(grepl("naive",names(fml$train$X)))]
-   fml$validation$X = fml$validation$X[,!(grepl("naive",names(fml$validation$X)))]
-   fml$class$X = fml$class$X[,!(grepl("naive",names(fml$class$X)))]
    saveRDS(fml,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
 
-   fmw$train$X = fmw$train$X[,!(grepl("naive",names(fmw$train$X)))]
-   fmw$validation$X = fmw$validation$X[,!(grepl("naive",names(fmw$validation$X)))]
-   fmw$class$X = fmw$class$X[,!(grepl("naive",names(fmw$class$X)))]
    saveRDS(fmw,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.4.rds")
 ```
