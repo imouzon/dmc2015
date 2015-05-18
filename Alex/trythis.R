@@ -1,3 +1,5 @@
+library(dplyr)
+library(gbm)
 get_set = function(dat, columns) {
 	trx = dat$train$X
 	try = dat$train$y
@@ -19,6 +21,22 @@ pred_set = function(dat, columns) {
 	full = data.frame(couponUsed = vy$couponUsed, vx)
 }
 
+fit_data = function(dat, fn, formula, ...) {
+	fn(formula, data = dat, ...)
+}
+
+lossFunMethod = function(yval,Xval,method,...) {
+  hatmat = as.matrix(matrix(predict(method,newdata = Xval,type="response",...),ncol=3,byrow=TRUE))
+  ymat = matrix(yval,ncol=3,byrow=TRUE)
+
+  error = colSums((ymat - hatmat)^2)
+  wt = colMeans(ymat)^2
+  cat("The coupon error is:  ",sum(error/wt),"\n")
+  cat("By column error:      ",error,"\n")
+  cat("By column weight:     ",error,"\n\n")
+  return(sum(error/wt))
+}
+
 run_set1_trials = function(method, ...) {
 	a = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 	set = readRDS("~/dmc2015/penglh/imp_rf_col.rds")$col_name
@@ -31,4 +49,4 @@ run_set1_trials = function(method, ...) {
 
 	return(p)
 }
-run_set1_trials(gbm, colset = 1, n.trees = 500, distribution="adaboost")
+run_set1_trials(gbm, n.trees = 500, distribution="adaboost")
