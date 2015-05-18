@@ -1,0 +1,501 @@
+\PassOptionsToPackage{xcolor}{usenames,dvipsnames,svgnames,table}
+\documentclass[10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdfcolmk}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{extramarks}
+\usepackage{enumerate}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{amsmath,amssymb,rotating}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{animate}
+\usepackage{array}
+\usepackage{graphics, color}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{tikz}
+\usepackage{mdframed}
+\usepackage{clrscode3e}
+\usepackage{formalHW}
+\usepackage[none,DMC]{formatHW}
+\usepackage{fancyquote}
+\usepackage{fancyenvironments}
+\usepackage{mymathmacros}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfplots}
+
+%set up fancy page header
+\pagestyle{fancy}
+   \chead{DMC@ISU:\ WRF}  
+   \rhead{\firstxmark}
+   \lfoot{\lastxmark}
+   \cfoot{}
+   \rfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+   \renewcommand\headrulewidth{0.4pt}
+   \renewcommand\footrulewidth{0.4pt}
+
+% pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+
+% header includes
+
+\begin{document}
+
+\thispagestyle{empty}%
+\begin{center}%
+    \renewcommand{\arraystretch}{1.5}%
+    \begin{tabular}{c}%
+       \Large{DMC@ISU: The 2015 Iowa State University Data Mining Cup Team}\\
+       Weighted Random Forest\\
+       Spring 2015, A Team as Strong as Steel \\
+    \end{tabular}
+\end{center}
+
+\begin{center}
+ \renewcommand{\arraystretch}{1.5}
+ \begin{tabular*}{0.65\textwidth}{r@{:\hspace{.3cm}}l}
+    \hline
+    
+    
+    Last Day&  May 19, 2015\\
+    \hline
+ \end{tabular*}
+\end{center}
+
+I am using the following packages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+   \KeywordTok{library}\NormalTok{(magrittr)}
+   \KeywordTok{library}\NormalTok{(dplyr)}
+   \KeywordTok{library}\NormalTok{(reshape2)}
+   \KeywordTok{library}\NormalTok{(tidyr)}
+   \KeywordTok{library}\NormalTok{(lubridate)}
+   \KeywordTok{library}\NormalTok{(ggplot2)}
+   \KeywordTok{library}\NormalTok{(directlabels)}
+   \KeywordTok{library}\NormalTok{(rCharts)}
+   \KeywordTok{library}\NormalTok{(xtable)}
+   \KeywordTok{library}\NormalTok{(foreach)}
+   \KeywordTok{library}\NormalTok{(gtools)}
+   \KeywordTok{library}\NormalTok{(knitr)}
+   \KeywordTok{library}\NormalTok{(utils)}
+   \KeywordTok{source}\NormalTok{(}\StringTok{"~/dmc2015/ian/R/renm.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+My working directory is set to \verb!~/dmc2015/ian/!.
+
+\section{Curating and Cross
+Validating}\label{curating-and-cross-validating}
+
+The reason features should be removed from an ``large data'' approach to
+a problem is if they are dominated by better features.
+
+However, when you have as many features as we do at the moment it can be
+difficult to
+
+I am starting with \textbf{set 1}
+
+\section{Load feature matrix}\label{load-feature-matrix}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## long}
+\NormalTok{f1 =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds"}\NormalTok{)}
+
+\NormalTok{## wide}
+\NormalTok{d1 =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds"}\NormalTok{)}
+
+\CommentTok{# estimate weights from the historical data:}
+\NormalTok{HTVset =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"~/dmc2015/data/featureMatrix/HTVset1.rds"}\NormalTok{)}
+
+\NormalTok{## Baseline basketValue}
+\KeywordTok{sum}\NormalTok{((d1$validation$y$basketValue -}\StringTok{ }\KeywordTok{mean}\NormalTok{(HTVset$H$basketValue))^}\DecValTok{2}\NormalTok{)/}\KeywordTok{mean}\NormalTok{(d1$validation$y$basketValue)^}\DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5442.26
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## baseline coupons 1}
+\KeywordTok{sum}\NormalTok{((d1$validation$y$coupon1Used -}\StringTok{ }\KeywordTok{mean}\NormalTok{(HTVset$H$coupon1Used))^}\DecValTok{2}\NormalTok{)/}\KeywordTok{mean}\NormalTok{(d1$validation$y$coupon1Used)^}\DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4310.565
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## baseline coupons 2}
+\KeywordTok{sum}\NormalTok{((d1$validation$y$coupon2Used -}\StringTok{ }\KeywordTok{mean}\NormalTok{(HTVset$H$coupon2Used))^}\DecValTok{2}\NormalTok{)/}\KeywordTok{mean}\NormalTok{(d1$validation$y$coupon2Used)^}\DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6568.962
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## baseline coupons 3}
+\KeywordTok{sum}\NormalTok{((d1$validation$y$coupon3Used -}\StringTok{ }\KeywordTok{mean}\NormalTok{(HTVset$H$coupon3Used))^}\DecValTok{2}\NormalTok{)/}\KeywordTok{mean}\NormalTok{(d1$validation$y$coupon3Used)^}\DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 7157.268
+\end{verbatim}
+
+\section{Check the data}\label{check-the-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## isolate the X and y for set 1}
+\NormalTok{Xn =}\StringTok{ }\NormalTok{f1$train$X}
+\NormalTok{yn =}\StringTok{ }\NormalTok{f1$train$y}
+
+\NormalTok{## remove the naive columns}
+\NormalTok{Xn =}\StringTok{ }\NormalTok{Xn[, !}\KeywordTok{grepl}\NormalTok{(}\StringTok{"naive"}\NormalTok{, }\KeywordTok{names}\NormalTok{(Xn))]}
+
+\NormalTok{## keep the validation sets}
+\NormalTok{Xv =}\StringTok{ }\NormalTok{f1$validation$X}
+\NormalTok{yv =}\StringTok{ }\NormalTok{f1$validation$y}
+\end{Highlighting}
+\end{Shaded}
+
+\section{How do we estimate the weights?
+Bayes}\label{how-do-we-estimate-the-weights-bayes}
+
+We need an estimate of the mean of each couponUsed column. This can be
+accomplished in a Bayesian sense. I believe that coupons are used about
+20\% of the time in this data, and that there is less than a 5\% chance
+that coupons are actually used less than 13\% of the time or more than
+27\% of the time. This give me the following choice for \(\alpha\) and
+\(\beta\):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# prior estimates: mean of coupon use at .2, F(.025) = .1337, F(.975) =}
+\CommentTok{# .2758}
+\NormalTok{alpha.est =}\StringTok{ }\DecValTok{24}
+\NormalTok{beta.est =}\StringTok{ }\DecValTok{4} \NormalTok{*}\StringTok{ }\NormalTok{alpha.est}
+\KeywordTok{qbeta}\NormalTok{(}\FloatTok{0.025}\NormalTok{, alpha.est, beta.est)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.1337019
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{qbeta}\NormalTok{(}\FloatTok{0.975}\NormalTok{, alpha.est, beta.est)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2757604
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{alpha.est}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 24
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{beta.est}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 96
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{alpha.est/(alpha.est +}\StringTok{ }\NormalTok{beta.est)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2
+\end{verbatim}
+
+This gives us the following posterior for \(p_1, p_2, p_3\):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## Historical estimates of p1,p2,p3:}
+\NormalTok{p1 =}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{(HTVset$H$coupon1Used) +}\StringTok{ }\NormalTok{alpha.est)/(alpha.est +}\StringTok{ }\NormalTok{beta.est +}\StringTok{ }\KeywordTok{nrow}\NormalTok{(HTVset$H))}
+\NormalTok{p2 =}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{(HTVset$H$coupon2Used) +}\StringTok{ }\NormalTok{alpha.est)/(alpha.est +}\StringTok{ }\NormalTok{beta.est +}\StringTok{ }\KeywordTok{nrow}\NormalTok{(HTVset$H))}
+\NormalTok{p3 =}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{(HTVset$H$coupon3Used) +}\StringTok{ }\NormalTok{alpha.est)/(alpha.est +}\StringTok{ }\NormalTok{beta.est +}\StringTok{ }\KeywordTok{nrow}\NormalTok{(HTVset$H))}
+
+\NormalTok{p1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2263798
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.1884939
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.1730589
+\end{verbatim}
+
+We can weight our responses and hopefully use this to get better
+estimates by unweighting. I am only using similarity columns and the one
+way loglikelihood columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## lets try a small random forest}
+\KeywordTok{library}\NormalTok{(randomForest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.
+## 
+## Attaching package: 'randomForest'
+## 
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## get the similarity columns}
+\NormalTok{sim_columns =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\KeywordTok{grep}\NormalTok{(}\StringTok{"sim_"}\NormalTok{, }\KeywordTok{names}\NormalTok{(Xn)))}
+
+\NormalTok{## get single way llrs:}
+\NormalTok{llr1_columns =}\StringTok{ }\KeywordTok{which}\NormalTok{(}\KeywordTok{grepl}\NormalTok{(}\StringTok{"llr"}\NormalTok{, }\KeywordTok{names}\NormalTok{(Xn)) &}\StringTok{ }\NormalTok{!}\KeywordTok{grepl}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\KeywordTok{names}\NormalTok{(Xn)))}
+
+\CommentTok{# The predictor and response columns}
+\NormalTok{Xrf =}\StringTok{ }\NormalTok{Xn[, }\KeywordTok{c}\NormalTok{(sim_columns, llr1_columns)]}
+\NormalTok{yrf =}\StringTok{ }\NormalTok{yn[, }\StringTok{"couponUsed"}\NormalTok{]}
+
+\CommentTok{# unweighted error}
+\NormalTok{unweighted.rf =}\StringTok{ }\KeywordTok{randomForest}\NormalTok{(Xrf, }\DataTypeTok{y =} \NormalTok{yrf, }\DataTypeTok{ntree =} \DecValTok{5000}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{11}\NormalTok{, }\DataTypeTok{replace =} \OtherTok{TRUE}\NormalTok{, }
+    \DataTypeTok{maxnodes =} \DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in randomForest.default(Xrf, y = yrf, ntree = 5000, mtry = 11,
+## replace = TRUE, : The response has five or fewer unique values.  Are you
+## sure you want to do regression?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# weighted error}
+\NormalTok{yrfw =}\StringTok{ }\NormalTok{yn[, }\StringTok{"couponUsed"}\NormalTok{] *}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{/p1, }\DecValTok{1}\NormalTok{/p2, }\DecValTok{1}\NormalTok{/p3), }\DataTypeTok{times =} \KeywordTok{nrow}\NormalTok{(Xrf)/}\DecValTok{3}\NormalTok{)}
+\NormalTok{weighted.rf =}\StringTok{ }\KeywordTok{randomForest}\NormalTok{(Xrf, }\DataTypeTok{y =} \NormalTok{yrfw, }\DataTypeTok{ntree =} \DecValTok{5000}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{11}\NormalTok{, }\DataTypeTok{replace =} \OtherTok{TRUE}\NormalTok{, }
+    \DataTypeTok{maxnodes =} \DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in randomForest.default(Xrf, y = yrfw, ntree = 5000, mtry = 11, :
+## The response has five or fewer unique values.  Are you sure you want to do
+## regression?
+\end{verbatim}
+
+\subsection{Comparing Errors:}\label{comparing-errors}
+
+\subsubsection{Training Set Results}\label{training-set-results}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Unweighted Loss Aspects}
+\NormalTok{uw.fitted =}\StringTok{ }\KeywordTok{predict}\NormalTok{(unweighted.rf, }\DataTypeTok{newdata =} \NormalTok{Xrf, }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\NormalTok{uw.fitted.loss =}\StringTok{ }\KeywordTok{colSums}\NormalTok{(}\KeywordTok{matrix}\NormalTok{((yrf -}\StringTok{ }\NormalTok{uw.fitted)^}\DecValTok{2}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{uw.scaled.fitted.loss =}\StringTok{ }\NormalTok{uw.fitted.loss/(}\KeywordTok{colMeans}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(yrf, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))^}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{# Weighted Loss Aspects}
+\NormalTok{w.fitted =}\StringTok{ }\KeywordTok{predict}\NormalTok{(weighted.rf, }\DataTypeTok{newdata =} \NormalTok{Xrf, }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{) *}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(p1, }
+    \NormalTok{p2, p3), }\DataTypeTok{times =} \KeywordTok{nrow}\NormalTok{(Xrf)/}\DecValTok{3}\NormalTok{)}
+\NormalTok{w.fitted.loss =}\StringTok{ }\KeywordTok{colSums}\NormalTok{(}\KeywordTok{matrix}\NormalTok{((yrf -}\StringTok{ }\NormalTok{w.fitted)^}\DecValTok{2}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{w.scaled.fitted.loss =}\StringTok{ }\NormalTok{w.fitted.loss/(}\KeywordTok{colMeans}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(yrf, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))^}\DecValTok{2}\NormalTok{)}
+
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss unweighted rf (no col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(uw.fitted.loss, }\KeywordTok{sum}\NormalTok{(uw.fitted.loss)), }
+    \DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss unweighted rf (no col weights):381.548741744449 | 324.549008499592 | 292.502649479028 | 998.600399723069
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss unweighted rf (col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(uw.scaled.fitted.loss, }
+    \KeywordTok{sum}\NormalTok{(uw.scaled.fitted.loss)), }\DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss unweighted rf (col weights):6376.80003449942 | 8651.8583427113 | 10498.8488246348 | 25527.5072018455
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss weighted rf (no col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(w.fitted.loss, }\KeywordTok{sum}\NormalTok{(w.fitted.loss)), }
+    \DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss weighted rf (no col weights):388.758212952329 | 325.727555326448 | 291.297057392399 | 1005.78282567118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss weighted rf (col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(w.scaled.fitted.loss, }\KeywordTok{sum}\NormalTok{(w.scaled.fitted.loss)), }
+    \DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss weighted rf (col weights):6497.29147167974 | 8683.276156136 | 10455.5762967304 | 25636.1439245461
+\end{verbatim}
+
+\subsubsection{Validation Set Results}\label{validation-set-results}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## validation sets}
+\NormalTok{yv =}\StringTok{ }\NormalTok{yv$couponUsed}
+\NormalTok{Xv =}\StringTok{ }\NormalTok{Xv[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(Xv) %in%}\StringTok{ }\KeywordTok{names}\NormalTok{(Xrf))]}
+
+\KeywordTok{message}\NormalTok{(}\StringTok{"VALIDATION SET"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## VALIDATION SET
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Unweighted Loss Aspects}
+\NormalTok{uw.predicted =}\StringTok{ }\KeywordTok{predict}\NormalTok{(unweighted.rf, }\DataTypeTok{newdata =} \NormalTok{Xv, }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\NormalTok{uw.predicted.loss =}\StringTok{ }\KeywordTok{colSums}\NormalTok{(}\KeywordTok{matrix}\NormalTok{((yv -}\StringTok{ }\NormalTok{uw.predicted)^}\DecValTok{2}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{uw.scaled.predicted.loss =}\StringTok{ }\NormalTok{uw.predicted.loss/(}\KeywordTok{colMeans}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(yv, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }
+    \DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))^}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{# Weighted Loss Aspects}
+\NormalTok{w.predicted =}\StringTok{ }\KeywordTok{predict}\NormalTok{(weighted.rf, }\DataTypeTok{newdata =} \NormalTok{Xv, }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{) *}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(p1, }
+    \NormalTok{p2, p3), }\DataTypeTok{times =} \KeywordTok{nrow}\NormalTok{(Xv)/}\DecValTok{3}\NormalTok{)}
+\NormalTok{w.predicted.loss =}\StringTok{ }\KeywordTok{colSums}\NormalTok{(}\KeywordTok{matrix}\NormalTok{((yv -}\StringTok{ }\NormalTok{w.predicted)^}\DecValTok{2}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{w.scaled.predicted.loss =}\StringTok{ }\NormalTok{w.predicted.loss/(}\KeywordTok{colMeans}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(yv, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))^}\DecValTok{2}\NormalTok{)}
+
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss unweighted rf (no col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(uw.predicted.loss, }\KeywordTok{sum}\NormalTok{(uw.predicted.loss)), }
+    \DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss unweighted rf (no col weights):220.949118250527 | 174.825179372017 | 164.790932402203 | 560.565230024748
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss unweighted rf (col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(uw.scaled.predicted.loss, }
+    \KeywordTok{sum}\NormalTok{(uw.scaled.predicted.loss)), }\DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss unweighted rf (col weights):3903.3445179996 | 6030.83694272542 | 6570.80642043898 | 16504.987881164
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss weighted rf (no col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(w.predicted.loss, }\KeywordTok{sum}\NormalTok{(w.predicted.loss)), }
+    \DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss weighted rf (no col weights):220.13419662128 | 174.707346812765 | 164.114698235298 | 558.956241669343
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{message}\NormalTok{(}\StringTok{"loss weighted rf (col weights):"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\KeywordTok{c}\NormalTok{(w.scaled.predicted.loss, }
+    \KeywordTok{sum}\NormalTok{(w.scaled.predicted.loss)), }\DataTypeTok{collapse =} \StringTok{" | "}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## loss weighted rf (col weights):3888.9479008087 | 6026.77214522917 | 6543.84253510349 | 16459.5625811414
+\end{verbatim}
+
+\end{document}

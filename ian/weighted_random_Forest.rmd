@@ -150,13 +150,13 @@ I am only using similarity columns and the one way loglikelihood columns.
 ```{r cache=FALSE}
       #Unweighted Loss Aspects
       uw.fitted = predict(unweighted.rf,newdata = Xrf,type="response")
-      uw.fitted.loss = colSums((matrix(yrf,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)
-      uw.scaled.fitted.loss = colSums((matrix(yrf,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yrf,ncol=3,byrow=TRUE))^2)
+      uw.fitted.loss = colSums(matrix((yrf - uw.fitted)^2,ncol=3,byrow=TRUE))
+      uw.scaled.fitted.loss = uw.fitted.loss/(colMeans(matrix(yrf,ncol=3,byrow=TRUE))^2)
 
       #Weighted Loss Aspects
       w.fitted = predict(weighted.rf,newdata = Xrf,type="response")*rep(c(p1,p2,p3),times=nrow(Xrf)/3)
-      w.fitted.loss = colSums((matrix(yrf,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)
-      w.scaled.fitted.loss = colSums((matrix(yrf,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yrf,ncol=3,byrow=TRUE))^2)
+      w.fitted.loss = colSums(matrix((yrf - w.fitted)^2,ncol=3,byrow=TRUE))
+      w.scaled.fitted.loss = w.fitted.loss/(colMeans(matrix(yrf,ncol=3,byrow=TRUE))^2)
 
       message("loss unweighted rf (no col weights):", paste(c(uw.fitted.loss, sum(uw.fitted.loss)) ,collapse=" | "))
       message("loss unweighted rf (col weights):", paste(c(uw.scaled.fitted.loss, sum(uw.scaled.fitted.loss)) ,collapse=" | "))
@@ -169,23 +169,23 @@ I am only using similarity columns and the one way loglikelihood columns.
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r chunk-label,cache=FALSE}
    ## validation sets
-   yv = yv
+   yv = yv$couponUsed
    Xv = Xv[,which(names(Xv) %in% names(Xrf))]
 
    message("VALIDATION SET")
       #Unweighted Loss Aspects
-      uw.fitted = predict(unweighted.rf,newdata = Xv,type="response")
-      uw.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)
-      uw.scaled.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv$couponUsed,ncol=3,byrow=TRUE))^2)
+      uw.predicted = predict(unweighted.rf,newdata = Xv,type="response")
+      uw.predicted.loss = colSums(matrix((yv - uw.predicted)^2,ncol=3,byrow=TRUE))
+      uw.scaled.predicted.loss = uw.predicted.loss/(colMeans(matrix(yv,ncol=3,byrow=TRUE))^2)
 
       #Weighted Loss Aspects
-      w.fitted = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
-      w.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)
-      w.scaled.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv$couponUsed,ncol=3,byrow=TRUE))^2)
+      w.predicted = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
+      w.predicted.loss = colSums(matrix((yv - w.predicted)^2,ncol=3,byrow=TRUE))
+      w.scaled.predicted.loss = w.predicted.loss/(colMeans(matrix(yv,ncol=3,byrow=TRUE))^2)
 
-      message("loss unweighted rf (no col weights):", paste(c(uw.fitted.loss, sum(uw.fitted.loss)) ,collapse=" | "))
-      message("loss unweighted rf (col weights):", paste(c(uw.scaled.fitted.loss, sum(uw.scaled.fitted.loss)) ,collapse=" | "))
+      message("loss unweighted rf (no col weights):", paste(c(uw.predicted.loss, sum(uw.predicted.loss)) ,collapse=" | "))
+      message("loss unweighted rf (col weights):", paste(c(uw.scaled.predicted.loss, sum(uw.scaled.predicted.loss)) ,collapse=" | "))
 
-      message("loss weighted rf (no col weights):", paste(c(w.fitted.loss, sum(w.fitted.loss)) ,collapse=" | "))
-      message("loss weighted rf (col weights):", paste(c(w.scaled.fitted.loss, sum(w.scaled.fitted.loss)) ,collapse=" | "))
+      message("loss weighted rf (no col weights):", paste(c(w.predicted.loss, sum(w.predicted.loss)) ,collapse=" | "))
+      message("loss weighted rf (col weights):", paste(c(w.scaled.predicted.loss, sum(w.scaled.predicted.loss)) ,collapse=" | "))
 ```
