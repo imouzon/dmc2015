@@ -54,10 +54,10 @@ I am starting with **set 1**
 <!--- dgg: R code (No Results in Document) -->
 ```{r dgg,cache=FALSE}
    ## long 
-   f1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 
    ## wide
-   d1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
 
    #estimate weights from the historical data:
    HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
@@ -68,7 +68,7 @@ I am starting with **set 1**
    ## dmc
    ## Historical estimates of p1,p2,p3:
    source("./load_data.r")
-
+    
    ## Baseline basketValue
    sum((d1$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(d1$validation$y$basketValue)^2
 

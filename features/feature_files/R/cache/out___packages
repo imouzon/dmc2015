@@ -17,3 +17,8 @@ randomForest
 devtools
 usefulR
 rmarkdown
+proto
+gsubfn
+DBI
+RSQLite
+sqldf
