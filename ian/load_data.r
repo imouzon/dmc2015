@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 17-05-2015
-#  Last Modified: Sun May 17 22:31:07 2015
+#  Last Modified: Mon May 18 14:05:50 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -20,26 +20,29 @@ d = clean_factor(d,"brand","brand")
 d = clean_factor(d,"productGroup","prod")
 d = clean_factor(d,"categoryIDs")
 
+d$ShopFast = 1*(d$TimeBtwnRecOrder < 28)
+d$EarlyRec = 1*(d$TimeBtwnSentRec < 8)
+
+d$Shop60 = floor(d$orderTimeTime)
+d$Shop30 = floor(d$orderTimeTime * 60/30)*30/60
+d$Shop15 = floor(d$orderTimeTime * 60/15)*15/60
+
+d$RecExpire60 = floor(d$TimeBtwnSentRec)
+d$RecOrder60 = floor(d$TimeBtwnRecOrder)
+d$OrderExpire60 = floor(d$TimeBtwnOrderExpire)
+
+d$basePrice_price_ratio1 = d$basePrice1/d$price1
+d$basePrice_price_ratio2 = d$basePrice2/d$price2
+d$basePrice_price_ratio3 = d$basePrice3/d$price3
+
 source("./r/stackCoupons2.R")
-dm = stackCoupons2(d,idcols = c(1:4,32:49)) 
-
-dm$ShopFast = 1*(dm$TimeBtwnRecOrder < 28)
-dm$EarlyRec = 1*(dm$TimeBtwnSentRec < 8)
-
-dm$Shop60 = floor(dm$orderTimeTime)
-dm$Shop30 = floor(dm$orderTimeTime * 60/30)*30/60
-dm$Shop15 = floor(dm$orderTimeTime * 60/15)*15/60
-
-dm$RecExpire60 = floor(dm$TimeBtwnSentRec)
-dm$RecOrder60 = floor(dm$TimeBtwnRecOrder)
-dm$OrderExpire60 = floor(dm$TimeBtwnOrderExpire)
-dm$basePrice_price_ratio = dm$basePrice/dm$price
+dm = stackCoupons2(d,idcols = c(1:4,32:57)) 
 
 source("./r/splitColumn.R")
 dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
 dmc = dmc[,-which(names(dmc) == "categoryIDs")]
 dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")
-dmc = dm %>% 
+dmcs = dm %>% 
    left_join(dmc %>%
          select(orderID,couponCol,categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
          gather(tmp,categoryID,-orderID,-couponCol) %>%
