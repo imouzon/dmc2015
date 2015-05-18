@@ -1,0 +1,237 @@
+---
+title: 
+titleshort:
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/couponCols_3wayllr_set3.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+
+
+# Loglikelihood statistics
+
+<!--- xx: R code (No Results in Document) -->
+```{r xx,cache=FALSE}
+   source("./R/llr_multiway.R")
+```
+
+# Getting Tranthe Data and Manipulations 
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   d = readRDS("../data/clean_data/universalCleanData.rds")
+
+   source("./R/clean_factor.r")
+   d = clean_factor(d,"couponID","cpn")
+   d = clean_factor(d,"brand","brand")
+   d = clean_factor(d,"productGroup","prod")
+   d = clean_factor(d,"categoryIDs")
+```
+
+I can melt the columns by coupon using the following:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("./r/stackCoupons2.R")
+   dm = stackCoupons2(d,idcols = c(1:4,32:49)) 
+```
+
+## Make a few quick features
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   dm$ShopFast = 1*(dm$TimeBtwnRecOrder < 28)
+   dm$EarlyRec = 1*(dm$TimeBtwnSentRec < 8)
+
+   dm$Shop60 = floor(dm$orderTimeTime)
+   dm$Shop30 = floor(dm$orderTimeTime * 60/30)*30/60
+   dm$Shop15 = floor(dm$orderTimeTime * 60/15)*15/60
+
+   dm$RecExpire60 = floor(dm$TimeBtwnSentRec)
+   dm$RecOrder60 = floor(dm$TimeBtwnRecOrder)
+   dm$OrderExpire60 = floor(dm$TimeBtwnOrderExpire)
+   dm$basePrice_price_ratio = dm$basePrice/dm$price
+```
+
+I and can split the columns of product group using:
+<!--- splitcols: R code (No Results in Document) -->
+```{r splitcols,cache=FALSE}
+   source("./r/splitColumn.R")
+   dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
+   dmc = dmc[,-which(names(dmc) == "categoryIDs")]
+   dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")
+   dmc = dm %>% 
+      left_join(dmc %>%
+            select(orderID,couponCol,categoryIDs1, categoryIDs2, categoryIDs3, categoryIDs4, categoryIDs5) %>%
+            gather(tmp,categoryID,-orderID,-couponCol) %>%
+            mutate(categoryEntry = gsub("categoryIDs","",tmp)) %>%
+            select(orderID,couponCol,categoryEntry,categoryID) %>%
+            arrange(orderID,couponCol,categoryEntry) %>%
+            filter(!is.na(categoryID)),
+         by = c("orderID","couponCol")) %>%
+      arrange(orderID,couponCol,categoryEntry)
+```
+
+
+# Based on Historical Set 2
+<!--- readHist1: R code (No Results in Document) -->
+```{r readHist1,cache=FALSE}
+   HTVset3 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
+   names(dm)
+```
+
+
+## Making comparisons
+Using these likelihoods, we can make the following comparisons:
+**basePrice_price_ratio, reward**
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   colsel = which(names(dm) %in% c("basePrice_price_ratio","reward"))
+   result = llr_multiway(dm,HTVset3$H,colsel)
+
+   dm %>% left_join(result$long, by= c("orderID","couponCol")) %>% ggplot(aes(factor(reward),llr_naive_rwdXbasePrice_price_ratio,color=factor(couponUsed),group=couponCol)) + geom_boxplot()
+
+   #show long results
+   tail(result$long) %>% kable
+
+   #show wide results
+   head(result$wide) %>% kable
+```
+
+Make this a function:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+CreateSets = function(varns){
+   filename = paste(varns,collapse="X")
+   colsel = which(names(dm) %in% varns)
+
+   message("Now making llrs for ",filename)
+   result = llr_multiway(dm,HTVset3$H,colsel)
+
+   #save long results
+   result$long %>% saveRDS(file = paste0("~/dmc2015/features/feature_files/set3/llr_",filename,"_long.rds"))
+
+   #save wide results
+   result$wide %>% saveRDS(file = paste0("~/dmc2015/features/feature_files/set3/llr_",filename,"_wide.rds"))
+}
+
+combn.strat = function(strats,rules){
+   #strats is a list where each first level member is a vector of members of a group
+   #rules is a matrix where the rows determine a selection scheme and the 
+   #columns determine a number from each group
+}
+```
+
+## Choosing comparisons
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   #comparison groups
+   groupA = c("Shop60", "Shop30", "Shop15", "RecExpire60", "RecOrder60", "OrderExpire60","couponCol")
+
+   groupB = c("basePrice_price_ratio", "price", "basePrice")
+
+   groupC1 = "userID"
+   groupC2 = "couponID"
+
+   groupD1 = c("ShopFast", "EarlyRec")
+   groupD2 = c("premiumProduct", "brand", "productGroup", "categoryIDs","reward")
+```
+
+
+# One way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+# one way
+   oneway = c("couponCol")
+   sapply(oneway, function(i) CreateSets(i)) 
+```
+
+
+# Two Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   ## two way
+   twoway = t(unique(t(do.call("cbind",lapply(c(groupB,groupC1,groupC2,groupD1,groupD2),function(x) combn(c(x,groupA),2))))))
+   sapply(1:ncol(twoway), function(i) CreateSets(twoway[,i]))
+```
+
+# add single row function
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   addSingleRow = function(newrow,set1,k){
+      setcombs = combn(set1,k)
+      return(rbind(setcombs, rep(newrow,ncol(setcombs))))
+   }
+```
+
+
+
+# Three Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## three way 
+matrix.a3 = combn(groupA,3)
+matrix.a2b1 = lapply(c(groupB,groupC1,groupC2,groupD1,groupD2), function(x) addSingleRow(x,groupA,2))
+matrix.a1b2 = lapply(groupA, function(x) addSingleRow(x,c(groupB,groupC1,groupC2,groupD1,groupD2),2))
+
+threeway = matrix.a3 %>% cbind(do.call("cbind",matrix.a2b1)) %>% cbind(do.call("cbind",matrix.a1b2))
+sapply(1:ncol(threeway), function(i) CreateSets(threeway[,i]))
+```
+
+
+# Four Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## four way
+fourway = combn(c(groupD1,groupD2),4)
+sapply(1:ncol(fourway), function(i) CreateSets(fourway[,i]))
+```
+
+
+# Five Way Comparisons
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+## five way only for groupD and internal
+fiveway = combn(c(groupD1,groupD2),5)
+sapply(1:ncol(fiveway), function(i) CreateSets(fiveway[,i]))
+```
