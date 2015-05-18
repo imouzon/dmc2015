@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 16:06:59 2015
+# Last Modified: Mon May 18 16:28:27 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -24,7 +24,7 @@ library(party)
 source("~/GitHub/dmc2015/pete/10_roc.R")
 source("~/GitHub/dmc2015/pete/loss_function.R")
 
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_0.3.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.4.rds")
 
 # Classification
 # ============================================================================
@@ -35,9 +35,9 @@ nvars = 150
 # Historical set 1
 # ----------------------------------------------------------------------------
 # Sort variables by importance in set 1
-imp <- imp[order(imp$h1_imp, decreasing = T),]
+# imp <- imp[order(imp$h1_imp, decreasing = T),]
 
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
               h1$train$X[names(h1$train$X) %in% as.character(imp$var[1:nvars])])
 h1_cf <- cforest(couponUsed~., data = h1_t,
@@ -69,12 +69,12 @@ h1_mod <- list(val_predictions = h1_v_p,
                               ntrees = ntrees,
                               mtry = 10))
 
-saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_coup.rds")
+saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.4_coup.rds")
 
 # Plot ROC
-jpeg("~/GitHub/dmc2015/pete/figures/cforest_h1_0.3.jpg", width = 480, height = 480)
-roc(h1_v_p, h1_v$couponUsed)
-dev.off()
+# jpeg("~/GitHub/dmc2015/pete/figures/cforest_h1_0.3.jpg", width = 480, height = 480)
+# roc(h1_v_p, h1_v$couponUsed)
+# dev.off()
 
 
 # Historical set 3
