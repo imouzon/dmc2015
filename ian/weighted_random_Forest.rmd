@@ -142,11 +142,12 @@ I am only using similarity columns and the one way loglikelihood columns.
    #weighted error
    yrfw = yn[,"couponUsed"]*rep(c(1/p1,1/p2,1/p3),times=nrow(Xrf)/3)
    weighted.rf = randomForest(Xrf, y=yrfw, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+```
 
-
-
-
-   message("TRAINING SET")
+## Comparing Errors:
+### Training Set Results
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
       #Unweighted Loss Aspects
       uw.fitted = predict(unweighted.rf,newdata = Xrf,type="response")
       uw.fitted.loss = colSums((matrix(yrf,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)
@@ -162,11 +163,11 @@ I am only using similarity columns and the one way loglikelihood columns.
 
       message("loss weighted rf (no col weights):", paste(c(w.fitted.loss, sum(w.fitted.loss)) ,collapse=" | "))
       message("loss weighted rf (col weights):", paste(c(w.scaled.fitted.loss, sum(w.scaled.fitted.loss)) ,collapse=" | "))
+```
 
-
-
-
-
+### Validation Set Results
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
    ## validation sets
    yv = yv
    Xv = Xv[,which(names(Xv) %in% names(Xrf))]
@@ -174,13 +175,13 @@ I am only using similarity columns and the one way loglikelihood columns.
    message("VALIDATION SET")
       #Unweighted Loss Aspects
       uw.fitted = predict(unweighted.rf,newdata = Xv,type="response")
-      uw.fitted.loss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)
-      uw.scaled.fitted.loss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(unweight.fit,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv,ncol=3,byrow=TRUE))^2)
+      uw.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)
+      uw.scaled.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(uw.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv$couponUsed,ncol=3,byrow=TRUE))^2)
 
       #Weighted Loss Aspects
       w.fitted = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
-      w.fitted.loss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)
-      w.scaled.fitted.loss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(unweight.fit,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv,ncol=3,byrow=TRUE))^2)
+      w.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)
+      w.scaled.fitted.loss = colSums((matrix(yv$couponUsed,ncol=3,byrow=TRUE) - matrix(w.fitted,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv$couponUsed,ncol=3,byrow=TRUE))^2)
 
       message("loss unweighted rf (no col weights):", paste(c(uw.fitted.loss, sum(uw.fitted.loss)) ,collapse=" | "))
       message("loss unweighted rf (col weights):", paste(c(uw.scaled.fitted.loss, sum(uw.scaled.fitted.loss)) ,collapse=" | "))
