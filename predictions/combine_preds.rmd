@@ -50,12 +50,20 @@ I am using the following packages:
      return(p)
    }
 
-   lossFunction = function(pred,actual) sum(((1/mean(actual))*(pred - actual))^2)
+   lossFunction = function(pred,actual){ 
+      actmat = matrix(actual,ncol=3,byrow=TRUE)
+      predmat = matrix(pred,ncol=3,byrow=TRUE)
+      numerat = colSums((actmat - predmat)^2)
+      denom = colMeans(actmat)^2
+      err = sum(numerat/denom)
+      return(err)
+   }
 
    predictor_weight = function(pred1,pred2,actual){
       alphas = seq(0,1,.001)
       err = sapply(alphas, function(alpha) lossFunction(alpha*pred1 + (1-alpha)*pred2, actual))
       pred = data.frame(proportion.1 = alphas, err = err)
+      pred = qplot(proportion.1,err,data=pred)
       return(pred)
    }
 ```
@@ -169,9 +177,34 @@ The rest of the files follow the same arrangement:
    }
 ```
 
-##Prediction Geometry
 Let's get the plots:
 <!--- : R code (No Results in Document) -->
-```{r fig.width=10,fig.height=10,out.width='.9\\linewidth',out.height='.9\\linewidth'}
-   ggpairs(validation_predictions,4:21)
+```{r cache=FALSE}
+   plot_func = function(i,j){
+      if(i == j) p = qplot(validation_predictions[,i],geom='density',binwidth = .1)
+      if(i < j) p = qplot(validation_predictions[,i],validation_predictions[,j])
+      if(i > j) p = predictor_weight(validation_predictions[,i],validation_predictions[,j],validation_predictions[,3])
+      return(p)
+   }
+
+cor(validation_predictions[,4:21]) < .89
+   names(validation_predictions)
+
+plot_func(17,4)
+newpred = validation_predictions[,17]*.5 + validation_predictions[,4]*.5
+addpred = validation_predictions[,7]
+
+predictor_weight(newpred,addpred,validation_predictions[,3])
+
+
 ```
+
+
+
+
+##Prediction Geometry
+<!--- 
+   val_predictions
+   class_predictions
+-->
+
