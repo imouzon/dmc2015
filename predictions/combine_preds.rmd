@@ -184,23 +184,22 @@ The rest of the files follow the same arrangement:
    validation_predictions$couponCol = as.numeric(validation_predictions$couponCol)
    classification_predictions$couponCol = as.numeric(classification_predictions$couponCol)
 
+   which(pred.struc == "renegade style")[9]
+   pred.struc = pred.struc[-9]
    for(i in which(pred.struc == "renegade style")){
-         pred.i  = preds[[i]]$validation
-         pred.i$couponCol = rep(1:3,1704/3)
-         pred.i$couponCol = as.numeric(pred.i$couponCol)
+      pred.i  = preds[[i]]$validation
 
-         validation_predictions = validation_predictions %>% 
-            left_join(pred.i,by=c("orderID","couponCol"))
+      validation_predictions = validation_predictions %>% 
+         left_join(pred.i,by=c("orderID","couponCol"))
 
-         pred.i$couponCol = rep(1:3,669)
-         pred.i$couponCol = as.numeric(pred.i$couponCol)
-         #get the validation predictions:
-         classification_predictions = classification_predictions %>% 
-            left_join(pred.i,by=c("orderID","couponCol"))
+      pred.i = preds[[i]]$class
+      #get the validation predictions:
+      classification_predictions = classification_predictions %>% 
+         left_join(pred.i,by=c("orderID","couponCol"))
 
-         validation_error = c(validation_error, preds[[i]]$err)
-         method_name = c(method_name,i)
-      }
+      validation_error = c(validation_error, preds[[i]]$err)
+      method_name = c(method_name,i)
+   }
 ```
 
 Let's get the plots:
