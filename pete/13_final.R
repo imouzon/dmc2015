@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 19-05-2015
-# Last Modified: Tue May 19 06:17:05 2015
+# Last Modified: Tue May 19 06:46:25 2015
 #
 # Purpose:
 #
@@ -24,5 +24,10 @@ set2_mix <- data.frame(orderID = lasso$class$orderID,
                        couponCol = rep(1:3, length(set2_mix) / 3),
                        couponUsed = set2_mix)
 
+out <- matrix(set1_mix$couponUsed, ncol = 3, byrow = T)
+colnames(out) <- c("coupon1Used", "coupon2Used", "coupon3Used")
+out <- data.frame(out)
+out <- cbind(orderID = 6054:6722, out)
 
+write.csv(out, "~/GitHub/dmc2015/pete/predictions/final.csv")
 saveRDS(set1_mix, "~/GitHub/dmc2015/pete/predictions/final.rds")
