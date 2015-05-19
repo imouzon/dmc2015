@@ -1,0 +1,52 @@
+---
+title: 
+titleshort:
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   #if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/new.rmd")
+```
+
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+
+x = readRDS("~/dmc2015/features/feature_files/set1/individual/HTVCmelt1_Combn_UniqueUser.rds")
+y = readRDS("~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
+
+ytrim = y$class$X[,c("orderID","couponCol",names(y$class$X)[!(names(y$class$X) %in% names(x$C_melt))])]
+
+sum(names(ytrim) %in% names(x$C_melt))
+xtrim = x$C_melt[,c("orderID","couponCol",names(x$C_melt)[!(names(x$C_melt) %in% names(ytrim))])]
+
+joined.xy = ytrim %>% left_join(xtrim,by=c("orderID","couponCol"))
+
+names(joined.xy)
+sapply(1:ncol(joined.xy), function(i) sum(is.na(joined.xy[,i])))
+
+y$class$X  = ytrim
+saveRDS(y, file="~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.7.rds")
+```

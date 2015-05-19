@@ -258,8 +258,11 @@ in this case, sets `r files[noSet]` have no proper place. We can figure out why 
 ### Combine Wide Sets:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
+   #fixlong = features[[2]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName)) %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
+
    wideFrame = features[[wideSet[1]]] %>% select(orderID)
    for(x in wideSet){
+      cat(x,"\n")
       dsn.i = features[[x]]
       dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
       if(length(dropCols) == 0){
@@ -268,7 +271,9 @@ in this case, sets `r files[noSet]` have no proper place. We can figure out why 
          wideFrame = wideFrame %>% full_join(dsn.i[,-dropCols],by="orderID")
       }
    }
+
    for(x in noSet){
+      cat(x,"\n")
       dsn.i = features[[x]]
       dropCols = which(names(dsn.i) %in% names(wideFrame) & names(dsn.i) != "orderID")
       if(length(dropCols) == 0){
@@ -318,6 +323,8 @@ Notice that not all of the files are the same "wide" as others, but we would sti
    coupons = bind_rows(coupon1,coupon2,coupon3) 
 
    longFrame = coupons %>% arrange(orderID,couponCol)
+
+   longFrame = longFrame %>% left_join(features[[2]],by=c("orderID","couponCol"))
 ```
 
 
@@ -393,6 +400,7 @@ Wide files should have columns identified as \verb!couponCol!:
 ### Combine Wide Sets:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
+   features[[2]] = features[[2]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName))  %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
    wideFrame = features[[wideSet[1]]] %>% select(orderID)
    for(x in wideSet){
       dsn.i = features[[x]]
@@ -444,6 +452,8 @@ Notice that not all of the files are the same "wide" as others, but we would sti
    coupons = bind_rows(coupon1,coupon2,coupon3) 
 
    longFrame = coupons %>% arrange(orderID,couponCol)
+
+   longFrame = longFrame %>% left_join(features[[2]],by=c("orderID","couponCol"))
 ```
 
 ### Check Set 3 Features
