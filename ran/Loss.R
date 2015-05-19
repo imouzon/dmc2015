@@ -2,17 +2,17 @@ source("//Users/Ran/Google Drive/ISU/dmc2015/yihua/Loss_caculator.R")
 library(e1071)
 
 # features selected by random forest
-imp_rf1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_SET3.rds")
+imp_rf1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1_v4/imp_rf_set1_v4.rds")
 imp_rf2 <- imp_rf1[1:100]
 # features selected by lasso
-imp_lasso <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name_set3.rds")
+imp_lasso <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1_v4/imp_lasso_set1_v4.rds")
 # features selected by C5.0
-imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name_set3.rds")
+imp_c50 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1_v4/imp_c50_set1_v4.rds")
 # features selected by adaboost
 imp_ada <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_ada.rds")
 imp_ada <- names(imp_ada)
 # features selected by correlation
-imp_corr <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_corr_v4.rds")
+imp_corr <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1_v4/imp_corr_v4.rds")
 
 # features
 dat = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
@@ -25,7 +25,7 @@ dat_te_y <- dat$validation$y
 dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
 dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
 
-col_pred_name <- imp_corr
+col_pred_name <- imp_rf1$col_name
 col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
 
 col1 <- which(dat_te_x$couponCol==1)
