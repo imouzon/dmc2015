@@ -14,7 +14,8 @@ library(e1071)
 
 setwd('/Users/yihuali/Documents/dmc2015')
 
-dat <- readRDS('./data//featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds')
+dat <- readRDS('./data//featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds')
+dat <- readRDS('./yihua/HTVCmelt1_Combn_UniqueUser.rds')
 train.x <- dat$train$X
 train.y <- dat$train$y
 class.x <- dat$class$X
@@ -49,7 +50,7 @@ feature.rf.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_rf_set1_v4.rds')
 feature.lasso.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_lasso_set1_v4.rds')
 feature.c50.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_c50_set1_v4.rds')
 
-feature <- intersect(rownames(feature.c50.v4.set1)[1:150], names(train.x))
+feature <- intersect(feature.318, names(train.x))
 
 length(feature)
 
