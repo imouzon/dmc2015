@@ -226,7 +226,6 @@ Let's get the plots:
    newpred1 = .5*validation_predictions[,8] + .5*validation_predictions[,32]
    clspred1 = .5*classification_predictions[,8] + .5*classification_predictions[,32]
    write.csv(matrix(clspred1,ncol=3,byrow=TRUE),"./predictions_based_on_1.csv")
-   write.csv(matrix(clspred3,ncol=3,byrow=TRUE),"./predictions_based_on_3.csv")
 
    names(validation_predictions)[c(8,32)]
 

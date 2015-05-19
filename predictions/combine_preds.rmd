@@ -232,10 +232,16 @@ Let's get the plots:
    cor(validation_predictions)[13,c(29,11)]
    names(validation_predictions)[13]
 
+   qplot(validation_predictions[,3],newpred3)
    newpred3 = .45*validation_predictions[,29] + .55*validation_predictions[,11]
-   clspred3 = .45*validation_predictions[,29] + .55*validation_predictions[,11]
+   clspred3 = .45*classification_predictions[,29] + .55*classification_predictions[,11]
 
-   lossFunction(newpred,validation_predictions[,3])/length(newpred)
+    d = data.frame(matrix(clspred3,ncol=3,byrow=TRUE))
+
+
+   d = matrix(clspred3,ncol=3,byrow=TRUE)
+   names(d) = c("coupon1Used","coupon2Used","coupon3Used")
+   write.csv(d,"./predictions_based_on_3_cleaner.csv")
 
 
 
