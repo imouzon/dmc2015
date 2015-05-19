@@ -1,0 +1,375 @@
+BasketValue Loss 
+========================================================
+
+## ZWC
+
+```{r}
+## 
+
+```
+
+## Version 1
+
+```{r}
+
+
+
+```
+
+## Version 2
+
+```{r}
+bsktLoss_ver2 <- function(trn, tst, FUN=mean){
+   trn = trn[order(trn$userID),]
+   tst = tst[order(tst$userID),]
+  lakers1 =  trn %>% group_by(userID, batchID) %>% select(userID, batchID, basketValue)%>% summarise( basketValue = mean(basketValue))
+  ## basketValues for users who occured in the training set
+
+  bsv.users = aggregate(basketValue~userID, FUN, data=lakers1)
+  
+  ## basketValues for users who didn't occur in  the training set
+  uid.rle = rle(as.character(trn$userID))
+  idx = uid.rle$values[uid.rle$lengths == 1]
+  
+  ## basketValues the first time users purchase
+  bsktValueFirstTime = trn$basketValue[sapply(idx, function(x) which(x==trn$userID))]
+  tst_p = tst[, c("userID"), drop=FALSE]
+  tst_p = left_join(tst_p, bsv.users, by = "userID")
+  bsktValueFirstTime.stat = FUN(bsktValueFirstTime)
+  tst_p$basketValue[is.na(tst_p$basketValue)] = bsktValueFirstTime.stat
+  ## loss
+  sum((tst_p$basketValue - tst$basketValue)^2)/mean(tst$basketValue)^2
+}
+
+
+
+```
+
+
+## Version 3
+
+```{r}
+
+bsktLoss_ver3 <- function(trn, tst, FUN=mean){
+  trn = trn[order(trn$userID),]
+  tst = tst[order(tst$userID),]
+  avg_user_byBatch =  trn %>% group_by(userID, batchID) %>% 
+    select(userID, batchID, basketValue)%>% 
+    summarise(basketValue = mean(basketValue))  
+  bsv.users = aggregate(basketValue~userID, FUN, data=avg_user_byBatch)
+  
+  ## basketValues for users who didn't occur in  the training set
+#  uid.rle = rle(as.character(trn$userID))
+ # idx = uid.rle$values[uid.rle$lengths == 1]
+  
+  ## basketValues the first time users purchase
+  #bsktValueFirstTime = trn$basketValue[sapply(idx, function(x) which(x==trn$userID))]
+  tst_p = tst[, c("userID"), drop=FALSE]
+  tst_p = left_join(tst_p, bsv.users, by = "userID")
+#  bsktValueFirstTime.stat = FUN(bsktValueFirstTime)
+
+  tst_p$basketValue[is.na(tst_p$basketValue)] = mean(bsv.users$basketValue)
+  ## loss
+  sum((tst_p$basketValue - tst$basketValue)^2)/mean(tst$basketValue)^2
+}
+
+```
+
+
+
+## Version 10 Split
+
+```{r}
+
+bsktLoss_ver10 <- function(trn, tst, FUN=mean){
+  trn = trn[order(trn$userID),]
+  tst = tst[order(tst$userID),]
+  avg_user_byBatch =  trn %>% group_by(userID, batchID) %>% 
+    select(userID, batchID, basketValue)%>% 
+    summarise(basketValue = mean(basketValue))  
+  bsv.users = aggregate(basketValue~userID, FUN, data=avg_user_byBatch)
+  
+  num_trn = rle(as.character(trn$userID))
+  trn_once_userID = num_trn$values[num_trn$lengths == 1]
+  trn_more_userID = num_trn$values[num_trn$lengths > 1]
+  
+  num_tst = rle(as.character(tst$userID))
+  tst_once_userID = num_tst$values[num_tst$lengths == 1]
+  tst_more_userID = num_tst$values[num_tst$lengths > 1]
+  
+  
+  trn_once_bv_overallmean = mean(trn$basketValue[sapply(trn_once_userID, function(x) which(x==trn$userID))])
+  #trn_more_bv_overallmean = mean(trn$basketValue[sapply(trn_more_userID, function(x) which(x==trn$userID))])
+  
+  trn_once_bv_batch_mean = trn_once_bv_overallmean
+  trn_more_bv_batch_mean = mean(bsv.users$basketValue[sapply(trn_more_userID, 
+                                                             function(x) which(x==bsv.users$userID))])
+  
+  
+  
+  
+  tst_p = tst[, c("userID"), drop=FALSE]
+  tst_p = left_join(tst_p, bsv.users, by = "userID")
+  
+  tst_old = tst_p$userID[!is.na(tst_p$basketValue)]
+  tst_new = tst_p$userID[is.na(tst_p$basketValue)]
+  new_once = intersect(tst_new, tst_once_userID)
+  new_more = intersect(tst_new, tst_more_userID)
+  
+  
+  tst_p$basketValue[sapply(new_once, function(x) which(x==tst_p$userID))] = trn_once_bv_batch_mean
+  tst_p$basketValue[unlist(sapply(new_more, function(x) which(x==tst_p$userID)))] =trn_once_bv_batch_mean
+  
+  loss1 = sum((tst_p$basketValue[unlist(sapply(unique(tst_new), function(x) which(x==tst_p$userID)))] - 
+                 tst$basketValue[unlist(sapply(unique(tst_new), function(x) which(x==tst$userID)))])^2)/mean(tst$basketValue)^2
+  
+  loss2 = sum((tst_p$basketValue[unlist(sapply(unique(tst_old), function(x) which(x==tst_p$userID)))] - 
+                 tst$basketValue[unlist(sapply(unique(tst_old), function(x) which(x==tst$userID)))])^2)/mean(tst$basketValue)^2
+ 
+    loss1/loss2      #0.5934438
+   length(tst_new)/length(tst_old)  #0.2938497
+   length(unique(tst_new))/length(unique(tst_old))   #0.2809524
+  
+  loss = c(loss1,loss2)
+  loss
+  
+
+}
+
+```
+
+## version10
+```{r}
+
+bsktLoss_ver10 <- function(trn, tst, FUN=mean){
+  trn = trn[order(trn$userID),]
+  tst = tst[order(tst$userID),]
+  avg_user_byBatch =  trn %>% group_by(userID, batchID) %>% 
+    select(userID, batchID, basketValue)%>% 
+    summarise(basketValue = mean(basketValue))  
+  
+    bsv.users = aggregate(basketValue~userID, FUN, data=avg_user_byBatch)
+  #bsv.users1 = aggregate(basketValue~userID, FUN, data=trn)
+  
+  num_trn = rle(as.character(trn$userID))
+  trn_once_userID = num_trn$values[num_trn$lengths == 1]
+  trn_more_userID = num_trn$values[num_trn$lengths > 1]
+  
+  num_tst = rle(as.character(tst$userID))
+  tst_once_userID = num_tst$values[num_tst$lengths == 1]
+  tst_more_userID = num_tst$values[num_tst$lengths > 1]
+  
+  
+  trn_once_bv_overallmean = mean(trn$basketValue[sapply(trn_once_userID, function(x) which(x==trn$userID))])
+  trn_more_bv_overallmean = mean(trn$basketValue[unlist(sapply(unique(trn_more_userID),
+                                                               function(x) which(x==trn$userID)))])
+  
+  trn_once_bv_batch_mean = trn_once_bv_overallmean
+  trn_more_bv_batch_mean = mean(bsv.users$basketValue[sapply(trn_more_userID, 
+                                                             function(x) which(x==bsv.users$userID))])
+  
+  
+  
+  
+  tst_p = tst[, c("userID"), drop=FALSE]
+  
+  #tst_p = left_join(tst_p, bsv.users1, by = "userID")
+  tst_p = left_join(tst_p, bsv.users, by = "userID")  
+  
+  tst_old = tst_p$userID[!is.na(tst_p$basketValue)]
+  tst_new = tst_p$userID[is.na(tst_p$basketValue)]
+  new_once = intersect(tst_new, tst_once_userID)
+  new_more = intersect(tst_new, tst_more_userID)
+  
+  
+  tst_p$basketValue[sapply(new_once, function(x) which(x==tst_p$userID))] = trn_once_bv_batch_mean
+  tst_p$basketValue[unlist(sapply(new_more, function(x) which(x==tst_p$userID)))] =trn_more_bv_batch_mean
+  
+  loss1 = sum((tst_p$basketValue[unlist(sapply(unique(tst_new), function(x) which(x==tst_p$userID)))] - 
+                 tst$basketValue[unlist(sapply(unique(tst_new), function(x) which(x==tst$userID)))])^2)/mean(tst$basketValue)^2
+  
+  loss2 = sum((tst_p$basketValue[unlist(sapply(unique(tst_old), function(x) which(x==tst_p$userID)))] - 
+                 tst$basketValue[unlist(sapply(unique(tst_old), function(x) which(x==tst$userID)))])^2)/mean(tst$basketValue)^2
+  
+  loss1/loss2      #0.5934438
+  length(tst_new)/length(tst_old)  #0.2938497
+  length(unique(tst_new))/length(unique(tst_old))   #0.2809524
+  
+  
+  
+  loss = c(loss1,loss2)   # 194.9636 328.8936
+  loss      # 523.8572
+}
+```
+
+
+## check for error
+
+```{r}
+
+
+
+##for set 1
+
+dat <- readRDS("./data/featureMatrix/HTVset1.rds")
+tr0 <- rbind(dat$H, dat$T)
+
+trn = tr0[tr0$basketValue<5000,]
+
+#trn <- subset(trn, basketValue <= 5000)
+tst <- dat$V
+########
+
+bsktLoss(trn,tst,mean)
+# 4800.948
+zs_bsktLoss(trn,tst,mean)
+# 4796.346
+bsktLoss_ver2(trn,tst,mean)
+# 4795.481
+bsktLoss_ver3(trn,tst)
+#  4795.098
+
+bsktLoss_ver10(trn,tst)
+# [1] 4228.297  571.165
+# 4799.46
+
+
+################
+dat = readRDS("./data/clean_data/clean_data_v1.rds")
+tr0 = dat$train
+tr = tr0[tr0$basketValue<5000,]
+#tr = tr[order(trn$userID),]
+#################
+
+trn = tr[as.numeric(tr$batchID)<9,]
+tst = tr0[as.numeric(tr0$batchID)==9,]
+##
+
+
+## for batch9
+
+bsktLoss(trn,tst,mean)
+# 526.9086
+zs_bsktLoss(trn,tst,mean)
+# 524.9163
+bsktLoss_ver2(trn,tst,mean)
+# 524.0735
+bsktLoss_ver3(trn,tst,mean)
+#524.1199
+bsktLoss_ver10(trn,tst,mean)
+#194.9636 328.8936
+# 523.8572
+
+
+##
+trn = tr[as.numeric(tr$batchID)<8,]
+tst = tr0[as.numeric(tr0$batchID)==8,]
+
+##### for batch 8
+
+bsktLoss(trn,tst)
+# 181194.7
+zs_bsktLoss(trn,tst,mean)
+# 181183.6
+bsktLoss_ver2(trn,tst,mean)
+# 181183.3
+bsktLoss_ver3(trn,tst,mean)
+# 181191.7
+bsktLoss_ver10(trn,tst,mean)
+# 4349.337 176828.928
+# 181178.265
+
+
+
+##
+trn = tr[as.numeric(tr$batchID)<7,]
+tst = tr0[as.numeric(tr0$batchID)==7,]
+##### for batch 7
+
+bsktLoss(trn,tst,mean)
+# 8964.976
+zs_bsktLoss(trn,tst,mean)
+# 8940.53
+bsktLoss_ver2(trn,tst,mean)
+# 8940.681
+bsktLoss_ver3(trn,tst,mean)
+# 8962.502
+bsktLoss_ver10(trn,tst,mean)
+# 7946.851 1013.744
+# 8960.595
+
+```
+
+## check the threshold (for loop)
+
+```{r}
+
+hold = seq(500,10000,by=100)
+funk = c(bsktLoss, zs_bsktLoss, bsktLoss_ver2, bsktLoss_ver3, bsktLoss_ver10)
+bvError = list()
+
+# for data set 1
+
+dat <- readRDS("./data/featureMatrix/HTVset1.rds")
+tr0 <- rbind(dat$H, dat$T)
+tst <- dat$V
+
+for( i in 1:5){
+  for (j in 1:length(hold)){
+    JJ = hold[j]
+    trn = tr0[tr0$basketValue<JJ,]
+    bvError[i][j]= funk[[i]](trn,tst,mean)
+    }
+  }
+
+### for batch 9
+
+dat = readRDS("./data/clean_data/clean_data_v1.rds")
+tr0 = dat$train
+
+###
+bvError_batch9 = list()
+tst = tr0[as.numeric(tr0$batchID)==9,]
+
+for( i in 1:5){
+  for (j in 1:length(hold)){
+    JJ = hold[j]
+    tr = tr0[tr0$basketValue<JJ,]
+    trn = tr[as.numeric(tr$batchID)<9,]
+    bvError_batch9[i][j]= funk[[i]](trn,tst,mean)
+    }
+  }
+
+
+
+###batch 8
+bvError_batch8 = list()
+tst = tr0[as.numeric(tr0$batchID)==8,]
+
+for( i in 1:5){
+  for (j in 1:length(hold)){
+    JJ = hold[j]
+    tr = tr0[tr0$basketValue<JJ,]
+    trn = tr[as.numeric(tr$batchID)<8,]
+    bvError_batch8[i][j]= funk[[i]](trn,tst,mean)
+    }
+  }
+
+
+
+###batch 8
+bvError_batch7 = list()
+tst = tr0[as.numeric(tr0$batchID)==7,]
+
+for( i in 1:5){
+  for (j in 1:length(hold)){
+    JJ = hold[j]
+    tr = tr0[tr0$basketValue<JJ,]
+    trn = tr[as.numeric(tr$batchID)<7,]
+    bvError_batch7[i][j]= funk[[i]](trn,tst,mean)
+    }
+  }  
+
+
+
+```
