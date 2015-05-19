@@ -17,7 +17,7 @@ output:
 
    #compile the document to PDF
    if(FALSE) 
-      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/feature_matrix_version0.5.rmd")
+      rmarkdown::render("/Users/user/dmc2015/features/feature_files/R/feature_matrix_version0.8.rmd")
 ```
 
 I am using the following packages:
@@ -86,7 +86,7 @@ makeWideFeatureMatrix = function(w,uf,set){
               "y" = Xcls %>% select(orderID,coupon1Used, coupon2Used, coupon3Used, basketValue))
 
    Fmat1 = list("train" = trn, "class" = cls, "validation" = val)
-   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_WIDE_ver0.5.rds"))
+   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_WIDE_ver0.8.rds"))
 }
 
 makeLongFeatureMatrix = function(l,u,set){
@@ -129,6 +129,7 @@ makeLongFeatureMatrix = function(l,u,set){
    trn$couponCol = as.numeric(trn$couponCol)
    
    Xtrn = trn %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
+   names(Xtrn) = gsub(".x","",names(Xtrn))
    trn = list("X" = Xtrn %>% select(-couponUsed,-basketValue), "y" = Xtrn %>% select(orderID,couponUsed, basketValue))
 
    #val
@@ -140,6 +141,7 @@ makeLongFeatureMatrix = function(l,u,set){
    val$couponCol = as.numeric(val$couponCol)
 
    Xval = val %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
+   names(Xval) = gsub(".x","",names(Xval))
    val = list("X" = Xval %>% select(-couponUsed,-basketValue),
               "y" = Xval %>% select(orderID,  couponUsed, basketValue))
 
@@ -152,11 +154,12 @@ makeLongFeatureMatrix = function(l,u,set){
    cls$couponCol = as.numeric(cls$couponCol)
 
    Xcls = cls %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
+   names(Xcls) = gsub(".x","",names(Xcls))
    cls = list("X" = Xcls %>% select(-couponUsed,-basketValue),
               "y" = Xcls %>% select(orderID,couponUsed, basketValue))
 
    Fmat1 = list("train" = trn, "class" = cls, "validation" = val)
-   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_LONG_ver0.5.rds"))
+   saveRDS(Fmat1,file=paste0("~/dmc2015/data/featureMatrix/featMat_based-on-HTV",set,"_LONG_ver0.8.rds"))
 }
 ```
 
