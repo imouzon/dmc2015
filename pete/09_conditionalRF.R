@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 19:08:50 2015
+# Last Modified: Mon May 18 19:31:34 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -17,8 +17,6 @@
 #
 # ============================================================================
 
-# Note: We still need to agree on a common loss function to use to compare 
-# models.
 
 library(party)
 source("~/GitHub/dmc2015/pete/10_roc.R")
@@ -132,32 +130,32 @@ dev.off()
 
 # Fit CRF on variables selected by other methods
 # ----------------------------------------------------------------------------
-imp <- readRDS("~/GitHub/dmc2015/penglh/imp_set1_v4/imp_c50_set1_v4.rds")
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.4.rds")
-h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
-              h1$train$X[rownames(imp)])
-h1_cf <- cforest(couponUsed~., data = h1_t,
+imp <- readRDS("~/GitHub/dmc2015/penglh/imp_rf_SET3.rds")
+h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.3.rds")
+h3_t <- cbind(couponUsed = h3$train$y$couponUsed, 
+              h3$train$X[imp])
+h3_cf <- cforest(couponUsed~., data = h3_t,
                  control = cforest_unbiased(mtry = 50, ntree = ntrees))
 # Validation set 
-h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
-              h1$validation$X[rownames(imp)])
-h1_v_p <- predict(h1_cf, newdata = h1_v)
+h3_v <- cbind(couponUsed = h3$validation$y$couponUsed, 
+              h3$validation$X[imp])
+h3_v_p <- predict(h3_cf, newdata = h3_v)
 # Validation error
-error = lossFun(h1_v$couponUsed, h1_v_p)
+error = lossFun(h3_v$couponUsed, h3_v_p)
 # Classification set predictions
-h1_c <- cbind(couponUsed = h1$class$y$couponUsed,
-              h1$class$X[rownames(imp)])
-h1_c_p <- predict(h1_cf, newdata = h1_c)
-h1_c_p <- cbind(orderID = h1$class$y$orderID, couponUsed = h1_c_p)
+h3_c <- cbind(couponUsed = h3$class$y$couponUsed,
+              h3$class$X[imp])
+h3_c_p <- predict(h3_cf, newdata = h3_c)
+h3_c_p <- cbind(orderID = h3$class$y$orderID, couponUsed = h3_c_p)
 # Save model and predictions
-h1_mod <- list(val_predictions = h1_v_p,
-               class_predictions = h1_c_p,
+h3_mod <- list(val_predictions = h3_v_p,
+               class_predictions = h3_c_p,
                error = error,
-               details = list(vars = "c5.0 selected",
-                              nvars = 390,
+               details = list(vars = "RF selected",
+                              nvars = 305,
                               ntrees = ntrees,
                               mtry = 50))
-saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.4_coup_c50.rds")
+saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.4_coup_rf.rds")
 
 # Regression
 # ============================================================================
