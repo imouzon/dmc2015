@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Tue May 19 01:23:19 2015
+# Last Modified: Tue May 19 03:25:47 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -26,20 +26,25 @@ source("~/GitHub/dmc2015/pete/loss_function.R")
 # Classification
 # ============================================================================
 
-ntrees = 2000
-nvars = 150
+ntrees = 500
+nvars = 100
 
 # Historical set 1
 # ----------------------------------------------------------------------------
 # Sort variables by importance in set 1
 # imp <- imp[order(imp$h1_imp, decreasing = T),]
-imp <- readRDS("~/GitHub/dmc2015/penglh/imp_set1/imp_corr_col_name.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.3.rds")
 
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.8.rds")
+# Grep out naive vars
+imp <- imp[-grep("naive", imp$var),]
+# Grep out est vars 
+imp <- imp[-grep("est", imp$var),]
+
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
               h1$train$X[names(h1$train$X) %in% as.character(imp$var[1:nvars])])
 h1_cf <- cforest(couponUsed~., data = h1_t,
-                 control = cforest_unbiased(mtry = 40, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
 # Validation set 
 h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
               h1$validation$X[as.character(imp$var[1:nvars])])
@@ -130,12 +135,12 @@ dev.off()
 
 # Fit CRF on variables selected by other methods
 # ----------------------------------------------------------------------------
-imp <- readRDS("~/GitHub/dmc2015/penglh/")
+imp <- readRDS("~/GitHub/dmc2015/penglh/imp_set3/imp_corr_col_name.rds")
 h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.8.rds")
 h3_t <- cbind(couponUsed = h3$train$y$couponUsed, 
               h3$train$X[imp])
 h3_cf <- cforest(couponUsed~., data = h3_t,
-                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 20, ntree = ntrees))
 # Validation set 
 h3_v <- cbind(couponUsed = h3$validation$y$couponUsed, 
               h3$validation$X[imp])
@@ -152,10 +157,10 @@ h3_mod <- list(val_predictions = h3_v_p,
                class_predictions = h3_c_p,
                error = error,
                details = list(vars = "Peng Liahua's variables",
-                              nvars = 386,
+                              nvars = 220,
                               ntrees = ntrees,
-                              mtry = 10))
-saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.8_coup_386.rds")
+                              mtry = 20))
+saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/set3/crf_220col_set3_0.8.rds")
 
 # Regression
 # ============================================================================
