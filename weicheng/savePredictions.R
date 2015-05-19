@@ -8,6 +8,7 @@
 ##' @param class.TV prediction for the class set using training and validation data sets
 ##' @param err loss value
 ##' @param method string, like "pca", "c5.0", "ada", "svm" and so on
+##' @param file path to save the file, ex: "~/dmc2015/"
 ##' @return list
 ##' @author 
 savePred <- function(d, validation, class.T, class.TV, err, method, file){
