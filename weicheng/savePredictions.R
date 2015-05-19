@@ -10,14 +10,14 @@
 ##' @param method string, like "pca", "c5.0", "ada", "svm" and so on
 ##' @return list
 ##' @author 
-savePred <- function(d, validation, class.T, class.TV, err, method){
+savePred <- function(d, validation, class.T, class.TV, err, method, file){
     V = d$validation$y[,1, drop=FALSE]
     C = d$class$y[,1, drop=FALSE]
     V.n = nrow(V)
     C.n = nrow(C)
     if(V.n != length(validation))
         stop("Validation set length error!")
-    if(C.n != length(class))
+    if(C.n != length(class.T))
         stop("Classification set length error!")
     V$couponCol = rep(1:3, V.n/3)
     C$couponCol = rep(1:3, C.n/3)
@@ -25,5 +25,6 @@ savePred <- function(d, validation, class.T, class.TV, err, method){
     V[colnames[1]] = validation
     C[colnames[2]] = class.T
     C[colnames[3]] = class.TV
-    list(validation = V, class = C, err = err)
+    res = list(validation = V, class = C, err = err)
+    saveRDS(res, file)
 }
