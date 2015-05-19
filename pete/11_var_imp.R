@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 15-05-2015
-# Last Modified: Mon May 18 18:25:54 2015
+# Last Modified: Mon May 18 21:15:14 2015
 #
 # Purpose: Measure variable importance with regard to conditional random
 # forests. To do this we will randomly group variables and fit conditional
@@ -36,7 +36,7 @@ source("~/GitHub/dmc2015/pete/10_roc.R")
 # Var importance on new feature matrix with 1000+ vars for classification.
 # Only do this for numeric variables. Factors will take too long.
 # ============================================================================
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 vars <- names(h1$train$X[sapply(h1$train$X, is.numeric)])
 vars <- vars[vars != "orderID"]
 sizes <- getGroupSize(80, length(vars))

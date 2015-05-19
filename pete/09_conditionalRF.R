@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 20:52:22 2015
+# Last Modified: Mon May 18 21:13:36 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -26,16 +26,16 @@ source("~/GitHub/dmc2015/pete/loss_function.R")
 # Classification
 # ============================================================================
 
-ntrees = 1000
+ntrees = 2000
 nvars = 150
 
 # Historical set 1
 # ----------------------------------------------------------------------------
 # Sort variables by importance in set 1
 # imp <- imp[order(imp$h1_imp, decreasing = T),]
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.3.rds")
 
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
               h1$train$X[names(h1$train$X) %in% as.character(imp$var[1:nvars])])
 h1_cf <- cforest(couponUsed~., data = h1_t,
@@ -194,4 +194,5 @@ h1_mod <- list(val_predictions = h1_v_p,
                class_predictions = h1_c_p, 
                error = h1_cf_error)
 saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.5_BV.rds")
+
 
