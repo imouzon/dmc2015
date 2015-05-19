@@ -30,6 +30,7 @@ I am using the following packages:
    library(tidyr)
    library(lubridate)
    library(ggplot2)
+   library(gridExtra)
    library(directlabels)
    library(rCharts)
    library(xtable)
@@ -77,46 +78,100 @@ We can read the files into R using the \verb!list.files! function.
 ```{r cache=FALSE}
    files = list.files("~/dmc2015/predictions/set1/",pattern="rds",full.names=TRUE)
    files
+
+   #base names
+   base_names = gsub("(/Users/user/dmc2015/predictions/set1//)(.*)(\\.rds)","\\2",files)
 ```
 Many of the sets have the **DMC Official** structure:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   str(readRDS("~/dmc2015/predictions/set1/crf_386col_set1_0.8.rds"))
+   DMCofficial = readRDS("~/dmc2015/predictions/set1/crf_386col_set1_0.8.rds")
+   str(DMCofficial)
 ```
 
 I can check the structure in a similar way to how I read in features:
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r chunk-label,cache=FALSE}
    preds = lapply(files,function(x) readRDS(x))
-
    pred.struc = rep("renegade style",length(files))
-   for(i in 1:files){
-      if(names(preds[[i]]) == c("val_predictions", "class_predictions", "error", "details")){
+
+   for(i in 1:length(files)){
+      if(all(names(preds[[i]]) %in% names(DMCofficial))){
          pred.struc[i] = "DMC Official"
       }
-          
+   }
 
-   
-   preds.i = 
-   str(preds[[1]])
+   pred.struc
+```
 
-   preds.i$val_predictions
-   
-   preds.i$class_predictions
+We can get the DMC official **validation predictions** like this:
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   #which files were DMC Official?
+   these_ones = which(pred.struc == "DMC Official")
 
-   predPlot(preds[[1]]$validation$prediction, preds[[2]]$validation$prediction)
+   #read the set
+   validation_predictions = HTVset1$V %>% 
+      select(orderID,coupon1Used,coupon2Used,coupon3Used) %>%
+      gather(colname,couponUsed,-orderID) %>%
+      mutate(couponCol = as.numeric(gsub("coupon(\\d)Used","\\1",colname))) %>%
+      select(orderID,couponCol,couponUsed) %>% 
+      arrange(orderID,couponCol) 
 
-   wgthd = predictor_weight(preds[[1]]$validation$prediction, preds[[2]]$validation$prediction, actual.val)
+   #make do.call dplyr friendly
+   you.call = function(x,func) do.call(func,x)
 
-   head(wgthd)
-   qplot(proportion.1,err,data=wgthd)
+   #extract validation predictions
+   pred.val = these_ones %>% 
+      lapply(function(i) preds[[i]]$val_predictions) %>%
+      you.call("cbind") %>%
+      data.frame 
 
-   sapply(1:length(files), function(i) names(preds[[i]]))
+   names(pred.val) = base_names[these_ones]
+
+   validation_predictions = validation_predictions %>% cbind(pred.val)
+```
+
+and the DMC Official classification predictions like this:
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   classification_predictions = HTVset1$C %>%
+      select(orderID, coupon1Used,coupon2Used,coupon3Used) %>%
+      gather(colname,couponUsed,-orderID) %>%
+      mutate(couponCol = as.numeric(gsub("coupon(\\d)Used","\\1",colname))) %>%
+      select(orderID,couponCol,couponUsed) %>% 
+      arrange(orderID,couponCol) 
+
+   #extract validation predictions
+   pred.class =  these_ones %>% 
+      lapply(function(i) preds[[i]]$class_predictions[,2]) %>%
+      you.call("cbind") %>%
+      data.frame 
+
+   #base names
+   base_names = gsub("(/Users/user/dmc2015/predictions/set1//)(.*)(\\.rds)","\\2",files)
+
+   names(pred.class) = base_names[these_ones]
+
+   classification_predictions = classification_predictions %>% cbind(pred.class)
+```
+
+The rest of the files follow the same arrangement:
+```{r cache=FALSE}
+   #get the validation predictions:
+   for(i in 11:18){
+      validation_predictions = validation_predictions %>% 
+         left_join(preds[[i]]$validation,by=c("orderID","couponCol"))
+
+      #get the validation predictions:
+      classification_predictions = classification_predictions %>% 
+         left_join(preds[[i]]$class,by=c("orderID","couponCol"))
+   }
 ```
 
 ##Prediction Geometry
-<!--- 
-   val_predictions
-   class_predictions
--->
-
+Let's get the plots:
+<!--- : R code (No Results in Document) -->
+```{r fig.width=10,fig.height=10,out.width='.9\\linewidth',out.height='.9\\linewidth'}
+   ggpairs(validation_predictions,4:21)
+```
