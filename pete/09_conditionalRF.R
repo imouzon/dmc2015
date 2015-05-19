@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 19:34:26 2015
+# Last Modified: Mon May 18 20:52:22 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -159,35 +159,39 @@ saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.4_coup_rf.rds")
 
 # Regression
 # ============================================================================
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_BV.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.5_BV.rds")
+# imp <- imp[order(imp$h1_imp, decreasing = T),]
 
-ntrees = 300
+ntrees = 1000
 nvars = 150
 
 # Historical set 1
 # ----------------------------------------------------------------------------
-imp <- imp[order(imp$h1_imp, decreasing = T),]
 
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.5.rds")
 h1_t <- cbind(basketValue = h1$train$y$basketValue, 
               h1$train$X[as.character(imp$var[1:nvars])])
 h1_cf <- cforest(basketValue~., data = h1_t,
-                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 50, ntree = ntrees))
+# OOB
+h1_cf_oob <- predict(h1_cf, OOB=T)
+mean(h1_cf_oob)
 # Validation set
 h1_v <- cbind(basketValue = h1$validation$y$basketValue, 
               h1$validation$X[as.character(imp$var[1:nvars])])
 h1_v_p <- predict(h1_cf, newdata = h1_v)
-basketValue_mean <- mean(h1_v$basketValue)
 # Validation set error
+basketValue_mean <- mean(h1_v$basketValue)
 h1_cf_error = sum(((h1_v$basketValue - h1_v_p) / basketValue_mean)^2)
-h1_cf_mean_err = h1_cf_error / length(h1_v_p)
+sum(((h1_v$basketValue - h1_v_p) / basketValue_mean)^2)
 # Classification set predictions
 h1_c <- cbind(basketValue = h1$class$y$basketValue,
               h1$class$X[as.character(imp$var[1:nvars])])
 h1_c_p <- predict(h1_cf, newdata = h1_c)
 h1_c_p <- cbind(orderID = h1$class$y$orderID, basketValue = h1_c_p)
 # Save model and predictions
-h1_mod <- list(predictions = h1_c_p, 
-               error = list(error = h1_cf_error, mean_error = h1_cf_mean_err))
-saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.3_BV.rds")
+h1_mod <- list(val_predictions = h1_v_p,
+               class_predictions = h1_c_p, 
+               error = h1_cf_error)
+saveRDS(h1_mod, "~/GitHub/dmc2015/predictions/cforest_H1_0.5_BV.rds")
 
