@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 21:13:36 2015
+# Last Modified: Mon May 18 23:37:10 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -33,13 +33,13 @@ nvars = 150
 # ----------------------------------------------------------------------------
 # Sort variables by importance in set 1
 # imp <- imp[order(imp$h1_imp, decreasing = T),]
-imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.3.rds")
+imp <- readRDS("~/GitHub/dmc2015/pete/predictions/importance_H1_0.6.rds")
 
-h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 h1_t <- cbind(couponUsed = h1$train$y$couponUsed, 
               h1$train$X[names(h1$train$X) %in% as.character(imp$var[1:nvars])])
 h1_cf <- cforest(couponUsed~., data = h1_t,
-                 control = cforest_unbiased(mtry = 10, ntree = ntrees))
+                 control = cforest_unbiased(mtry = 40, ntree = ntrees))
 # Validation set 
 h1_v <- cbind(couponUsed = h1$validation$y$couponUsed, 
               h1$validation$X[as.character(imp$var[1:nvars])])
