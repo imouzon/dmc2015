@@ -227,6 +227,7 @@ Wide files should have columns identified as \verb!couponCol!:
    wideSet = c()
    longSet = c()
    noSet = c()
+   features[[2]] = features[[2]] %>% gather(columnName,value,-orderID) %>% filter(!is.na(value)) %>% mutate(varName = gsub("ratio[0-9]","ratio",columnName)) %>% mutate(couponCol=1*grepl("ratio1",columnName) + 2*grepl("ratio2",columnName) + 3*grepl("ratio3",columnName))  %>% select(-columnName) %>% spread(varName,value) %>% arrange(orderID,couponCol)
    for(i in 1:length(features)){
       if(nrow(features[[i]]) == 20166){
          longSet = c(longSet,i)
@@ -258,6 +259,7 @@ in this case, sets `r files[noSet]` have no proper place. We can figure out why 
 ### Combine Wide Sets:
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
+   
    wideFrame = features[[wideSet[1]]] %>% select(orderID)
    for(x in wideSet){
       dsn.i = features[[x]]

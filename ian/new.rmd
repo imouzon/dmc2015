@@ -47,5 +47,6 @@ joined.xy = ytrim %>% left_join(xtrim,by=c("orderID","couponCol"))
 names(joined.xy)
 sapply(1:ncol(joined.xy), function(i) sum(is.na(joined.xy[,i])))
 
-saveRDS(
+y$class$X  = ytrim
+saveRDS(y, file="~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.7.rds")
 ```
