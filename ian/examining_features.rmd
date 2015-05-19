@@ -55,39 +55,11 @@ I am starting with **set 1**
 <!--- dgg: R code (No Results in Document) -->
 ```{r dgg,cache=FALSE}
    ## long 
-   fml3 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
-   fml5 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
-
-   tmp = fml3$train$X[,c("orderID","couponCol",names(fml3$train$X)[!(names(fml3$train$X) %in% names(fml5$train$X))])]
-   fmlomg = fml5$train$X %>% left_join(tmp,by=c("orderID","couponCol"))
-   fml5$train$X = fmlomg
-
-   tmp = fml3$validation$X[,c("orderID","couponCol",names(fml3$validation$X)[!(names(fml3$validation$X) %in% names(fml5$validation$X))])]
-   fmlomg = fml5$validation$X %>% left_join(tmp,by=c("orderID","couponCol"))
-   fml5$validation$X = fmlomg
-
-   tmp = fml3$class$X[,c("orderID","couponCol",names(fml3$class$X)[!(names(fml3$class$X) %in% names(fml5$class$X))])]
-   fmlomg = fml5$class$X %>% left_join(tmp,by=c("orderID","couponCol"))
-   fml5$class$X = fmlomg
+   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 
    ## wide
-   fmw3 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
-   fmw5 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.5.rds")
+   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.6.rds")
 
-   tmp = fmw3$train$X[,c("orderID",names(fmw3$train$X)[!(names(fmw3$train$X) %in% names(fmw5$train$X))])]
-   fmwomg = fmw5$train$X %>% left_join(tmp,by=c("orderID"))
-   fmw5$train$X = fmwomg
-
-   tmp = fmw3$validation$X[,c("orderID",names(fmw3$validation$X)[!(names(fmw3$validation$X) %in% names(fmw5$validation$X))])]
-   fmwomg = fmw5$validation$X %>% left_join(tmp,by=c("orderID"))
-   fmw5$validation$X = fmwomg
-
-   tmp = fmw3$class$X[,c("orderID",names(fmw3$class$X)[!(names(fmw3$class$X) %in% names(fmw5$class$X))])]
-   fmwomg = fmw5$class$X %>% left_join(tmp,by=c("orderID"))
-   fmw5$class$X = fmwomg
-
-   saveRDS(fml5,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
-   saveRDS(fmw5,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.6.rds")
    #estimate weights from the historical data:
    HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
 
