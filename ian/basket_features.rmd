@@ -1,0 +1,114 @@
+---
+title: 
+titleshort:
+instructions:
+author: Ian Mouzon
+authorshort: Mouzon
+contact: imouzon@iastate.edu
+grouplong: 
+groupshort: 
+leader: 
+leadershort: 
+semester: 
+assignment: 
+duedate: 
+output:
+  usefulR::hw_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/basket_features.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(reshape2)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(directlabels)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   library(GGally)
+   source("~/dmc2015/ian/R/renm.R")
+```
+My working directory is set to \verb!~/dmc2015/ian/!.
+
+I am starting with **set 1**
+
+# Load feature matrix
+<!--- dgg: R code (No Results in Document) -->
+```{r dgg,cache=FALSE}
+   ## long 
+   fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
+
+   ## wide
+   fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.5.rds")
+
+   #estimate weights from the historical data:
+   HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+
+   #load the following
+   ## d
+   ## dm
+   ## dmc
+   ## Historical estimates of p1,p2,p3:
+   source("./load_data.r")
+    
+   ## Baseline basketValue
+   sum((fmw$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(fmw$validation$y$basketValue)^2
+
+   ## baseline coupons 1
+   sum((fmw$validation$y$coupon1Used - mean(HTVset$H$coupon1Used))^2)/mean(fmw$validation$y$coupon1Used)^2
+   
+   ## baseline coupons 2
+   sum((fmw$validation$y$coupon2Used - mean(HTVset$H$coupon2Used))^2)/mean(fmw$validation$y$coupon2Used)^2
+
+   ## baseline coupons 3
+   sum((fmw$validation$y$coupon3Used - mean(HTVset$H$coupon3Used))^2)/mean(fmw$validation$y$coupon3Used)^2
+```
+
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   userd = d %>% arrange(userID, orderID)  
+   userd$visitOrder = unlist(sapply(table(d$userID), function(i) 1:i))
+   userd = userd %>% filter(basketValue < 100000)
+   userd1 = userd[which(userd$visitOrder == 1),]
+   first_mean = mean(with(userd,(basketValue*(visitOrder == 1))))
+   userd1$error = (userd1$basketValue - first_mean)^2
+   qplot(basketValue,size=error,data=userd1,binwidth = 1,xlim=c(0,1000))
+
+
+   userd$error = 
+   userd = userd %>% mutate(first_mean = sum(basketValue*(visitOrder == 1),na.rm=T)/sum(visitOrder == 1,na.rm=T),error = (basketValue - first_mean)^2)
+   qplot(error, data = userd[which(userd$visitOrder == 1),],binwidth=1)
+   userd %>% filter(visitOrder == 1) %>% ggplot(aes(x=orderID, y = error)) + geom_point()
+                                                
+
+   userd %>% filter(userID == "user1") %>% ggplot(aes(x=orderID,y=basketValue,color=basketGroup)) + geom_point()
+   qplot(orderID,basketValue,data = userd)
+    
+   userdt = d %>% group_by(userID) %>% summarize(freq0 = sum(basketGroup == 0,na.rm=T)/n(), freq1 = sum(basketGroup == 1,na.rm=T)/n(), freq2 = sum(basketGroup == 2,na.rm=T)/n(), freq3 = sum(basketGroup == 3,na.rm=T)/n())
+   userdt %>% gather(group,freq,-userID) %>% arrange(userID,group) %>% ggplot(aes(group,freq,group=userID)) + geom_line()
+
+   saveRDS(list("d" = d, "dm" = dm, dmc = "dmc"),"./written_data/basketPlots.rds")
+```
+

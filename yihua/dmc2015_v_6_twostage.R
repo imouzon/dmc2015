@@ -23,9 +23,9 @@ valid.y <- dat$validation$y
 
 feature.318 <- readRDS('./penglh/imp_rf_col.rds')
 
-sum(pred.c50<0.1)
-dat_x_tmp <- dat_x_te[pred.c50<0.1,]
-dat_y_tmp <- dat_y_te[pred.c50<0.1]
+sum((pred.c50<0.6) + (pred.c50>0.4))
+dat_x_tmp <- dat_x_te[(pred.c50<0.6 && pred.c50>0.4),]
+dat_y_tmp <- dat_y_te[(pred.c50<0.6 && pred.c50>0.4)]
 dat_x_tr2 <- dat_x_tmp[1:700,]
 dat_y_tr2 <- dat_y_tmp[1:700]
 dat_x_te2 <- dat_x_tmp[-(1:700),]
@@ -35,7 +35,6 @@ col_pca1 <- which(apply(dat_x_tr2,2,function(x) length(unique(x)))<5)
 col_pca2 <- which(apply(dat_x_te2,2,function(x) length(unique(x)))<5)
 dat_x_te2 <- dat_x_te2[,-c(col_pca1,col_pca2)]
 dat_x_tr2 <- dat_x_tr2[,-c(col_pca1,col_pca2)]
-
 
 pred.pca <- classifierPCA(dat_x_te2, dat_x_tr2, dat_y_tr2, K=45)
 
