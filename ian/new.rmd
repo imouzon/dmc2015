@@ -27,7 +27,7 @@ output:
    setwd(working.dir)
 
    #compile the document to PDF
-   #if(FALSE) 
+   if(FALSE) 
       rmarkdown::render("/Users/user/dmc2015/ian/new.rmd")
 ```
 

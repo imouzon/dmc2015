@@ -3,7 +3,7 @@
 #  Purpose:
 #
 #  Creation Date: 17-05-2015
-#  Last Modified: Mon May 18 19:58:16 2015
+#  Last Modified: Tue May 19 00:16:31 2015
 #  Created By:
 #
 #--------------------------------------**--------------------------------------#
@@ -12,9 +12,9 @@
 #  source('~/R/shlib/C_FORTRAN.shlib.r')
 #  .Fortran("subroutine name",as.integer(input1),as.double(input2), etc)
 #
-d = readRDS("../data/clean_data/universalCleanData.rds")
+d = readRDS("~/dmc2015/data/clean_data/universalCleanData.rds")
 
-source("./R/clean_factor.r")
+source("~/dmc2015/ian/R/clean_factor.r")
 d = clean_factor(d,"couponID","cpn")
 d = clean_factor(d,"brand","brand")
 d = clean_factor(d,"productGroup","prod")
@@ -35,10 +35,10 @@ d$basePrice_price_ratio1 = d$basePrice1/d$price1
 d$basePrice_price_ratio2 = d$basePrice2/d$price2
 d$basePrice_price_ratio3 = d$basePrice3/d$price3
 
-source("./r/stackCoupons2.R")
+source("~/dmc2015/ian/r/stackCoupons2.R")
 dm = stackCoupons2(d,idcols = c(1:4,32:57)) 
 
-source("./r/splitColumn.R")
+source("~/dmc2015/ian/r/splitColumn.R")
 dmc = splitColumn(dm,"categoryIDs","orderID",splitby=":") 
 dmc = dmc[,-which(names(dmc) == "categoryIDs")]
 dmc = clean_factor(dmc,"categoryIDs",scrape_off="cat")

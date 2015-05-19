@@ -40,22 +40,57 @@ I am using the following packages:
    library(GGally)
    source("~/dmc2015/ian/R/renm.R")
 ```
+
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   predPlot = function(pred_set1,pred_set2){
+     p = qplot(pred_set1,pred_set2) + coord_fixed() + geom_abline(intercept=0,slope=1,color="red")
+     print(p)
+     return(p)
+   }
+
+   lossFunction = function(pred,actual) sum(((1/mean(actual))*(pred - actual))^2)
+
+   predictor_weight = function(pred1,pred2,actual){
+      alphas = seq(0,1,.001)
+      err = sapply(alphas, function(alpha) lossFunction(alpha*pred1 + (1-alpha)*pred2, actual))
+      pred = data.frame(proportion.1 = alphas, err = err)
+      return(pred)
+   }
+```
 My working directory is set to \verb!~/dmc2015/predictions/!.
 
+I am using our new clean data - so should you
+<!--- chunk-label: R code (No Results in Document) -->
+```{r cache=FALSE}
+   source("~/dmc2015/ian/load_data.r")
+   HTVset1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+   actual.val = as.vector(t(HTVset1$V[,c("coupon1Used","coupon2Used","coupon3Used")]))
+
+   HTVset3 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
+   actual.val = as.vector(t(HTVset3$V[,c("coupon1Used","coupon2Used","coupon3Used")]))
+```
 
 ##Reading in the predictions
 
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
    files = list.files("~/dmc2015/predictions/",pattern="rds")
-   preds = lapply(files,function(x) readRDS(x))
-   preds1 = readRDS(files[1])
-qplot(preds$predictions,
-
-   sapply(1:length(files), function(i) names(preds[[i]]))
-
-   
-
-   
+   files
 ```
 
+
+##Prediction Geometry
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   preds = lapply(files,function(x) readRDS(x))
+
+   predPlot(preds[[1]]$validation$prediction, preds[[2]]$validation$prediction)
+
+   wgthd = predictor_weight(preds[[1]]$validation$prediction, preds[[2]]$validation$prediction, actual.val)
+
+   head(wgthd)
+   qplot(proportion.1,err,data=wgthd)
+
+   sapply(1:length(files), function(i) names(preds[[i]]))
+```
