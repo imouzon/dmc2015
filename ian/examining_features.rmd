@@ -57,6 +57,8 @@ I am starting with **set 1**
    ## long 
    fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 
+   names(fml[
+
    ## wide
    fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.6.rds")
 
