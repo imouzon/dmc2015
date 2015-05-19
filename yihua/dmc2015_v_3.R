@@ -40,6 +40,11 @@ feature.gbm <- readRDS('./penglh/imp_set1/imp_gbm_col_name.rds')
 feature.crf <- readRDS('./penglh/imp_set1/imp_crf_col_name.rds')
 feature.crf <- as.character(feature.crf$var)
 feature.220 <- readRDS('./penglh/imp_set3/imp_corr_col_name.rds')
+feature.rf.3 <- readRDS('./penglh/imp_set3/imp_rf_col_name.rds')
+feature.lasso.3 <- readRDS('./penglh/imp_set3/imp_lasso_col_name.rds')
+feature.c50.3 <- readRDS('./penglh/imp_set3/imp_c50_col_name.rds')
+feature.gbm <- readRDS('./penglh/imp_set3/imp_gbm_col_name.rds')
+
 # feature.318 <- as.character(feature.318$col_name)
 # feature.c50 <- readRDS('./penglh/imp_c50_col_name.rds')
 # feature.c50 <- as.character(feature.c50)
@@ -59,7 +64,7 @@ feature.220 <- readRDS('./penglh/imp_set3/imp_corr_col_name.rds')
 # feature.lasso.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_lasso_set1_v4.rds')
 # feature.c50.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_c50_set1_v4.rds')
 
-feature <- intersect(feature.220, names(train.x))
+feature <- intersect(feature.gbm.3, names(train.x))
 
 length(feature)
 
@@ -98,7 +103,7 @@ validation <- rf.pred[,2]
 class.T <- rf.pred.T[,2]
 class.TV <- rf.pred.TV[,2]
 err <- sum(loss)
-method <- 'rf_220col'
-file <- './predictions/set1/rf_220col_set1.rds'
+method <- 'rf_gbm'
+file <- './predictions/set3/rf_gbm_set3.rds'
 savePred(d, validation, class.T, class.TV, err, method, file)
   
