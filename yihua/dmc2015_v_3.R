@@ -34,6 +34,8 @@ na.col.class <- unique(which(is.na(class.x), arr.ind=TRUE)[,2])
 
 feature.386 <- readRDS('./penglh/imp_set1/imp_corr_col_name.rds')
 feature.rf150 <- readRDS('./penglh/imp_set1/imp_rf150_col_name.rds')
+feature.lasso <- readRDS('./penglh/imp_set1/imp_lasso_col_name.rds')
+feature.c50 <- readRDS('./penglh/imp_set1/imp_c50_col_name.rds')
 # feature.318 <- as.character(feature.318$col_name)
 # feature.c50 <- readRDS('./penglh/imp_c50_col_name.rds')
 # feature.c50 <- as.character(feature.c50)
@@ -53,9 +55,10 @@ feature.rf150 <- readRDS('./penglh/imp_set1/imp_rf150_col_name.rds')
 # feature.lasso.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_lasso_set1_v4.rds')
 # feature.c50.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_c50_set1_v4.rds')
 
-feature <- intersect(feature.rf150, names(train.x))
+feature <- intersect(feature.c50, names(train.x))
 
 length(feature)
+
 a <- proc.time()
 rf <- randomForest(x=train.x[,feature],
                    y=as.factor(train.y$couponUsed),
@@ -76,6 +79,7 @@ loss <- Loss_calculator(coupon1pred=result$predicted[result$couponcol==1],
                         coupon3pred=result$predicted[result$couponcol==3], 
                         coupon3true=result$couponUsed[result$couponcol==3])
 sum(loss)
+
 # 305 6561.542
 # c50 6533.521
 # rf 100 6566.606
@@ -91,7 +95,7 @@ sum(loss)
 a <- proc.time()
 rf1 <- randomForest(x=rbind(train.x[,feature], valid.x[,feature]),
                    y=as.factor(c(train.y$couponUsed, valid.y$couponUsed)),
-                   keep.forest=TRUE, ntree=500)
+                   keep.forest=TRUE, ntree=2000)
 proc.time() - a
 rf.pred.TV <- predict(rf1, class.x[,feature], type="prob")
 
@@ -102,8 +106,7 @@ validation <- rf.pred[,2]
 class.T <- rf.pred.T[,2]
 class.TV <- rf.pred.TV[,2]
 err <- sum(loss)
-method <- 'rf_rf'
-file <- './predictions/set1/rf_rf_set1.rds'
+method <- 'rf_c50'
+file <- './predictions/set1/rf_c50_set1.rds'
 savePred(d, validation, class.T, class.TV, err, method, file)
   
-tmp <- readRDS('./predictions/set1/rf_386col_set1.rds')
