@@ -60,30 +60,49 @@ I am using the following packages:
 ```
 My working directory is set to \verb!~/dmc2015/predictions/!.
 
+
+# Set 1
 I am using our new clean data - so should you
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r cache=FALSE}
    source("~/dmc2015/ian/load_data.r")
    HTVset1 = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
    actual.val = as.vector(t(HTVset1$V[,c("coupon1Used","coupon2Used","coupon3Used")]))
-
-   HTVset3 = readRDS("~/dmc2015/data/featureMatrix/HTVset3.rds")
-   actual.val = as.vector(t(HTVset3$V[,c("coupon1Used","coupon2Used","coupon3Used")]))
 ```
 
 ##Reading in the predictions
-
+The predictions are stored in \verb!~/dmc2015/predictions/!.
+We can read the files into R using the \verb!list.files! function.
 <!--- : R code (No Results in Document) -->
 ```{r cache=FALSE}
-   files = list.files("~/dmc2015/predictions/",pattern="rds")
+   files = list.files("~/dmc2015/predictions/set1/",pattern="rds",full.names=TRUE)
    files
 ```
+Many of the sets have the **DMC Official** structure:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   str(readRDS("~/dmc2015/predictions/set1/crf_386col_set1_0.8.rds"))
+```
 
-
-##Prediction Geometry
+I can check the structure in a similar way to how I read in features:
 <!--- chunk-label: R code (No Results in Document) -->
 ```{r chunk-label,cache=FALSE}
    preds = lapply(files,function(x) readRDS(x))
+
+   pred.struc = rep("renegade style",length(files))
+   for(i in 1:files){
+      if(names(preds[[i]]) == c("val_predictions", "class_predictions", "error", "details")){
+         pred.struc[i] = "DMC Official"
+      }
+          
+
+   
+   preds.i = 
+   str(preds[[1]])
+
+   preds.i$val_predictions
+   
+   preds.i$class_predictions
 
    predPlot(preds[[1]]$validation$prediction, preds[[2]]$validation$prediction)
 
@@ -94,3 +113,10 @@ I am using our new clean data - so should you
 
    sapply(1:length(files), function(i) names(preds[[i]]))
 ```
+
+##Prediction Geometry
+<!--- 
+   val_predictions
+   class_predictions
+-->
+
