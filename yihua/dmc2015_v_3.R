@@ -33,6 +33,7 @@ na.col.class <- unique(which(is.na(class.x), arr.ind=TRUE)[,2])
 # length(intersect(names(dat$V_melt), names(dat$C_melt)))
 
 feature.386 <- readRDS('./penglh/imp_set1/imp_corr_col_name.rds')
+feature.rf150 <- readRDS('./penglh/imp_set1/imp_rf150_col_name.rds')
 # feature.318 <- as.character(feature.318$col_name)
 # feature.c50 <- readRDS('./penglh/imp_c50_col_name.rds')
 # feature.c50 <- as.character(feature.c50)
@@ -52,17 +53,18 @@ feature.386 <- readRDS('./penglh/imp_set1/imp_corr_col_name.rds')
 # feature.lasso.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_lasso_set1_v4.rds')
 # feature.c50.v4.set1 <- readRDS('./penglh/imp_set1_v4/imp_c50_set1_v4.rds')
 
-feature <- intersect(feature.386, names(train.x))
+feature <- intersect(feature.rf150, names(train.x))
 
 length(feature)
-
+a <- proc.time()
 rf <- randomForest(x=train.x[,feature],
                    y=as.factor(train.y$couponUsed),
                    xtest=valid.x[,feature],
                    ytest=as.factor(valid.y$couponUsed),
-                   keep.forest=TRUE, ntree=500)
+                   keep.forest=TRUE, ntree=2000)
+proc.time()-a
 rf.pred <- predict(rf, valid.x[,feature], type="prob")
-rf.pred <- predict(rf, class.x[,feature], type="prob")
+rf.pred.T <- predict(rf, class.x[,feature], type="prob")
 result <- data.frame(orderID=valid.y$orderID,
                      couponUsed=valid.y$couponUsed, 
                      couponcol=valid.x$couponCol, 
@@ -79,9 +81,29 @@ sum(loss)
 # rf 100 6566.606
 # lasso 6634.932
 # AdaBoost 
-varImpPlot(rf)
-y = as.vector(rf$importance)
-names(y)=rownames(rf$importance)
-y <- sort(y, decreasing=TRUE)
-v <- names(y[1:150])
-saveRDS(names(y), './penglh/imp_set1/imp_rf150_col_name.rds')
+# varImpPlot(rf)
+# y = as.vector(rf$importance)
+# names(y)=rownames(rf$importance)
+# y <- sort(y, decreasing=TRUE)
+# v <- names(y[1:150])
+# saveRDS(v, './penglh/imp_set1/imp_rf150_col_name.rds')
+
+a <- proc.time()
+rf1 <- randomForest(x=rbind(train.x[,feature], valid.x[,feature]),
+                   y=as.factor(c(train.y$couponUsed, valid.y$couponUsed)),
+                   keep.forest=TRUE, ntree=500)
+proc.time() - a
+rf.pred.TV <- predict(rf1, class.x[,feature], type="prob")
+
+plot(rf.pred.T[,2], rf.pred.TV[,2])
+
+d <- dat
+validation <- rf.pred[,2]
+class.T <- rf.pred.T[,2]
+class.TV <- rf.pred.TV[,2]
+err <- sum(loss)
+method <- 'rf_rf'
+file <- './predictions/set1/rf_rf_set1.rds'
+savePred(d, validation, class.T, class.TV, err, method, file)
+  
+tmp <- readRDS('./predictions/set1/rf_386col_set1.rds')
