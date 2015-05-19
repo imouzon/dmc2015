@@ -1,108 +1,88 @@
 source("//Users/Ran/Google Drive/ISU/dmc2015/yihua/Loss_caculator.R")
+source("//Users/Ran/Google Drive/ISU/dmc2015/weicheng/savePredictions.R")
 library(e1071)
 
-# features selected by random forest
-imp_rf1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_col.rds")
-imp_rf3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_rf_SET3.rds")
-# features selected by lasso
-imp_lasso1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name_set1.rds")
-imp_lasso1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_lasso_col_name_set3.rds")
-# features selected by C5.0
-imp_c501 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name.rds")
-imp_c503 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_c50_col_name_set3.rds")
-# features selected by adaboost
-imp_ada1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/weicheng/data/imp_gbm_set1.rds")
-imp_ada3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/weicheng/data/imp_gbm_set3.rds")
-# features selected by conditional random forest
-imp_crf <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/pete/predictions/importance_0.3.rds")
-imp_crf1 <- imp_crf$h1_imp
-imp_crf3 <- imp_crf$h3_imp
 # features selected by correlation
-imp_corr <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1_v4/imp_corr_v4.rds")
+imp_corr1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_corr_col_name.rds")
+imp_corr3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_rf_SET3.rds")
+# features selected by random forest
+imp_rf1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_rf150_col_name.rds")
+imp_rf3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_rf_SET3.rds")
+# features selected by lasso
+imp_lasso1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_lasso_col_name.rds")
+imp_lasso3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_lasso_col_name.rds")
+# features selected by C5.0
+imp_c501 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_c50_col_name.rds")
+imp_c503 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_c50_col_name_set3.rds")
+# features selected by adaboost
+imp_ada1 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_gbm_col_name.rds")
+imp_ada3 <- readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_gbm_set3.rds")
+# features selected by conditional random forest
+imp_crf1 <- as.character(readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set1/imp_crf_col_name.rds")$var)
+imp_crf3 <- as.character(readRDS("//Users/Ran/Google Drive/ISU/dmc2015/penglh/imp_set3/imp_crf_col_name.rds")$var)
 
 # features
-dat1 = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
+dat1 = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.8.rds")
 dat3 = readRDS("//Users/Ran/Google Drive/ISU/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.6.rds")
 
+svm_pred <- function(dat, col_pred_name, method, file){
+  dat_tr_x <- dat$train$X
+  dat_tr_y <- dat$train$y
+  dat_te_x <- dat$validation$X
+  dat_te_y <- dat$validation$y
+  dat_cl_x <- dat$class$X
+  dat_cl_y <- dat$class$y
+  
+  col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
+  
+  col1 <- which(dat_te_x$couponCol==1)
+  col2 <- which(dat_te_x$couponCol==2)
+  col3 <- which(dat_te_x$couponCol==3)
+  
+  dat_x_tr <- dat_tr_x[,col_pred]
+  dat_x_te <- dat_te_x[,col_pred]
+  dat_x_cl <- dat_cl_x[,col_pred]
+  a <- as.numeric(which(apply(dat_x_tr, 2, function(x){length(unique(as.factor(x))) > 1})))
+  dat_x_tr <- dat_x_tr[, a]
+  dat_x_te <- dat_x_te[, a]
+  dat_x_cl <- dat_x_cl[, a]
+  
+  for (i in 1:length(col_pred)){
+    dat_x_tr[, i] <- as.numeric(dat_x_tr[, i])
+    dat_x_te[, i] <- as.numeric(dat_x_te[, i])
+    dat_x_cl[, i] <- as.numeric(dat_x_cl[, i])
+  }
+  
+  dat_y_tr <- as.factor(dat_tr_y$couponUsed)
+  dat_y_te <- as.factor(dat_te_y$couponUsed)
+  
+  ### SVM ###
+  
+  # radial kernel with default gamma, training dataset only
+  svmfit_radial_T <- svm(x = dat_x_tr, y = dat_y_tr, 
+                         kernel = "radial", probability = TRUE)
+  # validation error
+  validation <- predict(svmfit_radial_T, dat_x_te, probability = TRUE)
+  class.T <- predict(svmfit_radial_T, dat_x_cl, probability = TRUE)
+  
+  prob_radial <- attr(validation, "probabilities")[, 2]
+  loss_te <- sum(Loss_calculator(prob_radial[col1],dat_te_y$couponUsed[col1],
+                                 prob_radial[col2],dat_te_y$couponUsed[col2],
+                                 prob_radial[col3],dat_te_y$couponUsed[col3]))
+  prob_class.T <- attr(class.T, "probabilities")[, 2]
+  
+  # training + validation dataset 
+  svmfit_radial_TV <- svm(x = rbind(dat_x_tr, dat_x_te), y = as.factor(c(dat_y_tr, dat_y_te) - 1), 
+                          kernel = "radial", probability = TRUE)
+  class.TV <- predict(svmfit_radial_TV, dat_x_cl, probability = TRUE)
+  prob_class.TV <- attr(class.TV, "probabilities")[, 2]
+  
+  # save file
+  savePred(dat, prob_radial, prob_class.T, prob_class.TV, loss_te, method, file)
+}
+
 dat <- dat1
-dat_tr_x <- dat$train$X
-dat_tr_y <- dat$train$y
-dat_te_x <- dat$validation$X
-dat_te_y <- dat$validation$y
-dat_cl_x <- dat$class$X
-dat_cl_y <- dat$class$y
+col_pred_name <- imp_c501
+file <- "//Users/Ran/Google Drive/ISU/dmc2015/ran/SVM_c50_set1.rds"
 
-dat_tr_x$order_match_class <- as.numeric(dat_tr_x$order_match_class)
-dat_te_x$order_match_class <- as.numeric(dat_te_x$order_match_class)
-
-col_pred_name <- imp_rf1$col_name
-col_pred <- which(colnames(dat_tr_x)%in%col_pred_name)
-
-col1 <- which(dat_te_x$couponCol==1)
-col2 <- which(dat_te_x$couponCol==2)
-col3 <- which(dat_te_x$couponCol==3)
-
-dat_x_tr <- dat_tr_x[,col_pred]
-dat_x_te <- dat_te_x[,col_pred]
-a <- as.numeric(which(apply(dat_x_tr, 2, function(x){length(unique(as.factor(x))) > 1})))
-dat_x_tr <- dat_x_tr[, a]
-dat_x_te <- dat_x_te[, a]
-
-dat_y_tr <- as.factor(dat_tr_y$couponUsed)
-dat_y_te <- as.factor(dat_te_y$couponUsed)
-
-
-### SVM ###
-
-# polynomial kernel with default order 3
-svmfit_polynomial <- svm(x = dat_x_tr, y = dat_y_tr, 
-                         kernel = "polynomial", probability = TRUE)
-# validation error
-pred_polynomial <- predict(svmfit_polynomial, dat_x_te, probability = TRUE)
-table_polynomial <- table(pred_polynomial, dat_y_te)
-1 - sum(diag(table_polynomial)) / sum(table_polynomial)  # 0.1911
-# probability loss
-prob_polynomial <- attr(pred_polynomial, "probabilities")[, 2]
-sum(Loss_calculator(prob_polynomial[col1],dat_te_y$couponUsed[col1],
-                    prob_polynomial[col2],dat_te_y$couponUsed[col2],
-                    prob_polynomial[col3],dat_te_y$couponUsed[col3]))
-
-# radial kernel with default gamma
-svmfit_radial <- svm(x = dat_x_tr, y = dat_y_tr, 
-                     kernel = "radial", probability = TRUE)
-# validation error
-pred_radial <- predict(svmfit_radial, dat_x_te, probability = TRUE)
-table_radial <- table(pred_radial, dat_y_te)
-1 - sum(diag(table_radial)) / sum(table_radial)  # 0.1854
-# probability loss
-prob_radial <- attr(pred_radial, "probabilities")[, 2]
-sum(Loss_calculator(prob_radial[col1],dat_te_y$couponUsed[col1],
-                    prob_radial[col2],dat_te_y$couponUsed[col2],
-                    prob_radial[col3],dat_te_y$couponUsed[col3]))
-
-# radial kernel with half default gamma
-svmfit_radial0.5 <- svm(x = dat_x_tr, y = dat_y_tr, 
-                        kernel = "radial", probability = TRUE, gamma = svmfit_radial$gamma/2)
-# validation error
-pred_radial0.5 <- predict(svmfit_radial0.5, dat_x_te, probability = TRUE)
-table_radial0.5 <- table(pred_radial0.5, dat_y_te)
-1 - sum(diag(table_radial0.5)) / sum(table_radial0.5)  # 0.1854
-# probability loss
-prob_radial0.5 <- attr(pred_radial0.5, "probabilities")[, 2]
-sum(Loss_calculator(prob_radial0.5[col1],dat_te_y$couponUsed[col1],
-                    prob_radial0.5[col2],dat_te_y$couponUsed[col2],
-                    prob_radial0.5[col3],dat_te_y$couponUsed[col3]))
-
-# radial kernel with double default gamma
-svmfit_radial2 <- svm(x = dat_x_tr, y = dat_y_tr, 
-                      kernel = "radial", probability = TRUE, gamma = svmfit_radial$gamma * 2)
-# validation error
-pred_radial2 <- predict(svmfit_radial2, dat_x_te, probability = TRUE)
-table_radial2 <- table(pred_radial2, dat_y_te)
-1 - sum(diag(table_radial2)) / sum(table_radial2)  # 0.1854
-# probability loss
-prob_radial2 <- attr(pred_radial2, "probabilities")[, 2]
-sum(Loss_calculator(prob_radial2[col1],dat_te_y$couponUsed[col1],
-                    prob_radial2[col2],dat_te_y$couponUsed[col2],
-                    prob_radial2[col3],dat_te_y$couponUsed[col3]))
-
+svm_pred(dat, col_pred_name, "SVM", file)
