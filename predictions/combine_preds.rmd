@@ -107,9 +107,10 @@ I can check the structure in a similar way to how I read in features:
       if(all(names(preds[[i]]) %in% names(DMCofficial))){
          pred.struc[i] = "DMC Official"
       }
+      cat(pred.struc[i],": ", files[i],"\n")
    }
 
-   pred.struc
+   pred.struc[11] = "DMC Official"
 ```
 
 We can get the DMC official **validation predictions** like this:
@@ -184,8 +185,8 @@ The rest of the files follow the same arrangement:
    validation_predictions$couponCol = as.numeric(validation_predictions$couponCol)
    classification_predictions$couponCol = as.numeric(classification_predictions$couponCol)
 
-   which(pred.struc == "renegade style")[9]
-   pred.struc = pred.struc[-9]
+   #which(pred.struc == "renegade style")[9]
+   #pred.struc = pred.struc[-9]
    for(i in which(pred.struc == "renegade style")){
       pred.i  = preds[[i]]$validation
 
@@ -208,9 +209,9 @@ Let's get the plots:
    qplot(method_name, validation_error)
 
    #drop errors
-   qplot(method_name[-which(validation_error > 16400)], validation_error[-which(validation_error > 16400)])
+   qplot(method_name[-which(validation_error > 6700)], validation_error[-which(validation_error > 6700)])
 
-   files[method_name[-which(validation_error > 16400)]]
+   files[method_name[-which(validation_error > 6700)]]
 
    plot_func = function(i,j){
       if(i == j) p = qplot(validation_predictions[,i],geom='density',binwidth = .1)
@@ -221,21 +222,27 @@ Let's get the plots:
 
    # ggpairs(validation_predictions,4:ncol(validation_predictions))
    cor(validation_predictions[,4:ncol(validation_predictions)])
-   order(
-         which.min(validation_error)
-         )
    order(validation_error)
 
-   plot_func(32,8)
-   names(validation_predictions)[c(8,32)]
-   order(rowSums(cor(validation_predictions)[c(rep(TRUE,3),validation_error < 16400),c(32,8)]))
-   cor(validation_predictions)[28,c(32,8)]
-   names(validation_predictions)
+   plot_func(29,11) + ylim(6250,6400)
+   # .45 * 29 + .55 * 11
 
-   newpred = .5*validation_predictions[,8] + .5*validation_predictions[,32]
-   names(validation_predictions)[c(8,32)]
+   names(validation_predictions)[c(29,11)]
+   order(rowSums(cor(validation_predictions)[c(rep(TRUE,3),validation_error < 6700),c(29,11)]))
+   cor(validation_predictions)[13,c(29,11)]
+   names(validation_predictions)[13]
 
-   predictor_weight(newpred,validation_predictions[,35],validation_predictions[,3])
+   newpred3 = .45*validation_predictions[,29] + .55*validation_predictions[,11]
+   clspred3 = .45*validation_predictions[,29] + .55*validation_predictions[,11]
+
+   lossFunction(newpred,validation_predictions[,3])/length(newpred)
+
+
+
+   names(validation_predictions)[c(29,11)]
+sapply(4:ncol(validation_predictions), function(i) print(predictor_weight(newpred,validation_predictions[,i],validation_predictions[,3]))
+       )
+}
 
    
 

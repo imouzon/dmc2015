@@ -213,23 +213,35 @@ Let's get the plots:
 
    # ggpairs(validation_predictions,4:ncol(validation_predictions))
    cor(validation_predictions[,4:ncol(validation_predictions)])
-   order(
-         which.min(validation_error)
-         )
+   which.min(validation_error)
    order(validation_error)
 
-   plot_func(32,8)
+   plot_func(32,8) + ylim(c(15800,16400))
    names(validation_predictions)[c(8,32)]
    order(rowSums(cor(validation_predictions)[c(rep(TRUE,3),validation_error < 16400),c(32,8)]))
    cor(validation_predictions)[28,c(32,8)]
-   names(validation_predictions)
+   names(validation_predictions)[28]
 
-   newpred = .5*validation_predictions[,8] + .5*validation_predictions[,32]
+   #
+   newpred1 = .5*validation_predictions[,8] + .5*validation_predictions[,32]
+   clspred1 = .5*classification_predictions[,8] + .5*classification_predictions[,32]
+   write.csv(matrix(clspred1,ncol=3,byrow=TRUE),"./predictions_based_on_1.csv")
+   write.csv(matrix(clspred3,ncol=3,byrow=TRUE),"./predictions_based_on_3.csv")
+
    names(validation_predictions)[c(8,32)]
 
-   predictor_weight(newpred,validation_predictions[,35],validation_predictions[,3])
+   sapply(4:ncol(validation_predictions), function(i) print(predictor_weight(newpred,validation_predictions[,i],validation_predictions[,3])))
+
+   lossFunction(newpred,validation_predictions[,3])/length(newpred)
+   
 
    
+   
+
+   #3.687798
+   #3.955731
+
+   3.687798*
 
 
    names(safe_valid)[c(21,4)]
