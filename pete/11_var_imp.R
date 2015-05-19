@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 15-05-2015
-# Last Modified: Mon May 18 21:15:14 2015
+# Last Modified: Mon May 18 22:53:46 2015
 #
 # Purpose: Measure variable importance with regard to conditional random
 # forests. To do this we will randomly group variables and fit conditional
@@ -39,18 +39,18 @@ source("~/GitHub/dmc2015/pete/10_roc.R")
 h1 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 vars <- names(h1$train$X[sapply(h1$train$X, is.numeric)])
 vars <- vars[vars != "orderID"]
-sizes <- getGroupSize(80, length(vars))
+sizes <- getGroupSize(100, length(vars))
 importance <- data.frame(var = NULL, imp = NULL)
 
 for (s in sizes) {
   samp <- sample(vars[!(vars %in% importance$var)], s)
   train <- cbind(couponUsed = h1$train$y$couponUsed, h1$train$X[samp])
   cf <- cforest(couponUsed~., data = train,
-                control = cforest_unbiased(mtry = 3, ntree = 50))
+                control = cforest_unbiased(mtry = 4, ntree = 100))
   vImp <- varimp(cf)
   temp <- data.frame(var = names(vImp), imp = as.numeric(vImp))
   importance <- rbind(importance, temp)
-  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
+  saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.6.rds")
   cat(nrow(importance))
   cat("\n")
 }
@@ -58,7 +58,7 @@ for (s in sizes) {
 importance$imp <- importance$imp * 10000
 importance <- importance[order(importance$imp, decreasing = T),]
 rownames(importance) <- 1:nrow(importance)
-saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.5.rds")
+saveRDS(importance, "~/GitHub/dmc2015/pete/predictions/importance_H1_0.6.rds")
 
 
 h3 <- readRDS("~/GitHub/dmc2015/data/featureMatrix/featMat_based-on-HTVset3_LONG_ver0.5.rds")
@@ -162,3 +162,5 @@ imp <- imp[order(imp$h1_imp, decreasing = T),]
 rownames(imp) <- 1:nrow(imp)
 saveRDS(imp, "~/GitHub/dmc2015/pete/predictions/importance_BV.rds")
 
+# Penglh basketValue feature matrix 
+h1 <- readRDS("~/GitHub/dmc2015/penglh/basketValue_est/features_HTVset1_basketValue_est.rds")
