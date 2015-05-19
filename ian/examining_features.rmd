@@ -56,12 +56,23 @@ I am starting with **set 1**
 ```{r dgg,cache=FALSE}
    ## long 
    fml = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.5.rds")
+   fml3 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+   fml3$train$X = fml$train$X %>% left_join(fml3$train$X[,names(fml3$train$X)[which(!(names(fml3$train$X) %in% names(fml$train$X)) | names(fml3$train$X) %in% names(fml$train$X))]],by=c("orderID","couponCol"))
+   fml3$validation$X = fml$validation$X %>% left_join(fml3$validation$X[,names(fml3$validation$X)[which(!(names(fml3$validation$X) %in% names(fml$validation$X)) | names(fml3$validation$X) %in% names(fml$validation$X))]],by=c("orderID","couponCol"))
+   fml3$class$X = fml$class$X %>% left_join(fml3$class$X[,names(fml3$class$X)[which(!(names(fml3$class$X) %in% names(fml$class$X)) | names(fml3$class$X) %in% names(fml$class$X))]],by=c("orderID","couponCol"))
+
+   saveRDS(fml3,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.6.rds")
 
    ## wide
    fmw = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.5.rds")
+   fmw3 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+   fmw3$train$X = fmw$train$X %>% left_join(fmw3$train$X[,names(fmw3$train$X)[which(!(names(fmw3$train$X) %in% names(fmw$train$X)) | names(fmw3$train$X) %in% names(fmw$train$X))]],by=c("orderID"))
+   fmw3$validation$X = fmw$validation$X %>% left_join(fmw3$validation$X[,names(fmw3$validation$X)[which(!(names(fmw3$validation$X) %in% names(fmw$validation$X)) | names(fmw3$validation$X) %in% names(fmw$validation$X))]],by=c("orderID"))
+   fmw3$class$X = fmw$class$X %>% left_join(fmw3$class$X[,names(fmw3$class$X)[which(!(names(fmw3$class$X) %in% names(fmw$class$X)) | names(fmw3$class$X) %in% names(fmw$class$X))]],by=c("orderID"))
 
    #estimate weights from the historical data:
    HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+   saveRDS(fmw3,"~/dmc2015/data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.6.rds")
 
    #load the following
    ## d
@@ -298,9 +309,8 @@ We can weight our responses and hopefully use this to get better estimates by un
    saveRDS(weighted.rf$importance, file="./written_data/importance_cols.rds")
 
    Xv = Xval[,which(names(Xval) %in% names(Xrf))]
-   preds = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
+   weight.fit = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
 
-   weighted.rf$mse
    dtrn = Xn %>% left_join(dm,by=c("orderID","couponCol"))
 
    dtrn$rferror = ((yrf-weighted.rf$predicted*rep(c(p1,p2,p3)))^2)
@@ -316,9 +326,8 @@ We can weight our responses and hopefully use this to get better estimates by un
    Xv = Xv[,which(names(Xv) %in% names(Xrf))]
    Xv$couponCol = rep(1:3,nrow(Xv)/3)
    #mse
-   weight.fit = 
-   w.actualLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)
-   w.weightedLoss = colSums((matrix(yv,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)/colMeans((matrix(yv,ncol=3,byrow=TRUE))^2)
+   w.actualLoss = colSums((matrix(yval,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)
+   w.weightedLoss = colSums((matrix(yval,ncol=3,byrow=TRUE) - matrix(weight.fit,ncol=3,byrow=TRUE))^2)/(colMeans(matrix(yval,ncol=3,byrow=TRUE))^2)
 
    cat("loss unweighted rf (no col weights):",sum(actualLoss))
    cat("loss unweighted rf (col weights):   ",sum(weightedLoss))
