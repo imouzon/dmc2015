@@ -86,7 +86,7 @@ I am starting with **set 1**
 ## Estimating the proportion of coupons used in each column by bootstrapping the historical set
 <!--- rf: R code (No Results in Document) -->
 ```{r rf,cache=FALSE}
-   B = 100000
+   B = 10000
    n = nrow(fmw$validation$y)
    boot.samples = sample(1:nrow(HTVset$H), size = B * n, replace = TRUE)
    cpn1.boots = rowMeans(matrix(HTVset$H$coupon1Used[boot.samples], B, n))
@@ -114,9 +114,14 @@ I am starting with **set 1**
 
    boots.melt = boots.df %>% gather(coupon, proportion,-iter) 
 
-   chk = fmw$validation$y %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
+   chk1 = fmw$validation$y %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
+   chk2 = fmw$train$y %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
+   chk3 = HTVset$H %>% summarize(coupon1 = mean(coupon1Used), coupon2 = mean(coupon2Used), coupon3 = mean(coupon3Used)) %>% gather(coupon,proportion)
 
-   boots.melt %>% ggplot(aes(x=proportion,fill=coupon)) + geom_density() + facet_grid(~coupon) + geom_vline(data=chk,aes(xintercept = proportion, color=coupon))
+   boots.melt %>% ggplot(aes(x=proportion)) + geom_density(fill="white") + facet_grid(~coupon) + 
+   geom_vline(data=chk1,aes(xintercept = proportion), color="red") + 
+   geom_vline(data=chk2,aes(xintercept = proportion), color="black") + 
+   geom_vline(data=chk3,aes(xintercept = proportion), color="blue")
 
    ggpairs(boots.df[,2:4],alpha=.01)
 

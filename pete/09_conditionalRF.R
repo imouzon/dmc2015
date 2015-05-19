@@ -5,7 +5,7 @@
 # Contact: epwalsh@iastate.edu
 #
 # Creation Date: 14-05-2015
-# Last Modified: Mon May 18 19:31:32 2015
+# Last Modified: Mon May 18 19:34:26 2015
 #
 # Purpose: Create predictions using conditional random forests for 
 # individual coupon predictions, basket value, and basket value using coupon 
@@ -17,8 +17,6 @@
 #
 # ============================================================================
 
-# Note: We still need to agree on a common loss function to use to compare 
-# models.
 
 library(party)
 source("~/GitHub/dmc2015/pete/10_roc.R")
@@ -99,18 +97,17 @@ h3_c <- cbind(couponUsed = h3$class$y$couponUsed,
 h3_c_p <- predict(h3_cf, newdata = h3_c)
 h3_c_p <- cbind(orderID = h3$class$y$orderID, couponUsed = h3_c_p)
 # Importance 
-h3_imp <- varimp(h3_cf)
-h3_imp <- data.frame(var = names(h3_imp), imp = as.numeric(h3_imp))
-h3_imp <- h3_imp[order(h3_imp$imp, decreasing = T),]
-h3_imp$imp <- h3_imp$imp * 10000
+# h3_imp <- varimp(h3_cf)
+# h3_imp <- data.frame(var = names(h3_imp), imp = as.numeric(h3_imp))
+# h3_imp <- h3_imp[order(h3_imp$imp, decreasing = T),]
+# h3_imp$imp <- h3_imp$imp * 10000
 # Save model and predictions
 h3_mod <- list(val_predictions = h3_v_p,
               class_predictions = h3_c_p,
               error = error,
-              importance = h3_imp,
               details = list(nvars = nvars,
                              ntrees = ntrees,
-                             mtry = 50))
+                             mtry = 10))
 
 saveRDS(h3_mod, "~/GitHub/dmc2015/predictions/cforest_H3_0.5_coup.rds")
 
@@ -151,8 +148,8 @@ h1_c <- cbind(couponUsed = h1$class$y$couponUsed,
 h1_c_p <- predict(h1_cf, newdata = h1_c)
 h1_c_p <- cbind(orderID = h1$class$y$orderID, couponUsed = h1_c_p)
 # Save model and predictions
-h1_mod <- list(val_predictions = h1_v_p,
-               class_predictions = h1_c_p,
+h3_mod <- list(val_predictions = h3_v_p,
+               class_predictions = h3_c_p,
                error = error,
                details = list(vars = "RF selected",
                               nvars = 390,
