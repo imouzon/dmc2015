@@ -129,7 +129,7 @@ makeLongFeatureMatrix = function(l,u,set){
    trn$couponCol = as.numeric(trn$couponCol)
    
    Xtrn = trn %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
-   names(Xtrn) = gsub(".x","",names(Xtrn))
+   names(Xtrn) = gsub("\\.x","",names(Xtrn))
    trn = list("X" = Xtrn %>% select(-couponUsed,-basketValue), "y" = Xtrn %>% select(orderID,couponUsed, basketValue))
 
    #val
@@ -141,7 +141,7 @@ makeLongFeatureMatrix = function(l,u,set){
    val$couponCol = as.numeric(val$couponCol)
 
    Xval = val %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
-   names(Xval) = gsub(".x","",names(Xval))
+   names(Xval) = gsub("\\.x","",names(Xval))
    val = list("X" = Xval %>% select(-couponUsed,-basketValue),
               "y" = Xval %>% select(orderID,  couponUsed, basketValue))
 
@@ -154,7 +154,7 @@ makeLongFeatureMatrix = function(l,u,set){
    cls$couponCol = as.numeric(cls$couponCol)
 
    Xcls = cls %>% left_join(f1,by=c("orderID","couponCol")) %>% arrange(orderID,couponCol)
-   names(Xcls) = gsub(".x","",names(Xcls))
+   names(Xcls) = gsub("\\.x","",names(Xcls))
    cls = list("X" = Xcls %>% select(-couponUsed,-basketValue),
               "y" = Xcls %>% select(orderID,couponUsed, basketValue))
 
