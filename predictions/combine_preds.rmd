@@ -234,12 +234,20 @@ Let's get the plots:
 
    qplot(validation_predictions[,3],newpred3)
    newpred3 = .45*validation_predictions[,29] + .55*validation_predictions[,11]
-   clspred3 = .45*classification_predictions[,29] + .55*classification_predictions[,11]
+   clspred3 = 
+   .45*classification_predictions[,29] + .55*classification_predictions[,11]
 
-    d = data.frame(matrix(clspred3,ncol=3,byrow=TRUE))
+   clspred3
+   
+   d = data.frame(cbind(
+                        matrix(clspred3,ncol=3,byrow=TRUE)
+                        )
 
 
-   d = matrix(clspred3,ncol=3,byrow=TRUE)
+   X = matrix(c(classification_predictions$orderID, clspred3),ncol=2,byrow=FALSE)
+   head(X)
+   d = matrix(
+              ,ncol=3,byrow=TRUE)
    names(d) = c("coupon1Used","coupon2Used","coupon3Used")
    write.csv(d,"./predictions_based_on_3_cleaner.csv")
 
