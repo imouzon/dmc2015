@@ -85,54 +85,6 @@ The parts you need to edit are LIKE_THIS
 <table>
    <tbody>
       <tr>
-         <th>Connor Jennings (IE)</th>
-         <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/connorj.jpeg" style="overflow: hidden"> 
-               <img src="./team_pics/connorj.jpeg" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I can break into a car with only a shoelace.</li>
-               <li>I love tomatoes</li>
-               <li>I wanted to be a gym teacher when I was in high school.</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-
-<table>
-   <tbody>
-      <tr>
-         <th>Yet Nguyen (STAT)</th>
-         <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/Yet.JPG" style="overflow: hidden"> 
-               <img src="./team_pics/Yet.JPG" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I cut my hair twice a month</li>
-               <li>I can run nonstop for 1 hour</li>
-               <li>I can swim nonstop for 2 hours</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-
-<table>
-   <tbody>
-      <tr>
          <th>Chen Hua (STAT)</th>
          <th align="center">Two Facts and a Falsehood</th>
       </tr>
@@ -175,8 +127,6 @@ The parts you need to edit are LIKE_THIS
       </tr>
    </tbody>
 </table>
-
-
 
 <table>
    <tbody>
@@ -225,7 +175,6 @@ The parts you need to edit are LIKE_THIS
    </tbody>
 </table>
 
-
 <table>
    <tbody>
       <tr>
@@ -252,75 +201,6 @@ The parts you need to edit are LIKE_THIS
 <table>
    <tbody>
       <tr>
-         <th>Guillermo Basulto-Elias (STAT)</th>
-         <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/ian.jpeg" style="overflow: hidden"> 
-               <img src="./team_pics/guillermo.png" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I think it's annoying to have two last names</li>
-               <li>I like to live in Ames</li>
-               <li>Stat 500 has been the most difficult course for me at ISU</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-<table>
-   <tbody>
-      <tr>
-        <th>Sam Benidt (STAT)</th>
-        <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/Sam_Benidt.jpg" style="overflow: hidden"> 
-               <img src="./team_pics/Sam_Benidt.jpg" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I have not been beaten unconscious</li>
-               <li>I'm terrified of bees</li>
-               <li>I have what plants crave</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-<table>
-   <tbody>
-      <tr>
-         <th>Meiling Liu (BCB)</th>
-        <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/Meiling.jpg" style="overflow: hidden"> 
-               <img src="./team_pics/Meiling.jpg" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I like rock climbing.</li>
-               <li>I hate the smell of cheese, so I never eat it.</li>
-               <li>Cheery is my favorite fruit.</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-<table>
-   <tbody>
-      <tr>
         <th>Weicheng Zhu (STAT)</th>
         <th align="center">Two Facts and a Falsehood</th>
       </tr>
@@ -335,29 +215,6 @@ The parts you need to edit are LIKE_THIS
                <li>Xfce is my favorite desktop environment.</li>
                <li>I'm learning openGL.</li>
                <li>Vim is my basic editor.</li>
-            </ol>
-         </td>
-      </tr>
-   </tbody>
-</table>
-
-<table>
-   <tbody>
-      <tr>
-         <th>Jason Saporta (STAT)</th>
-         <th align="center">Two Facts and a Falsehood</th>
-      </tr>
-      <tr>
-         <td>
-            <a href="./team_pics/jsaporta.jpg" style="overflow: hidden"> 
-               <img src="./team_pics/jsaporta.jpg" width="100"/> 
-            </a>
-         </td>
-         <td>
-            <ol>
-               <li>I have had the name "Jason" my entire life.</li>
-               <li>I have had the name "Andrew" my entire life.</li>
-               <li>I have had the name "Saporta" my entire life.</li>
             </ol>
          </td>
       </tr>
