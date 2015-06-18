@@ -5,6 +5,7 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       <meta name="keywords" content="dmc,data mining,dmc2015,intro"/>
       <meta name="description" content="Introduction to the 2015 Data Mining Cup"/>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
       <style type="text/css">
          @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
          @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -18,12 +19,73 @@
             font-weight: 400;
             margin-bottom: 0;
          }
+
          .remark-slide-content h1 { font-size: 3em; }
          .remark-slide-content h2 { font-size: 2em; }
          .remark-slide-content h3 { font-size: 1.6em; }
          .footnote {
             position: absolute;
             bottom: 3em;
+         }
+         .g {
+            padding: 0.25em;
+            overflow: hidden;
+         }
+         .g li {
+            float: left;
+            width: 50%;
+            padding: 0.25em;
+         }
+         .g img {
+            display: block;
+         }
+         .g li:nth-child(odd) {
+            clear: left;
+         }
+
+         @media screen and (min-width: 40em) {
+            .g li {
+               width: 33.3333333333333333%; 
+            }
+            .g li:nth-child(3n+1) {
+               clear: left;
+            }
+            .g li:nth-child(odd) {
+               clear: none;
+            }
+         }
+         @media screen and (min-width: 55em) {
+            .g li {
+               width: 25%; 
+            }
+            .g li:nth-child(4n+1) {
+               clear: left;
+            }
+            .g li:nth-child(3n+1) {
+               clear: none;
+            }
+         }
+         @media screen and (min-width: 72em) {
+            .g li {
+               width: 20%; 
+            }
+            .g li:nth-child(5n+1) {
+               clear: left;
+            }
+            .g li:nth-child(4n+1) {
+               clear: none;
+            }
+         }
+         @media screen and (min-width: 90em) {
+            .g li {
+               width: 16.666666666%; 
+            }
+            .g li:nth-child(6n+1) {
+               clear: left;
+            }
+            .g li:nth-child(5n+1) {
+               clear: none;
+            }
          }
          li p { line-height: 1.25em; }
             .red { color: #fa0000; }
@@ -204,7 +266,7 @@ layout: false
 <img src="figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
 </center>
 
--  The largest city, Des Moines, only has a population of about 500,000
+-  The largest city, Des Moines, only has a population of about 600,000
 -  The largest producer of corn, ethanol, and soybeans in the United States
 -  There are more pigs than people in Iowa
 -  It is named after the Iowa river which itself is named after the Native American "Ioway" tribe.
@@ -221,17 +283,111 @@ layout: false
 ]
 .right-column[
 
-<img src="http://www.kdnuggets.com/wp-content/uploads/data-mining-cup.png" alt="dmc logo" height="145"> 
+<center>
+<img src="./figs/american_football.jpg" alt="dmc logo" height="145"> 
+</center>
 
-The Data Mining Cup is a yearly competition hosted by prudsys (all lower case) a German analytics company
-focused on marketplace behavior. prudsys describes it this way:
-
-> The DATA MINING CUP (DMC for short) has been inspiring students around the world to pursue intelligent data analysis since the year 2000.
-> In 2014 over one thousand students from about 100 universities in 28 countries took part in the competition.
-> The best teams will be invited to Berlin for the awards ceremony at the prudsys personalization summit.
-
+-  First statistics course offered in 1915
+-  Department established in 1947 (the first statistics department in the US)
+-  Snedecor Hall built in 1953
 ]
+---
+layout: false
+.left-column[
+  ## Iowa
+  ### Where is Iowa
+  ### About Iowa
+  ## Iowa State
+  ### The Stats Dept
+  ## Our Team
+]
+.right-column[
+-  Great Teammates
+<!--Pattern HTML-->
+<div id="pattern" class="pattern">
+   <ul class="g">
+      <li><a><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Meiling.jpg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Neo_Zhou.jpg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Ran.jpg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Sam_Benidt.jpg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Weicheng.JPG alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Yaxun Sun.jpg alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Yet.JPG alt="Team Captain" /></a></li>
+      <li><a><img ~/dmc2015/team_pics/Yihua.JPG alt="Team Captain" /></a></li>
+   </ul>
+</div>
+<div id="pattern" class="pattern">
+   <ul class="g">
+      <li><a href="#"><img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/connorj.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/guillermo.png alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/jsaporta.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" /></a></li>
+   </ul>
+</div>
+]
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#Our Approach
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#In The First 10 Days
+---
+layout: false
+#  Picture of batches colred by batch week
 
+\begin{align}
+E \= \\sum_\{i\=1\}^\{n\}\\Bigg\[ & \\left\(\\frac\{\\text\{coupon1Used\}_\{i\} - \\widehat\{\\text\{coupon1Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon1Used\}_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{\\text\{coupon2Used\}_\{i\} - \\widehat\{\\text\{coupon2Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon2Used\}_\{i\}\}\\right\)^\{2\} \\\\ + & \\left\(\\frac\{\\text\{coupon3Used\}_\{i\} - \\widehat\{\\text\{coupon3Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon3Used\}_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{\\text\{basketValue\}_\{i\} - \\widehat\{\\text\{basketValue\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{basketValue\}_\{i\}\}\\right\)^\{2\} \\Bigg\]
+\end{align}
+
+---
+layout: false
+#  Picture of early rec ~ early_shop and usage 
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#And Then...
+---
+layout: false
+---
+#Nothing
+We had nothing working for us at all
+-  attempts to create some kind of base monetary value of coupons failed
+-  attempts to fit a statistical model to user behavior failed
+-  attempts to use "oddities" in the data failed
+-  Too many categorical 
+---
+# Create new features
+-  LLRs
+-  tf-idf
+---
+# New features means new data divisions
+-  Historical set 1 (desc. by Pete - mentioned by ian in background)
+-  Historical set 3 (desc. by Ian - mentioned by Pete in background)
+---
+# Now features can be generated with ease
+- LLRs on reward, user, ...
+- LLRs on rewardXuser, ...
+- LLRs on rewardXuserXbrand, ...
+# Data Explosion! Thousands of features
+---
+# Reduce features by selection
+- Pete - lasso and crf to reduce number of features
+# Data Explosion! Thousands of features
+- list of techinques for reduction
+---
       </textarea>
       <script>
          var slideshow = remark.create();
