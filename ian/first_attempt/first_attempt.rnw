@@ -291,7 +291,7 @@ If we start putting the batches together using Tuesday January 1st 2015 at 9:00 
 %-- assign_batch: R code (Code in Document)
 <<assign_batch, echo=TRUE, cache=FALSE, include = TRUE>>=
    #this batch leads to bad results
-   batchres = GetBatchInfo("2015-01-06 09:00:00")
+   batchres = GetBatchInfo("2015-01-06 00:00:00")
 @
 %$
 Customers are using coupons much more than a week after they were sent out if 
