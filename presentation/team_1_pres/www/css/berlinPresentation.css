@@ -83,6 +83,15 @@ code {
    font-size: 0.9em;
    padding: 15px;
 }
+.lossfunc {
+   background: #333333;
+   color: #f3f3f3;
+   padding-left: 1.6em;
+}
+.lossfunc h1, .inverse h2 {
+   color: #f3f3f3;
+   line-height: 0.8em;
+}
 .inverse {
    background: #333333;
    color: #777872;

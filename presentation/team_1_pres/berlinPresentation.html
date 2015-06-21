@@ -8,10 +8,10 @@
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
       </style>
 
-      <title>Iowa State Team 1 and 2 LOL</title>
+      <title>Iowa State Team 1</title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       <meta name="keywords" content="dmc,data mining,dmc2015,intro"/>
-      <meta name="description" content="Introduction to the 2015 Data Mining Cup"/>
+      <meta name="description" content="Our Solution to the 2015 Data Mining Cup"/>
       <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
    </head>
    <body>
@@ -24,8 +24,8 @@ class: center, middle, inverse
 # Our 2015 Data Mining Cup Solution
 ## Iowa State University Team 1
 ### or
-### How I Learned to Stop Worrying and Love the Grind
-.footnote[A link to our [github page](https://github.com/imouzon/dmc2015)]
+## How I Learned to Stop Worrying and Love the Grind
+.footnote[Our github page: [github.com/imouzon/dmc2015](https://github.com/imouzon/dmc2015)]
 ---
 #Iowa 
 #Iowa State University
@@ -98,33 +98,18 @@ layout: false
   ## Our Team
 ]
 .right-column[
--  Great Teammates
 <!--Pattern HTML-->
-<div id="pattern" class="pattern">
-   <ul class="g">
-      <li><a><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Meiling.jpg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Neo_Zhou.jpg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Ran.jpg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Sam_Benidt.jpg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Weicheng.JPG alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Yaxun Sun.jpg alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Yet.JPG alt="Team Captain" /></a></li>
-      <li><a><img ~/dmc2015/team_pics/Yihua.JPG alt="Team Captain" /></a></li>
-   </ul>
-</div>
-<div id="pattern" class="pattern">
-   <ul class="g">
-      <li><a href="#"><img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/connorj.jpeg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/guillermo.png alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/jsaporta.jpg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" /></a></li>
-      <li><a href="#"><img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" /></a></li>
-   </ul>
-</div>
+   <img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/Ran.jpg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/Weicheng.JPG alt="Team Captain" />
+   <img ~/dmc2015/team_pics/Yihua.JPG alt="Team Captain" />
+   <img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" />
+
+   <img ~/dmc2015/team_pics/Yaxun Sun.jpg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/Neo_Zhou.jpg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" />
+   <img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" />
 ]
 ---
 name: inverse
@@ -139,7 +124,15 @@ class: center, middle, inverse
 ---
 #In The First 10 Days
 ---
-layout: false
+name: lossfunc
+layout: true
+class: center, middle, lossfunc
+---
+# Dealing with Loss 
+$$
+   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+$$
+---
 layout: false
 .left-column[
   ## First Steps
@@ -147,12 +140,6 @@ layout: false
   ### Examine Error
 ]
 .right-column[
-# Dealing with Loss 
-
-$$
-   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
-$$
-
 
 Looking at this, we realized we needed to
 
