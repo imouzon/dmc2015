@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+.knitr.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+},
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0em 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage.left {
+  text-align: left;
+}
+.rimage.right {
+  text-align: right;
+}
+.rimage.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<style type="text/css">
+.knitr.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+},
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0em 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage.left {
+  text-align: left;
+}
+.rimage.right {
+  text-align: right;
+}
+.rimage.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<style type="text/css">
+.knitr.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+},
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0em 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage.left {
+  text-align: left;
+}
+.rimage.right {
+  text-align: right;
+}
+.rimage.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<style type="text/css">
+.knitr.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+},
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0em 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage.left {
+  text-align: left;
+}
+.rimage.right {
+  text-align: right;
+}
+.rimage.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<style type="text/css">
+.knitr.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+},
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0em 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage.left {
+  text-align: left;
+}
+.rimage.right {
+  text-align: right;
+}
+.rimage.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+  <title>Our 2015 Data Mining Cup Solution</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Our 2015 Data Mining Cup Solution">
+  <meta name="author" content="ISU DMC 2015 Team 1">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Our 2015 Data Mining Cup Solution</h1>
+    <h2>Or How I Learned to Stop Worrying and Love the Grind</h2>
+    <p>ISU DMC 2015 Team 1<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <article data-timings="">
+    <!--- packages R code (No Results in Document) -->
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>Slide 2</h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h1>Our 2015 Data Mining Cup Solution</h1>
+  </hgroup>
+  <article data-timings="">
+    <h2>Iowa State University Team 1</h2>
+
+<h3>or</h3>
+
+<h3>How I Learned to Stop Worrying and Love the Grind</h3>
+
+<h2>.footnote[A link to our <a href="https://github.com/imouzon/dmc2015">github page</a>]</h2>
+
+<p>#Iowa 
+#Iowa State University
+##and </p>
+
+<h2>#Our Team</h2>
+
+<h2>Iowa</h2>
+
+<h3>Where is Iowa</h3>
+
+<p>Because we know that this is an international audience, you might not all be familiar with the state of Iowa.</p>
+
+<iframe width="600" 
+   height="450" 
+   frameborder="0" 
+   style="border:0"
+   src="https://www.google.com/maps/embed/v1/directions?origin=Berlin%2C%20Germany&destination=Iowa%20State%20University%2C%20Ames%2C%20IA%2C%20United%20States&key=...">
+</iframe>
+
+<hr>
+
+<h2>Iowa</h2>
+
+<h3>Where is Iowa</h3>
+
+<h3>About Iowa</h3>
+
+<h2>Iowa is in America&#39;s Midwest</h2>
+
+<p><center>
+   <img src="figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
+</center></p>
+
+<ul>
+<li> The largest city, Des Moines, only has a population of about 600,000</li>
+<li> The largest producer of corn, ethanol, and soybeans in the United States</li>
+<li> There are more pigs than people in Iowa</li>
+<li> It is named after the Iowa river which itself is named after the Native American &quot;Ioway&quot; tribe.</li>
+</ul>
+
+<h2>-  It is the birth place of the actor John Wayne (The Searchers, Red River, ...)</h2>
+
+<h2>Iowa</h2>
+
+<h3>Where is Iowa</h3>
+
+<h3>About Iowa</h3>
+
+<h2>Iowa State</h2>
+
+<h3>The Stats Dept</h3>
+
+<p><center>
+<img src="./figs/american_football.jpg" alt="dmc logo" height="145"> 
+</center></p>
+
+<ul>
+<li> First statistics course offered in 1915</li>
+<li> Department established in 1947 (the first statistics department in the US)</li>
+</ul>
+
+<h2>-  Snedecor Hall built in 1953</h2>
+
+<h2>Iowa</h2>
+
+<h3>Where is Iowa</h3>
+
+<h3>About Iowa</h3>
+
+<h2>Iowa State</h2>
+
+<h3>The Stats Dept</h3>
+
+<h2>Our Team</h2>
+
+<ul>
+<li> Great Teammates
+&lt;!--Pattern HTML--&gt;
+<ul class="g">
+<li><a><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Meiling.jpg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Neo_Zhou.jpg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Ran.jpg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Sam_Benidt.jpg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Weicheng.JPG alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Yaxun Sun.jpg alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Yet.JPG alt="Team Captain" /></a></li>
+<li><a><img ~/dmc2015/team_pics/Yihua.JPG alt="Team Captain" /></a></li>
+</div>
+<ul>
+<li><a href="#"><img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" /></a></li>
+<li><a href="#"><img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" /></a></li>
+<li><a href="#"><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
+<li><a href="#"><img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" /></a></li>
+<li><a href="#"><img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" /></a></li>
+</ul>
+---
+#Our Approach
+---
+#In The First 10 Days
+---
+## First Steps
+### Find Structure
+### Examine Error</li>
+</ul>
+
+<h1>Dealing with Loss</h1>
+
+<p>\[
+E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+\]</p>
+
+<p>Looking at this, we realized we needed to</p>
+
+<ul>
+<li> Need to accurately predict coupon use</li>
+<li> Need to accurately predict basket value</li>
+</ul>
+
+<h2>-  <strong>and</strong> accurately predict the weights</h2>
+
+<h1>Picture of early rec ~ early_shop and usage</h1>
+
+<hr>
+
+<h2>#And Then...</h2>
+
+<p>#Nothing
+We had nothing working for us at all</p>
+
+<ul>
+<li> attempts to create some kind of base monetary value of coupons failed</li>
+<li> attempts to fit a statistical model to user behavior failed</li>
+<li> attempts to use &quot;oddities&quot; in the data failed</li>
+</ul>
+
+<h2>-  Too many categorical </h2>
+
+<h1>Create new features</h1>
+
+<ul>
+<li> LLRs</li>
+</ul>
+
+<h2>-  tf-idf</h2>
+
+<h1>New features means new data divisions</h1>
+
+<ul>
+<li> Historical set 1 (desc. by Pete - mentioned by ian in background)</li>
+</ul>
+
+<h2>-  Historical set 3 (desc. by Ian - mentioned by Pete in background)</h2>
+
+<h1>Now features can be generated with ease</h1>
+
+<ul>
+<li>LLRs on reward, user, ...</li>
+<li>LLRs on rewardXuser, ...</li>
+<li>LLRs on rewardXuserXbrand, ...
+# Data Explosion! Thousands of features
+---
+# Reduce features by selection</li>
+<li>Pete - lasso and crf to reduce number of features
+# Data Explosion! Thousands of features</li>
+</ul>
+
+<h2>- list of techinques for reduction</h2>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title=''>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Slide 2'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Our 2015 Data Mining Cup Solution'>
+         3
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>

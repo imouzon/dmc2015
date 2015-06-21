@@ -1,10 +1,18 @@
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   library(devtools)
+   install_github("slidify")
+   library("slidify")
+```
+
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Title</title>
+      <title>Iowa State Team 1 and 2 LOL</title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       <meta name="keywords" content="dmc,data mining,dmc2015,intro"/>
       <meta name="description" content="Introduction to the 2015 Data Mining Cup"/>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
       <style type="text/css">
          @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
          @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -18,6 +26,7 @@
             font-weight: 400;
             margin-bottom: 0;
          }
+
          .remark-slide-content h1 { font-size: 3em; }
          .remark-slide-content h2 { font-size: 2em; }
          .remark-slide-content h3 { font-size: 1.6em; }
@@ -27,7 +36,7 @@
          }
          li p { line-height: 1.25em; }
             .red { color: #fa0000; }
-            .bgcol { color: #272822; }
+            .bgcol { color: #333333; }
             .large { font-size: 2em; }
             a, a > code {
             color: rgb(249, 38, 114);
@@ -45,14 +54,18 @@
               padding-left: 1.6em;
               margin-top: 0;
          }
+         /* ISU colors:
+            red = 333333
+            yellow = ffcc66
+         */
          table {
             width: 10%;
             border-collapse: collapse;
-            border-color: #272822;
+            border-color: #333333;
             padding: 10px;
             }
          th {
-            background-color: #272822;
+            background-color: #333333;
             color: #777872;
             font-size: .6em;
          }
@@ -91,7 +104,7 @@
             padding: 15px;
          }
          .inverse {
-            background: #272822;
+            background: #333333;
             color: #777872;
             text-shadow: 0 0 20px #333;
          }
@@ -158,304 +171,186 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-# So You Want To Be a Data Miner?
-## The 2015 Data Mining Cup
-### What to Expect When You're Predicting
-.footnote[A link to our [github page](https://github.com/imouzon/dmc2015)]
+# 
+# Our 2015 Data Mining Cup Solution
+## Iowa State University Team 1
+### or
+### How I Learned to Stop Worrying and Love the Grind
 ---
-#What Is The Data Mining Cup
-#and 
-#Why Are We Here?
+#Iowa 
+#Iowa State University
+##and 
+#Our Team
 ---
 layout: false
 .left-column[
-  ## What is it?
+  ## Iowa
+  ### Where is Iowa
 ]
 .right-column[
 
-<img src="http://www.kdnuggets.com/wp-content/uploads/data-mining-cup.png" alt="dmc logo" height="145"> 
-
-The Data Mining Cup is a yearly competition hosted by prudsys (all lower case) a German analytics company
-focused on marketplace behavior. prudsys describes it this way:
-
-> The DATA MINING CUP (DMC for short) has been inspiring students around the world to pursue intelligent data analysis since the year 2000.
-> In 2014 over one thousand students from about 100 universities in 28 countries took part in the competition.
-> The best teams will be invited to Berlin for the awards ceremony at the prudsys personalization summit.
-
+Because we know that this is an international audience, you might not all be familiar with the state of Iowa.
+<iframe width="600" 
+        height="450" 
+        frameborder="0" 
+        style="border:0"
+        src="https://www.google.com/maps/embed/v1/directions?origin=Berlin%2C%20Germany&destination=Iowa%20State%20University%2C%20Ames%2C%20IA%2C%20United%20States&key=...">
+</iframe>
 ]
 ---
+layout: false
 .left-column[
-  ## What is it?
-  ## Why am I here?
+  ## Iowa
+  ### Where is Iowa
+  ### About Iowa
 ]
 .right-column[
+
+## Iowa is in America's Midwest
+
 <center>
-<img src=" http://www.photographyblogger.net/wp-content/uploads/2012/02/011.jpg" alt="dmc logo" height="400"> 
+<img src="figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
 </center>
+
+-  The largest city, Des Moines, only has a population of about 600,000
+-  The largest producer of corn, ethanol, and soybeans in the United States
+-  There are more pigs than people in Iowa
+-  It is named after the Iowa river which itself is named after the Native American "Ioway" tribe.
+-  It is the birth place of the actor John Wayne (The Searchers, Red River, ...)
+]
+---
+layout: false
+.left-column[
+  ## Iowa
+  ### Where is Iowa
+  ### About Iowa
+  ## Iowa State
+  ### The Stats Dept
+]
+.right-column[
+
+<center>
+<img src="./figs/american_football.jpg" alt="dmc logo" height="145"> 
+</center>
+
+-  First statistics course offered in 1915
+-  Department established in 1947 (the first statistics department in the US)
+-  Snedecor Hall built in 1953
+]
+---
+layout: false
+.left-column[
+  ## Iowa
+  ### Where is Iowa
+  ### About Iowa
+  ## Iowa State
+  ### The Stats Dept
+  ## Our Team
+]
+.right-column[
+-  Great Teammates
+<!--Pattern HTML-->
+<div id="pattern" class="pattern">
+   <ul>
+      <li><a><img ../../team_pics/ian.jpeg alt="Team Captain"/></a></li>
+      <li><a><img ../../team_pics/Meiling.jpg alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Neo_Zhou.jpg alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Ran.jpg alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Sam_Benidt.jpg alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Weicheng.JPG alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Yaxun Sun.jpg alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Yet.JPG alt="Team Captain" /></a></li>
+      <li><a><img ../../team_pics/Yihua.JPG alt="Team Captain" /></a></li>
+   </ul>
+</div>
+<div id="pattern" class="pattern">
+   <ul>
+      <li><a href="#"><img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/connorj.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/guillermo.png alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/jsaporta.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" /></a></li>
+      <li><a href="#"><img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" /></a></li>
+   </ul>
+</div>
 ]
 ---
 name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#Only you can answer that
-# Money? 
-# Power?
-# Glory?
----
-#I can tell you why I'm here
----
-layout: false
-.left-column[
-  ## What is it?
-  ## Why am I here?
-]
-.right-column[
-<center>
-<img src="./figs/teampic1smallC.jpg" alt="dmc logo" height="250"> 
-</center>
-##In Spring 2013 I was taking STAT 602
-- And 602 was really, really hard.
-- So hard that I didn't even **look** at the midterm when I got it back
-- But I knew that "data mining" was important and I liked it
-- I just needed a chance to prove to myself that I could do it
-]
----
-.left-column[
-  ## What is it?
-  ## Why am I here?
-]
-.right-column[
-##That's when I joined the Data Mining Cup Team
-And as if by magic STAT 602 started making much more sense.
-Without the big complicated data sets, 
-it's hard to see where these theories and techniques matter. 
-But working with these datasets takes up so much time, 
-the methods become bizarre black boxes.
-Working at the DMC gave me:
-###Data Mining Experience
-- A better understanding of why we need Machine Learning techniques
-- A chance to apply what I was learning without any guardrails
-- A chance to learn from others who had been through this before
-]
----
-.left-column[
-  ## What is it?
-  ## Why am I here?
-]
-.right-column[
-###Better Computing Skills
-- The problems you have to deal with are often computational, and you get better at working through them
-- I got much better at R during this competition (I learned how to use `knitr` for instance)
-
-###Collaborative Skills
-- I got the chance to work hard at something because people were depending on me
-- People working together on the same problem disagree - we had to resolve conflicts and move on
-- Our solution is the hard work of several people, all woven together
-- As the days went past, we got really close (friends for life kinda stuff)
-]
----
-<center>
-<h1>I may not be much better at this stuff</h1>
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSui25NJlJwCR0TaL-8ogAXOSBP2oeckuYeFUdUXFW82yHsU2vJ" alt="dmc logo" height="450"> 
-</center>
----
-.left-column[
-  ## What is it?
-  ## Why am I here?
-  ## We almost won
-]
-.right-column[
-###We came in fifth 
-####People went to Germany
-<center>
-   <img src="./figs/team2013.png" alt="my dogs" height="300">
-</center>
-<center>
-   <img src="./figs/ceremony_2013.jpg" alt="dmc logo" height="100"> 
-   <img src="./figs/berlin_stuff.jpg" alt="dmc logo" height="100"> 
-   <img src="./figs/berlin_stuff2.jpg" alt="dmc logo" height="100"> 
-</center>
-]
----
-.left-column[
-  ## What is it?
-  ## Why am I here?
-  ## We almost won
-  ## In 2014 we did win
-]
-.right-column[
-<center>
-   <img src="http://www.data-mining-cup.de/typo3temp/pics/8b9a02b940.jpg" alt="dmc logo" height="450"> 
-</center>
-]
+#Our Approach
 ---
 name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#What Makes the DMC Special?
+#In The First 10 Days
 ---
 layout: false
+layout: false
 .left-column[
-  ## Kaggle issues
+  ## First Steps
+  ### Find Structure
+  ### Examine Error
 ]
 .right-column[
-<center>
-   <img src= "https://www.kaggle.com/content/v/4e5085eca1ab/kaggle/img/logos/kaggle-logo-transparent-300.png" alt="dmc logo" height="150"> 
-</center>
-<center>
-<h2> Kaggle Gets Most Things Right </h2>
-</center>
-- Kaggle attracts lots of teams
-- Large data sets
-- Big prizes
-<center>
-<h2>But they also get a lot of things wrong</h2>
-</center>
-- In Kaggle you have get anywhere from 5 to 10 test predictions a day (the "leaderboard")
-- Data in Kaggle competitions is often big without being complicated
-- The data is often processed and feels generic (often it's just a black box)
-]
----
-.left-column[
-  ## Kaggle issues
-  ## DMC more realistic
-]
-.right-column[
-<center>
-   <img src= "./figs/dmc_data_samp.png" alt="dmc logo" height="150"> 
-</center>
-<center>
-<h2> The DMC data is real</h2>
-</center>
-- DMC data is real data
-- It Hasn't been overly processed, needs cleaning
-- It isn't given to you in the format that you are "supposed" to use, it's given to you in the format it was collected
-- You know what each record means, there are no "f145", "f513" columns
-]
----
-.left-column[
-  ## Kaggle issues
-  ## DMC more realistic
-  ## DMC data good
-]
-.right-column[
-<center>
-   <img src= "./figs/dmc_data_samp.png" alt="dmc logo" height="150"> 
-</center>
-<center>
-<h2>The DMC data is interesting</h2>
-</center>
-Both the 2013 and 2014 data sets were incredibly deep.
-- There were time dependencies, repeat customers, and other complicated interactions
-- Since we could approach the data from multiple angles, we could create a much larger and more unique set of features than anyone could have given us
-- Big and complex data is much more fun than just "large memory allocation" data
-]
----
-<!-- packages: R code (No Results in Document) -->
-```{r packages,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
-   library(xtable)
-   altrows.xtable = function(df){
-      print(xtable(df), booktabs = TRUE, add.to.row = list(pos=as.list(rws),command=col))
-   }
-```
+# Dealing with Loss 
 
-<!-- read_data: R code (No Results in Document) -->
-```{r read_data,echo=2:5,warning=FALSE,error=FALSE,cache=TRUE,message=FALSE,warning=FALSE,comment=NA}
-   setwd('~/dmc2015/dmc2013/')
-   #the 2013 data in the github repo dmc2014/dmc2013/
-   d.class = read.table('./data/transact_class.txt',header=TRUE,sep="|")
-   d.train = read.table('./data/transact_train.txt',header=TRUE,sep="|")
-```
-<!-- tab1: R code (No Results in Document) -->
-```{r tab1,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,results='asis',cache=TRUE,warning=FALSE,include=TRUE,comment=NA}
-   print(xtable(d.train[which(d.train$sessionNo < 3),1:12]),type="html",size='small',include.rownames=FALSE)
-```
-```{r tab2,echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,results='asis',cache=TRUE,warning=FALSE,include=TRUE,comment=NA}
-   print(xtable(d.train[which(d.train$sessionNo < 3),13:24]),type="html",size='small',include.rownames=FALSE)
-```
+$$
+\begin{align}
+   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ & \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\}  \\\\
+   & + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+\end{align}
+$$
+
+
+Looking at this, we realized we needed to
+
+-  Need to accurately predict coupon use
+-  Need to accurately predict basket value
+-  **and** accurately predict the weights
+]
 ---
-.left-column[
-  ## Kaggle issues
-  ## DMC more realistic
-  ## DMC data good
-]
-.right-column[
-<center>
-<h2>It matters how we handle time</h2>
-</center>
-<center>
-   <img src= "./figs/graphics-durationPlots.jpg" alt="dmc logo" height="150"> 
-</center>
-<center>
-   <img src= "./figs/graphics-durationPlots0.jpg" alt="dmc logo" height="350"> 
-</center>
-]
+layout: false
+#  Picture of early rec ~ early_shop and usage 
 ---
 name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#What is Participating in the Data Mining Cup Like?
+#And Then...
 ---
 layout: false
-.left-column[
-  ## It's a lot of fun
-]
-.right-column[
-<center>
-   <img src= "./figs/IMG_0033.JPG" alt="dmc logo" height="450"> 
-</center>
-- You get to work with smart people
-- On something you are all interested in
-- And you get to be creative
-<center>
-]
 ---
-.left-column[
-  ## It's a lot of fun
-  ## It's a lot of work
-]
-.right-column[
-<center>
-<h1>
-The comptition only lasts five weeks
-</h1>
-</center>
-- It's pretty fast paced
-- It takes a little bit of commitment
-- It can take a backseat to other things going on in your life
-<center>
-]
+#Nothing
+We had nothing working for us at all
+-  attempts to create some kind of base monetary value of coupons failed
+-  attempts to fit a statistical model to user behavior failed
+-  attempts to use "oddities" in the data failed
+-  Too many categorical 
 ---
-.left-column[
-  ## It's a lot of fun
-  ## It's a lot of work
-  ## It's a third thing
-]
-.right-column[
-###I think the first 100 or so things we think about data are usually the same
-
-- How many rows, columns, etc.
-- Are these variables counts or classes?
-- Is there a relationship between this variable and that variable?
-
-###and so on.
-###But after that, we start to think about different things
-
-- You start to bring your own third things to the problem
-- Things that only you can do
-- Things that could make the difference between winning and losing
-]
+# Create new features
+-  LLRs
+-  tf-idf
 ---
-name: inverse
-layout: true
-class: center, middle, inverse
+# New features means new data divisions
+-  Historical set 1 (desc. by Pete - mentioned by ian in background)
+-  Historical set 3 (desc. by Ian - mentioned by Pete in background)
 ---
-#Your turn, github, questions, etc.
-
-
+# Now features can be generated with ease
+- LLRs on reward, user, ...
+- LLRs on rewardXuser, ...
+- LLRs on rewardXuserXbrand, ...
+# Data Explosion! Thousands of features
+---
+# Reduce features by selection
+- Pete - lasso and crf to reduce number of features
+# Data Explosion! Thousands of features
+- list of techinques for reduction
+---
       </textarea>
       <script>
          var slideshow = remark.create();

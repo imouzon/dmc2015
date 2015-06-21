@@ -1,221 +1,18 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Title</title>
+      <link href ="www/css/berlinPresentation.css" type="text/css" rel = "stylesheet">
+      <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+      </style>
+
+      <title>Iowa State Team 1 and 2 LOL</title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       <meta name="keywords" content="dmc,data mining,dmc2015,intro"/>
       <meta name="description" content="Introduction to the 2015 Data Mining Cup"/>
       <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
-      <style type="text/css">
-         @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
-         @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
-         @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
-
-         body { 
-            font-family: 'Droid Serif'; 
-         }
-         h1, h2, h3 {
-            font-family: 'Yanone Kaffeesatz';
-            font-weight: 400;
-            margin-bottom: 0;
-         }
-
-         .remark-slide-content h1 { font-size: 3em; }
-         .remark-slide-content h2 { font-size: 2em; }
-         .remark-slide-content h3 { font-size: 1.6em; }
-         .footnote {
-            position: absolute;
-            bottom: 3em;
-         }
-         .g {
-            padding: 0.25em;
-            overflow: hidden;
-         }
-         .g li {
-            float: left;
-            width: 50%;
-            padding: 0.25em;
-         }
-         .g img {
-            display: block;
-         }
-         .g li:nth-child(odd) {
-            clear: left;
-         }
-
-         @media screen and (min-width: 40em) {
-            .g li {
-               width: 33.3333333333333333%; 
-            }
-            .g li:nth-child(3n+1) {
-               clear: left;
-            }
-            .g li:nth-child(odd) {
-               clear: none;
-            }
-         }
-         @media screen and (min-width: 55em) {
-            .g li {
-               width: 25%; 
-            }
-            .g li:nth-child(4n+1) {
-               clear: left;
-            }
-            .g li:nth-child(3n+1) {
-               clear: none;
-            }
-         }
-         @media screen and (min-width: 72em) {
-            .g li {
-               width: 20%; 
-            }
-            .g li:nth-child(5n+1) {
-               clear: left;
-            }
-            .g li:nth-child(4n+1) {
-               clear: none;
-            }
-         }
-         @media screen and (min-width: 90em) {
-            .g li {
-               width: 16.666666666%; 
-            }
-            .g li:nth-child(6n+1) {
-               clear: left;
-            }
-            .g li:nth-child(5n+1) {
-               clear: none;
-            }
-         }
-         li p { line-height: 1.25em; }
-            .red { color: #fa0000; }
-            .bgcol { color: #333333; }
-            .large { font-size: 2em; }
-            a, a > code {
-            color: rgb(249, 38, 114);
-            text-decoration: none;
-         }
-         /* Styling for Template:Quote */
-         blockquote.templatequote {
-           margin-top: 0;
-         }
-         blockquote.templatequote div.templatequotecite {
-             line-height: 1.5em;
-              /* @noflip */
-              text-align: left;
-              /* @noflip */
-              padding-left: 1.6em;
-              margin-top: 0;
-         }
-         /* ISU colors:
-            red = 333333
-            yellow = ffcc66
-         */
-         table {
-            width: 10%;
-            border-collapse: collapse;
-            border-color: #333333;
-            padding: 10px;
-            }
-         th {
-            background-color: #333333;
-            color: #777872;
-            font-size: .6em;
-         }
-         td {
-            text-align: right;
-            font-size: .6em;
-         }
-         table
-         code {
-            -moz-border-radius: 5px;
-            -web-border-radius: 5px;
-            background: #e7e8e2;
-            border-radius: 5px;
-         }
-         .remark-container {
-            background-color: bgcol;
-         }
-         .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
-         .remark-code-line-highlighted     { background-color: #373832; }
-         .pull-left {
-            float: left;
-            width: 47%;
-         }
-         .pull-right {
-            float: right;
-            width: 47%;
-         }
-         .pull-right ~ p {
-            clear: both;
-         }
-         #slideshow .slide .content code {
-            font-size: 0.8em;
-         }
-         #slideshow .slide .content pre code {
-            font-size: 0.9em;
-            padding: 15px;
-         }
-         .inverse {
-            background: #333333;
-            color: #777872;
-            text-shadow: 0 0 20px #333;
-         }
-         .inverse h1, .inverse h2 {
-            color: #f3f3f3;
-            line-height: 0.8em;
-         }
-         /* Slide-specific styling */
-         #slide-inverse .footnote {
-            bottom: 12px;
-            left: 20px;
-         }
-         #slide-how .slides {
-            font-size: 0.9em;
-            position: absolute;
-            top:  151px;
-            right: 140px;
-         }
-         #slide-how .slides h3 {
-            margin-top: 0.2em;
-         }
-         #slide-how .slides .first, #slide-how .slides .second {
-            padding: 1px 20px;
-            height: 90px;
-            width: 120px;
-            -moz-box-shadow: 0 0 10px #777;
-            -webkit-box-shadow: 0 0 10px #777;
-            box-shadow: 0 0 10px #777;
-         }
-         #slide-how .slides .first {
-            background: #fff;
-            position: absolute;
-            top: 20%;
-            left: 20%;
-            z-index: 1;
-         }
-         #slide-how .slides .second {
-            position: relative;
-            background: #fff;
-            z-index: 0;
-         }
-
-         /* Two-column layout */
-         .left-column {
-            color: #777;
-            width: 20%;
-            height: 92%;
-            float: left;
-         }
-         .left-column h2:last-of-type, .left-column h3:last-child {
-            color: #000;
-         }
-         .right-column {
-            width: 75%;
-            float: right;
-            padding-top: 1em;
-         }
-      </style>
    </head>
    <body>
    <textarea id="source">
@@ -224,7 +21,6 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-# 
 # Our 2015 Data Mining Cup Solution
 ## Iowa State University Team 1
 ### or
@@ -344,12 +140,26 @@ class: center, middle, inverse
 #In The First 10 Days
 ---
 layout: false
-#  Picture of batches colred by batch week
+layout: false
+.left-column[
+  ## First Steps
+  ### Find Structure
+  ### Examine Error
+]
+.right-column[
+# Dealing with Loss 
 
-\begin{align}
-E \= \\sum_\{i\=1\}^\{n\}\\Bigg\[ & \\left\(\\frac\{\\text\{coupon1Used\}_\{i\} - \\widehat\{\\text\{coupon1Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon1Used\}_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{\\text\{coupon2Used\}_\{i\} - \\widehat\{\\text\{coupon2Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon2Used\}_\{i\}\}\\right\)^\{2\} \\\\ + & \\left\(\\frac\{\\text\{coupon3Used\}_\{i\} - \\widehat\{\\text\{coupon3Used\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{coupon3Used\}_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{\\text\{basketValue\}_\{i\} - \\widehat\{\\text\{basketValue\}\}_\{i\}\}\{\\frac\{1\}\{n\}\\sum_\{i\=1\}^\{n\}\\text\{basketValue\}_\{i\}\}\\right\)^\{2\} \\Bigg\]
-\end{align}
+$$
+   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+$$
 
+
+Looking at this, we realized we needed to
+
+-  Need to accurately predict coupon use
+-  Need to accurately predict basket value
+-  **and** accurately predict the weights
+]
 ---
 layout: false
 #  Picture of early rec ~ early_shop and usage 

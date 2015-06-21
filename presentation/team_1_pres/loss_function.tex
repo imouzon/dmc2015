@@ -1,0 +1,19 @@
+% For LaTeX-Box: root = loss_function.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  File Name: loss_function.tex
+%  Purpose:
+%
+%  Creation Date: 17-06-2015
+%  Last Modified: Wed Jun 17 19:58:12 2015
+%  Created By:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{amsart}
+
+\begin{document}
+
+
+\begin{align*}
+E = \sum_{i=1}^{n}\Bigg[ & \left(\frac{\text{coupon1Used}_{i} - \widehat{\text{coupon1Used}}_{i}}{\frac{1}{n}\sum_{i=1}^{n}\text{coupon1Used}_{i}}\right)^{2} + \left(\frac{\text{coupon2Used}_{i} - \widehat{\text{coupon2Used}}_{i}}{\frac{1}{n}\sum_{i=1}^{n}\text{coupon2Used}_{i}}\right)^{2} \\
++ & \left(\frac{\text{coupon3Used}_{i} - \widehat{\text{coupon3Used}}_{i}}{\frac{1}{n}\sum_{i=1}^{n}\text{coupon3Used}_{i}}\right)^{2} + \left(\frac{\text{basketValue}_{i} - \widehat{\text{basketValue}}_{i}}{\frac{1}{n}\sum_{i=1}^{n}\text{basketValue}_{i}}\right)^{2} \Bigg]
+\end{align*}
+\end{document}
