@@ -1,0 +1,51 @@
+---
+title       : Our 2015 Data Mining Cup Solution
+author      : Iowa State University Team 1
+subtitle    : Or How I Learned to Stop Worrying and Love the Grind
+framework   : revealjs
+highlighter : highlight.js
+hitheme     : tomorrow
+widgets     : [mathjax]
+mode        : selfcontained
+knit        : slidify::knit2slides
+---
+
+## Quick example with ggplot2
+```{r, echo=5}
+   library(ggplot2)
+   data(diamonds)
+   diamonds<-diamonds[sample(1:nrow(diamonds),2000),]
+   ggplot(diamonds, aes(carat, price))+geom_point(color="firebrick")
+```
+
+---
+
+## Slide 2
+
+---
+
+## slide 3
+
+---
+layout: slide
+replace: slide.content
+---
+{{{ slide.content }}}
+<footer class = 'logo'>
+  <img src = 'path/to/logo'></img>
+  </footer>
+
+## Two Column Layout   
+This slide has two columns
+
+*** {name: left}
+
+- point 1
+- point 2
+- point 3
+
+*** {name: right}
+
+- point 1
+- point 2
+- point 3

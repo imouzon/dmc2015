@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 07-04-2015
-%  Last Modified: Wed Apr 22 15:15:05 2015
+%  Last Modified: Sun Jun 21 17:26:45 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent file
@@ -344,6 +344,11 @@ We can save the \verb!order -> batch! assgnments as:
 <<assign_batch2, echo=TRUE, cache=FALSE, include = TRUE>>=
    #this batch leads to bad results
    batchres = GetBatchInfo("2015-01-06 00:00:00")
+
+   batchres$plots[[1]]
+   batchres$plots[[2]]
+   batchres$plots[[3]]
+
    write.csv(batchres$train[,c("orderID","batchID","couponsSent","couponsExpire")],file='./written_data/trainingset.batchID.csv',row.names=FALSE,quote=FALSE,na="")
    write.csv(batchres$test[,c("orderID","batchID","couponsSent","couponsExpire")],file='./written_data/testingset.batchID.csv',row.names=FALSE,quote=FALSE,na="")
 

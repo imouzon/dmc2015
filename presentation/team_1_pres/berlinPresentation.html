@@ -122,13 +122,61 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#In The First 10 Days
+#The First 10 Days
+---
+layout: false
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+]
+
+.right-column[
+
+##The Data Didn't Just Appear Randomly
+
+-  There must be some **structure** underlying it 
+-  There must be some **unit** generating it in the context of the structure
+
+Here's an analogy:
+
+-  The tracks the structure
+-  The train is the unit, whose future position is uncertain but constrained by the tracks
+
+<center>
+   <img src="http://33.media.tumblr.com/11db69e7cd1e1283dc195e8d60e443ec/tumblr_inline_nlkv5eNmcw1r4j8j1.gif" alt="buster" height=240>
+</center>
+
+]
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+]
+
+.right-column[
+
+]
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+]
+.right-column[
+
+Looking at this, we realized we needed to
+
+- Need to accurately predict coupon use
+- Need to accurately predict basket value
+- **and** accurately predict the weights
+]
 ---
 name: lossfunc
 layout: true
 class: center, middle, lossfunc
 ---
 # Dealing with Loss 
+<br><br>
 $$
    E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
 $$
@@ -140,8 +188,10 @@ layout: false
   ### Examine Error
 ]
 .right-column[
-
 Looking at this, we realized we needed to
+$$
+   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+$$
 
 -  Need to accurately predict coupon use
 -  Need to accurately predict basket value
@@ -149,7 +199,7 @@ Looking at this, we realized we needed to
 ]
 ---
 layout: false
-#  Picture of early rec ~ early_shop and usage 
+# Picture of early rec ~ early_shop and usage 
 ---
 name: inverse
 layout: true
@@ -161,14 +211,14 @@ layout: false
 ---
 #Nothing
 We had nothing working for us at all
--  attempts to create some kind of base monetary value of coupons failed
--  attempts to fit a statistical model to user behavior failed
--  attempts to use "oddities" in the data failed
--  Too many categorical 
+- attempts to create some kind of base monetary value of coupons failed
+- attempts to fit a statistical model to user behavior failed
+- attempts to use "oddities" in the data failed
+- Too many categorical 
 ---
 # Create new features
--  LLRs
--  tf-idf
+- LLRs
+- tf-idf
 ---
 # New features means new data divisions
 -  Historical set 1 (desc. by Pete - mentioned by ian in background)
