@@ -184,6 +184,7 @@ layout: false
   ### Examine Error
 ]
 .right-column[
+### PROBLEM
 The basic piece of the loss function is
 $$
 \\frac\{1\}\{\\bar\{x\}\}   \\sum\_\{i=1\}^\{n\} \\left\(x\_\{i\} - \\widehat\{x\}\_\{i\}\\right\)^\{2\}
@@ -193,7 +194,6 @@ $$
 - We get punished for more as the more we miss by
 - we get punished more if the mean response is low
 
-### PROBLEM
 We have to predict the mean response too!
 
 Consider `basketValue`:
@@ -208,10 +208,15 @@ layout: false
 .left-column[
   ## First Steps
   ### Examine Error
-  ### Error By Group
+  ### Basket Error
 ]
 .right-column[
 ## Error and `basketValue`:
+**Basket behavior**
+There are some extreme values, but most seem to be very close to 180:
+<center>
+   <img src="www/figs/basketFreq.png" alt="orderFast" height=120></img>
+</center>
 
 **Possible Scenarios:**
 
@@ -219,9 +224,11 @@ layout: false
 |--------------------------|:-------------------:|:-----------------------:|
 | **Prediction is huge**  |  Small Error<br> Huge Mean | **Huge Error** <br> **Small Mean**       |
 | **Predict is small** |  Huge Error<br> Huge Mean | Small Error<br> Small Mean       |
-We are never better off making incorrect predictions, but we would lose the entire competition
-if we are wrong just be predicition 
 
+- Obviously, we are never better off making incorrect predictions
+- *But* we could lose the entire competition just by making one mistake in basketValue
+
+**Decision:** Use exponential tools that restrict prediction size
 ]
 ---
 .left-column[
