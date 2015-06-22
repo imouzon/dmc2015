@@ -190,12 +190,9 @@ layout: false
 .right-column[
 
 Because we know that this is an international audience, you might not all be familiar with the state of Iowa.
-<iframe width="600" 
-        height="450" 
-        frameborder="0" 
-        style="border:0"
-        src="https://www.google.com/maps/embed/v1/directions?origin=Berlin%2C%20Germany&destination=Iowa%20State%20University%2C%20Ames%2C%20IA%2C%20United%20States&key=...">
-</iframe>
+<center>
+<img src="www/figs/iowa.jpeg>
+</center>
 ]
 ---
 layout: false
