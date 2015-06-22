@@ -59,7 +59,7 @@ layout: false
 ## Iowa is in America's Midwest
 
 <center>
-<img src="figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
+<img src="www/figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
 </center>
 
 -  The largest city, Des Moines, only has a population of about 600,000
@@ -78,9 +78,9 @@ layout: false
   ### The Stats Dept
 ]
 .right-column[
-
 <center>
-<img src="./figs/american_football.jpg" alt="dmc logo" height="145"> 
+   <h2> Iowa State Univeristy</h2>
+<img src="www/figs/american_football.jpg" alt="dmc logo" height="245"> 
 </center>
 
 -  First statistics course offered in 1915
@@ -98,18 +98,6 @@ layout: false
   ## Our Team
 ]
 .right-column[
-<!--Pattern HTML-->
-   <img ~/dmc2015/team_pics/ian.jpeg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/Ran.jpg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/Weicheng.JPG alt="Team Captain" />
-   <img ~/dmc2015/team_pics/Yihua.JPG alt="Team Captain" />
-   <img ~/dmc2015/team_pics/alex.jpg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/penglh.jpg alt="Team Captain" />
-
-   <img ~/dmc2015/team_pics/Yaxun Sun.jpg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/Neo_Zhou.jpg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/chen.jpeg alt="Team Captain" />
-   <img ~/dmc2015/team_pics/pete.jpg alt="Team Captain" />
 ]
 ---
 name: inverse
@@ -125,14 +113,11 @@ class: center, middle, inverse
 #The First 10 Days
 ---
 layout: false
----
 .left-column[
   ## First 10 Days
   ### Find Structure
 ]
-
 .right-column[
-
 ##The Data Didn't Just Appear Randomly
 
 -  There must be some **structure** underlying it 
@@ -144,31 +129,40 @@ Here's an analogy:
 -  The train is the unit, whose future position is uncertain but constrained by the tracks
 
 <center>
-   <img src="http://33.media.tumblr.com/11db69e7cd1e1283dc195e8d60e443ec/tumblr_inline_nlkv5eNmcw1r4j8j1.gif" alt="buster" height=240>
+   <img src="http://33.media.tumblr.com/11db69e7cd1e1283dc195e8d60e443ec/tumblr_inline_nlkv5eNmcw1r4j8j1.gif" alt="buster" height=240></img>
+</center>
+]
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+]
+.right-column[
+<center>
+   ## Coupons Expire
+   <img src="www/figs/batchID_plot.jpg" alt="ChenPlot" height=320></img>
+</center>
+- Batches of coupons are sent every Monday at 11:59 p.m.
+- They keep the same coupons for one week
+- After that week has passed, they can not use the coupons anymore and instead have three new coupons.
+]
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+  ### Using structure
+]
+.right-column[
+<center>
+## The Structure Matters
+</center>
+   - We can examine how the customers (the units) behave in this structure of coupon delivery and expiration
+
+<center>
+   <img src="www/figs/order_fast-shop_fast.png" alt="orderFast" height=320></img>
 </center>
 
-]
----
-.left-column[
-  ## First 10 Days
-  ### Find Structure
-]
-
-.right-column[
-
-]
----
-.left-column[
-  ## First 10 Days
-  ### Find Structure
-]
-.right-column[
-
-Looking at this, we realized we needed to
-
-- Need to accurately predict coupon use
-- Need to accurately predict basket value
-- **and** accurately predict the weights
+- This structure is important - customers who receive coupons early and shop quickly are more likely to use them.
 ]
 ---
 name: lossfunc
@@ -184,18 +178,54 @@ $$
 layout: false
 .left-column[
   ## First Steps
-  ### Find Structure
   ### Examine Error
 ]
 .right-column[
-Looking at this, we realized we needed to
+The basic piece of the loss function is
 $$
-   E = \\sum\_\{i=1\}^\{n\}\\Biggl\[ \\left\(\\frac\{u\_\{i\} - \\widehat\{u\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}u\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{v\_\{i\} - \\widehat\{v\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}v\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{w\_\{i\} - \\widehat\{w\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}w\_\{i\}\}\\right\)^\{2\} + \\left\(\\frac\{b\_\{i\} - \\widehat\{b\}\_\{i\}\}\{\\frac\{1\}\{n\}\\sum\_\{i=1\}^\{n\}b\_\{i\}\}\\right\)^\{2\} \\Biggr\]
+\\frac\{1\}\{\\bar\{x\}\}   \\sum\_\{i=1\}^\{n\} \\left\(x\_\{i\} - \\widehat\{x\}\_\{i\}\\right\)^\{2\}
 $$
 
--  Need to accurately predict coupon use
--  Need to accurately predict basket value
--  **and** accurately predict the weights
+- We get punished for for missing in either direction
+- We get punished for more as the more we miss by
+- we get punished more if the mean response is low
+
+### PROBLEM
+We have to predict the mean response too!
+]
+---
+layout: false
+.left-column[
+  ## First Steps
+  ### Examine Error
+  ### Error Scenarios
+]
+.right-column[
+Consider `basketValue`:
+The basic piece of the loss function is
+$$
+\\frac\{1\}\{\\bar\{x\}\}   \\sum\_\{i=1\}^\{n\} \\left\(x\_\{i\} - \\widehat\{x\}\_\{i\}\\right\)^\{2\}
+$$
+
+- We get punished for for missing in either direction
+- We get punished for more as the more we miss by
+- we get punished more if the mean response is low
+
+### PROBLEM
+We have to predict the mean response too!
+]
+---
+.left-column[
+  ## First 10 Days
+  ### Find Structure
+]
+.right-column[
+
+Looking at this, we realized we needed to
+
+- Need to accurately predict coupon use
+- Need to accurately predict basket value
+- **and** accurately predict the weights
 ]
 ---
 layout: false

@@ -4,7 +4,7 @@
 %  Purpose:
 %
 %  Creation Date: 12-04-2015
-%  Last Modified: Sat Jun 13 17:23:45 2015
+%  Last Modified: Sun Jun 21 18:36:02 2015
 %  Created By:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-- Set parent fil
@@ -36,7 +36,7 @@ I am using the following packages:
    library(rCharts)
    library(plyr)
    library(dplyr)
-   options(dplyr.width = Inf)
+   #options(dplyr.width = Inf)
    library(reshape2)
    library(gtools)
    library(sqldf)
@@ -48,13 +48,13 @@ I am now reading the feature matrix:
 %-- readDat: R code (Code in Document)
 <<readDat, echo=TRUE, cache=FALSE, include=TRUE>>=
    #training set ("historical data")
-   featMat = readRDS("../data/featureMatrix/old/featMat_v0.0.rds")
-   trn = featMat$train
-   cls = featMat$class
+   featMat = readRDS("~/dmc2015/data/clean_data/universalCleanData.rds")
+   trn = featMat$train$X
+   cls = featMat$class$X
 
    #combine the two sets and stack the coupons to focus on coupon specifics information
    source("./R/stackCoupons.R")
-   d.stack = stackCoupons(trn,cls)
+   d.stack = stackCoupons(featMat,featMat)
 @
 
 \section{Exploring Coupons}
@@ -220,15 +220,17 @@ How many unique coupons are there total:
 
    head(d.stack$train$couponsReceived)
    head(as.numeric(d.stack$train$couponsReceived))
-   trm = d.stack$train
+   trm = d.stack$train[which(!is.na(d.stack$train$couponUsed)),]
 
    trm$superEarlyRec = factor(c("Early","Late")[1*(-as.numeric(trm$couponsSent) + as.numeric(trm$couponsReceived) > 60*60*8) + 1])
    trm$FirstDay= factor(c("First Day","not first")[1*(-as.numeric(trm$couponsSent) + as.numeric(trm$couponsReceived) > 60*60*28) + 1])
    qplot(as.numeric(couponsReceived) - as.numeric(couponsSent), geom='density',data=d.stack$train, alpha=I(.1),fill=factor(couponUsed),facets=.~couponUsed) + geom_vline(aes(xintercept=60*60*8))
 
-
    trm$ordtimeclass = factor(c("order fast", "order slow")[1*(as.numeric(trm$orderTime) -as.numeric(trm$couponsReceived)  > 60*60*1) + 1])
+
+   png("~/dmc2015/presentation/team_1_pres/www/figs/order_fast-shop_fast.png",width = 480, height=480)
    qplot(as.factor(couponUsed),facets=FirstDay~ordtimeclass, data=trm)
+   dev.off()
 
    with(trm[(trm$superEarlyRec=="Early"),],table(ordtimeclass,couponUsed)/rowSums(table(ordtimeclass,couponUsed)))
    with(trm[(trm$superEarlyRec=="Late"),],table(ordtimeclass,couponUsed)/rowSums(table(ordtimeclass,couponUsed)))
