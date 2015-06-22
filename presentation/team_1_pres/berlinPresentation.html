@@ -227,25 +227,23 @@ There are some extreme values, but most seem to be very close to 180:
 
 - Obviously, we are never better off making incorrect predictions
 - *But* we could lose the entire competition just by making one mistake in basketValue
-
-**Decision:** Use exponential tools that restrict prediction size
 ]
 ---
-.left-column[
-  ## First 10 Days
-  ### Find Structure
-]
-.right-column[
-
-Looking at this, we realized we needed to
-
-- Need to accurately predict coupon use
-- Need to accurately predict basket value
-- **and** accurately predict the weights
-]
+name: inverse
+layout: true
+class: center, middle, inverse
 ---
-layout: false
-# Picture of early rec ~ early_shop and usage 
+#Decision
+<br><br>
+## Use exponential tools that restrict prediction size 
+---
+layout: true
+class: center, middle
+---
+#We were off to a good start
+## We had an good grasp of the data structure
+## We had an intuitive feel for the loss function
+## We had a lot of time left to find the important features
 ---
 name: inverse
 layout: true
@@ -254,21 +252,37 @@ class: center, middle, inverse
 #And Then...
 ---
 layout: false
----
-#Nothing
+<center>
+   <img src="http://3.bp.blogspot.com/-u6MZBWbGcZI/UT4mft01YTI/AAAAAAAADpU/JubGsyGdL00/s1600/failure.png" alt="ChenPlot" height=220></img>
+</center>
+<center>
+#Nothing Else We Did Worked
+</center>
+<br>
 We had nothing working for us at all
 - attempts to create some kind of base monetary value of coupons failed
 - attempts to fit a statistical model to user behavior failed
 - attempts to use "oddities" in the data failed
 - Too many categorical 
+<center>
+#There was just no clever way to unlock the data
+</center>
 ---
-# Create new features
-- LLRs
-- tf-idf
+name: inverse
+layout: true
+class: center, middle, inverse
 ---
+#We just had to work a little harder
+---
+#Good general methods
+Instead of trying to find more and better data specific features, we created good general features
+
+- LLR: used to examine likelihood a coupon is used when examined through different categories
+- tf-idf: Used to measure how similar a trio of coupons were to each other
+
 # New features means new data divisions
--  Historical set 1 (desc. by Pete - mentioned by ian in background)
--  Historical set 3 (desc. by Ian - mentioned by Pete in background)
+
+-  Historical data sets can be used to provide background data for features without biasing the predictions
 ---
 # Now features can be generated with ease
 - LLRs on reward, user, ...
@@ -280,6 +294,28 @@ We had nothing working for us at all
 - Pete - lasso and crf to reduce number of features
 # Data Explosion! Thousands of features
 - list of techinques for reduction
+---
+# Data Explosion! Thousands of features
+- Hundreds of features based on LLRs and tf-idf
+- Most features are only weakly related to response
+- Needed an easy way to select strongest features.
+---
+# Feature Selection:
+Iteratively run on subsets of data:
+- random forest
+- C5.0
+- adaboost
+- lasso
+---
+# Feature Selection:
+Once we had applied these general methods we had another problem: almost 1000 columns in feature matrix.
+
+- 305 from random forest
+- 70 most important C5.0
+- 38 from lasso
+---
+# Reduce features by selection
+- Pete - lasso and crf to reduce number of features
 ---
       </textarea>
       <script>
