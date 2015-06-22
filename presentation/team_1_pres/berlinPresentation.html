@@ -217,15 +217,10 @@ layout: false
 
 |                          |  basketValue is huge| basketValue is NOT huge |
 |--------------------------|:-------------------:|:-----------------------:|
-| We predict a huge value  |  The error is small | The error is large      |
-|                          |  The mean is large  | The mean is small       |
-| We predict a small value |  The error is large | The error is small      |
-|                          |  The mean is large  | The mean is small       |
-    
-
-Consider the following scenarios:
-
-
+| **Prediction is huge**  |  Small Error<br> Huge Mean | **Huge Error** <br> **Small Mean**       |
+| **Predict is small** |  Huge Error<br> Huge Mean | Small Error<br> Small Mean       |
+We are never better off making incorrect predictions, but we would lose the entire competition
+if we are wrong just be predicition 
 
 ]
 ---
