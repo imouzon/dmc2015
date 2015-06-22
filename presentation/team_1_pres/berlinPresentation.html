@@ -98,6 +98,10 @@ layout: false
   ## Our Team
 ]
 .right-column[
+## Our Team
+<center>
+   <img src="www/figs/team1.png" alt="ChenPlot" height=320></img>
+</center>
 ]
 ---
 name: inverse
@@ -123,7 +127,7 @@ layout: false
 -  There must be some **structure** underlying it 
 -  There must be some **unit** generating it in the context of the structure
 
-Here's an analogy:
+**Here's an analogy**:
 
 -  The tracks the structure
 -  The train is the unit, whose future position is uncertain but constrained by the tracks
@@ -153,10 +157,9 @@ Here's an analogy:
   ### Using structure
 ]
 .right-column[
-<center>
 ## The Structure Matters
-</center>
-   - We can examine how the customers (the units) behave in this structure of coupon delivery and expiration
+
+- We can examine how the customers (the units) behave in this structure of coupon delivery and expiration
 
 <center>
    <img src="www/figs/order_fast-shop_fast.png" alt="orderFast" height=320></img>
@@ -209,6 +212,21 @@ layout: false
 ]
 .right-column[
 ## Error and `basketValue`:
+
+**Possible Scenarios:**
+
+|                          |  basketValue is huge| basketValue is NOT huge |
+|--------------------------|:-------------------:|:-----------------------:|
+| We predict a huge value  |  The error is small | The error is large      |
+|                          |  The mean is large  | The mean is small       |
+| We predict a small value |  The error is large | The error is small      |
+|                          |  The mean is large  | The mean is small       |
+    
+
+Consider the following scenarios:
+
+
+
 ]
 ---
 .left-column[
