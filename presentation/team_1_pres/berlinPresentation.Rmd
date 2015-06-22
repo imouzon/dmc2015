@@ -344,12 +344,27 @@ We had nothing working for us at all
 - LLRs on reward, user, ...
 - LLRs on rewardXuser, ...
 - LLRs on rewardXuserXbrand, ...
+---
 # Data Explosion! Thousands of features
+- Hundreds of features based on LLRs and tf-idf
+- Most features are only weakly related to response
+- Needed an easy way to select strongest features.
+---
+# Feature Selection:
+Iteratively run on subsets of data:
+- random forest
+- C5.0
+- adaboost
+- lasso
+---
+# Feature Selection:
+- ~ 900-1000 columns in feature matrix.
+- 305 from random forest
+- 70 most important C5.0
+- 38 from lasso
 ---
 # Reduce features by selection
 - Pete - lasso and crf to reduce number of features
-# Data Explosion! Thousands of features
-- list of techinques for reduction
 ---
       </textarea>
       <script>
