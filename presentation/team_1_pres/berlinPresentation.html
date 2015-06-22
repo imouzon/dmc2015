@@ -192,27 +192,23 @@ $$
 
 ### PROBLEM
 We have to predict the mean response too!
+
+Consider `basketValue`:
+<center>
+   <img src="www/figs/basketValue.png" alt="orderFast" height=120></img>
+</center>
+
+There are some enormous values in there - how should that impact our prediction?
 ]
 ---
 layout: false
 .left-column[
   ## First Steps
   ### Examine Error
-  ### Error Scenarios
+  ### Error By Group
 ]
 .right-column[
-Consider `basketValue`:
-The basic piece of the loss function is
-$$
-\\frac\{1\}\{\\bar\{x\}\}   \\sum\_\{i=1\}^\{n\} \\left\(x\_\{i\} - \\widehat\{x\}\_\{i\}\\right\)^\{2\}
-$$
-
-- We get punished for for missing in either direction
-- We get punished for more as the more we miss by
-- we get punished more if the mean response is low
-
-### PROBLEM
-We have to predict the mean response too!
+## Error and `basketValue`:
 ]
 ---
 .left-column[
