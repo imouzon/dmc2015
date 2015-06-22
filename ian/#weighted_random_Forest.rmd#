@@ -1,0 +1,191 @@
+---
+title: Weighted Random Forest
+titleshort: WRF
+instructions: 
+output:
+  usefulR::DMC_format
+---
+
+<!--- # (R code (No Results in Document)) -->
+```{r set-parent, echo=FALSE,warning=FALSE,error=FALSE,message=FALSE,cache=TRUE,warning=FALSE,include=FALSE,comment=NA}
+   #set up knitr
+   #devtools::install_github('imouzon/usefulR')
+   library(usefulR)
+
+   #set working directory
+   working.dir = "/Users/user/dmc2015/ian"
+   setwd(working.dir)
+
+   #compile the document to PDF
+   if(FALSE) 
+      rmarkdown::render("/Users/user/dmc2015/ian/examining_features.rmd")
+```
+
+I am using the following packages:
+<!--- # (R code (No Results in Document))-->
+```{r paks, echo=TRUE, cache=FALSE, message=FALSE, tidy=FALSE, include=TRUE}
+   library(magrittr)
+   library(dplyr)
+   library(reshape2)
+   library(tidyr)
+   library(lubridate)
+   library(ggplot2)
+   library(directlabels)
+   library(rCharts)
+   library(xtable)
+   library(foreach)
+   library(gtools)
+   library(knitr)
+   library(utils)
+   source("~/dmc2015/ian/R/renm.R")
+```
+My working directory is set to \verb!~/dmc2015/ian/!.
+
+# Curating and Cross Validating
+
+The reason features should be removed from an "large data" approach to a problem
+is if they are dominated by better features.
+
+However, when you have as many features as we do at the moment it can be difficult to 
+
+I am starting with **set 1**
+
+# Load feature matrix
+<!--- dgg: R code (No Results in Document) -->
+```{r dgg,cache=FALSE}
+   ## long 
+   f1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_LONG_ver0.3.rds")
+
+   ## wide
+   d1 = readRDS("../data/featureMatrix/featMat_based-on-HTVset1_WIDE_ver0.3.rds")
+
+   #estimate weights from the historical data:
+   HTVset = readRDS("~/dmc2015/data/featureMatrix/HTVset1.rds")
+
+   ## Baseline basketValue
+   sum((d1$validation$y$basketValue - mean(HTVset$H$basketValue))^2)/mean(d1$validation$y$basketValue)^2
+
+   ## baseline coupons 1
+   sum((d1$validation$y$coupon1Used - mean(HTVset$H$coupon1Used))^2)/mean(d1$validation$y$coupon1Used)^2
+   
+   ## baseline coupons 2
+   sum((d1$validation$y$coupon2Used - mean(HTVset$H$coupon2Used))^2)/mean(d1$validation$y$coupon2Used)^2
+
+   ## baseline coupons 3
+   sum((d1$validation$y$coupon3Used - mean(HTVset$H$coupon3Used))^2)/mean(d1$validation$y$coupon3Used)^2
+```
+
+# Check the data
+<!--- chkh: R code (No Results in Document) -->
+```{r chkh,cache=FALSE}
+   ## isolate the X and y for set 1
+   Xn = f1$train$X
+   yn = f1$train$y
+   
+   ## remove the naive columns
+   Xn = Xn[,!grepl("naive",names(Xn))]
+
+   ## keep the validation sets
+   Xv = f1$validation$X
+   yv = f1$validation$y
+```
+
+# How do we estimate the weights? Bayes
+We need an estimate of the mean of each couponUsed column. This can be accomplished in a Bayesian sense.
+I believe that coupons are used about 20\% of the time in this data, and that there is less than a 5\% chance
+that coupons are actually used less than 13\% of the time or more than 27\% of the time.
+This give me the following choice for $\alpha$ and $\beta$:
+<!--- rf: R code (No Results in Document) -->
+```{r rf,cache=FALSE}
+   #prior estimates: mean of coupon use at .2, F(.025) = .1337, F(.975) = .2758
+   alpha.est = 24
+   beta.est = 4*alpha.est
+   qbeta(.025,alpha.est,beta.est)
+   qbeta(.975,alpha.est,beta.est)
+   
+   alpha.est
+   beta.est
+   alpha.est/(alpha.est + beta.est)
+```
+This gives us the following posterior for $p_1, p_2, p_3$:
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   ## Historical estimates of p1,p2,p3:
+   p1 = (sum(HTVset$H$coupon1Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p2 = (sum(HTVset$H$coupon2Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+   p3 = (sum(HTVset$H$coupon3Used) + alpha.est)/(alpha.est + beta.est + nrow(HTVset$H))
+
+   p1
+   p2
+   p3
+```
+We can weight our responses and hopefully use this to get better estimates by unweighting.
+I am only using similarity columns and the one way loglikelihood columns.
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+   ## lets try a small random forest
+   library(randomForest)
+   
+   ## get the similarity columns
+   sim_columns = c(3,grep("sim_", names(Xn)))
+
+   ## get single way llrs:
+   llr1_columns = which(grepl("llr", names(Xn)) & !grepl("X",names(Xn)))
+
+   #The predictor and response columns
+   Xrf = Xn[,c(sim_columns,llr1_columns)]
+   yrf = yn[,"couponUsed"]
+
+   #unweighted error
+   unweighted.rf = randomForest(Xrf, y=yrf, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+
+   #weighted error
+   yrfw = yn[,"couponUsed"]*rep(c(1/p1,1/p2,1/p3),times=nrow(Xrf)/3)
+   weighted.rf = randomForest(Xrf, y=yrfw, ntree=5000, mtry=11, replace=TRUE, maxnodes = 100)
+```
+
+## Comparing Errors:
+### Training Set Results
+<!--- : R code (No Results in Document) -->
+```{r cache=FALSE}
+      #Unweighted Loss Aspects
+      uw.fitted = predict(unweighted.rf,newdata = Xrf,type="response")
+      uw.fitted.loss = colSums(matrix((yrf - uw.fitted)^2,ncol=3,byrow=TRUE))
+      uw.scaled.fitted.loss = uw.fitted.loss/(colMeans(matrix(yrf,ncol=3,byrow=TRUE))^2)
+
+      #Weighted Loss Aspects
+      w.fitted = predict(weighted.rf,newdata = Xrf,type="response")*rep(c(p1,p2,p3),times=nrow(Xrf)/3)
+      w.fitted.loss = colSums(matrix((yrf - w.fitted)^2,ncol=3,byrow=TRUE))
+      w.scaled.fitted.loss = w.fitted.loss/(colMeans(matrix(yrf,ncol=3,byrow=TRUE))^2)
+
+      message("loss unweighted rf (no col weights):", paste(c(uw.fitted.loss, sum(uw.fitted.loss)) ,collapse=" | "))
+      message("loss unweighted rf (col weights):", paste(c(uw.scaled.fitted.loss, sum(uw.scaled.fitted.loss)) ,collapse=" | "))
+
+      message("loss weighted rf (no col weights):", paste(c(w.fitted.loss, sum(w.fitted.loss)) ,collapse=" | "))
+      message("loss weighted rf (col weights):", paste(c(w.scaled.fitted.loss, sum(w.scaled.fitted.loss)) ,collapse=" | "))
+```
+
+### Validation Set Results
+<!--- chunk-label: R code (No Results in Document) -->
+```{r chunk-label,cache=FALSE}
+   ## validation sets
+   yv = yv$couponUsed
+   Xv = Xv[,which(names(Xv) %in% names(Xrf))]
+
+   message("VALIDATION SET")
+      #Unweighted Loss Aspects
+      uw.predicted = predict(unweighted.rf,newdata = Xv,type="response")
+      uw.predicted.loss = colSums(matrix((yv - uw.predicted)^2,ncol=3,byrow=TRUE))
+      uw.scaled.predicted.loss = uw.predicted.loss/(colMeans(matrix(yv,ncol=3,byrow=TRUE))^2)
+
+      #Weighted Loss Aspects
+      w.predicted = predict(weighted.rf,newdata = Xv,type="response")*rep(c(p1,p2,p3),times=nrow(Xv)/3)
+      w.predicted.loss = colSums(matrix((yv - w.predicted)^2,ncol=3,byrow=TRUE))
+      w.scaled.predicted.loss = w.predicted.loss/(colMeans(matrix(yv,ncol=3,byrow=TRUE))^2)
+
+      message("loss unweighted rf (no col weights):", paste(c(uw.predicted.loss, sum(uw.predicted.loss)) ,collapse=" | "))
+      message("loss unweighted rf (col weights):", paste(c(uw.scaled.predicted.loss, sum(uw.scaled.predicted.loss)) ,collapse=" | "))
+
+      message("loss weighted rf (no col weights):", paste(c(w.predicted.loss, sum(w.predicted.loss)) ,collapse=" | "))
+      message("loss weighted rf (col weights):", paste(c(w.scaled.predicted.loss, sum(w.scaled.predicted.loss)) ,collapse=" | "))
+```
