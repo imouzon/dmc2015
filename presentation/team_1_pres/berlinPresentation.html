@@ -254,8 +254,6 @@ class: center, middle, inverse
 layout: false
 <center>
    <img src="http://3.bp.blogspot.com/-u6MZBWbGcZI/UT4mft01YTI/AAAAAAAADpU/JubGsyGdL00/s1600/failure.png" alt="ChenPlot" height=220></img>
-</center>
-<center>
 #Nothing Else We Did Worked
 </center>
 <br>
@@ -264,9 +262,7 @@ We had nothing working for us at all
 - attempts to fit a statistical model to user behavior failed
 - attempts to use "oddities" in the data failed
 - Too many categorical 
-<center>
-#There was just no clever way to unlock the data
-</center>
+##There was just no clever way to unlock the data
 ---
 name: inverse
 layout: true
@@ -274,49 +270,79 @@ class: center, middle, inverse
 ---
 #We just had to work a little harder
 ---
-#Good general methods
+layout: false
+#We needed good general methods
+
 Instead of trying to find more and better data specific features, we created good general features
 
-- LLR: used to examine likelihood a coupon is used when examined through different categories
-- tf-idf: Used to measure how similar a trio of coupons were to each other
+- LLR: likelihood a coupon is used when examined through different categories
+- tf-idf: measure similarity of a trio of coupons 
 
-# New features means new data divisions
+## New features means new data divisions
 
--  Historical data sets can be used to provide background data for features without biasing the predictions
+-  Historical data sets used to provide background data 
+-  Now we can create features based on previous outcomes without biasing the predictions
+-  The method of dividing the training data into historical, testing, and validation is difficult
+
+## New features can be generated with ease
 ---
-# Now features can be generated with ease
+#Log Likelihood Ratio Statistics
+With just historical data, we can calculate the log likelihood ratio that any coupon will be used as:
+
+$$
+\\text\{LLR\} = \\log\\left\(\\frac\{ \\sum u_i + \\epsilon_1 \}\{ n - \\sum u_i + \\epsilon_2 \} \\right\)
+$$
+
+### But we can also consider the LLR for *specific* subsets of coupons.  
+
+For instance if we calculate
+the value above for coupons by brand, then we have *numeric* values comparing brands based on
+whether they are more or less likely to be used.
+
+The combinations are almost endless:
+
 - LLRs on reward, user, ...
 - LLRs on rewardXuser, ...
 - LLRs on rewardXuserXbrand, ...
-# Data Explosion! Thousands of features
 ---
-# Reduce features by selection
-- Pete - lasso and crf to reduce number of features
-# Data Explosion! Thousands of features
-- list of techinques for reduction
----
-# Data Explosion! Thousands of features
+# Data Explosion! 
+# Thousands of features
+## Reduce features by selection
+Once we had applied these general methods we had another problem: almost 1000 columns in feature matrix.
 - Hundreds of features based on LLRs and tf-idf
 - Most features are only weakly related to response
 - Needed an easy way to select strongest features.
 ---
-# Feature Selection:
-Iteratively run on subsets of data:
-- random forest
-- C5.0
-- adaboost
-- lasso
----
-# Feature Selection:
-Once we had applied these general methods we had another problem: almost 1000 columns in feature matrix.
+# Data Explosion! 
 
-- 305 from random forest
-- 70 most important C5.0
+## Feature Selection:
+Many machine techniques have importance criteria to help identify usefule features.
+Iteratively run on subsets of data, these can help us reduce the size of our feature matrix:
+- random forest found 305 important features
+- C5.0 found 83
+- adaboost found 105
 - 38 from lasso
 ---
-# Reduce features by selection
-- Pete - lasso and crf to reduce number of features
+name: inverse
+layout: true
+class: center, middle, inverse
 ---
+# Final Predictions
+---
+layout: false
+#Putting Predictor Together
+- We had several methods to select variables and we have several options for prediction 
+- Combining these gave us a lot of prediction methods to work with
+<center>
+<img src="www/figs/scatterplot_set3.png" alt="dmc logo" height="385"> 
+</center>
+---
+#Putting Predictor Together
+Combining predictors leads to the best final prediction 
+<center>
+<img src="www/figs/predict_set3.png" alt="dmc logo" height="385"> 
+</center>
+
       </textarea>
       <script>
          var slideshow = remark.create();
