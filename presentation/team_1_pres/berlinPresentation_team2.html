@@ -8,7 +8,7 @@
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
       </style>
 
-      <title>Iowa State Team 1</title>
+      <title>Iowa State Team 2</title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
       <meta name="keywords" content="dmc,data mining,dmc2015,intro"/>
       <meta name="description" content="Our Solution to the 2015 Data Mining Cup"/>
@@ -92,8 +92,8 @@ $$
 \\sum\_\{i=1\}^\{n\} \\left\(\\frac\{x\_\{i\} - \\widehat\{x\}\_\{i\}\}\{\\bar\{x\}\} \\right\)^\{2\}
 $$
 - We get punished for for missing in either direction
-- We get punished for more as the more we miss by
-- we get punished more if the mean response is low
+- We get punished more for the more we miss by
+- We get punished more if the mean response is low
 
 We have to predict the mean response too!
 
@@ -132,6 +132,36 @@ class: center, middle, inverse
 <br><br>
 ## Use exponential tools that restrict prediction size 
 ---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# Categorical Variables
+<br><br>
+## Problem: Many ML techniques cannot handle categorical data 
+### (especially with many levels)
+---
+layout: false
+# Example: Random forests
+
+Random forests learn by choosing the best binary split among all predictor variables.
+
+This is easy when the data is numeric, because it is ordered. But most categorical variables have no natural order.
+
+In fact if a categorical variable has \\(m\\) levels, there are \\(2^{m-1} - 1\\) possible binary splits. 
+
+This becomes computationally infeasible very fast.
+
+Another possibility would be to create dummy variables for each level, but that could greatly increase the dimensionality of the data, especially if we account for interactions between different categorical variables.
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# Another Solution
+<br><br>
+## Find a way to map categorical variables to continuous variables.
+---
 layout: false
 #Cory Lanker's LLR Approach
 
@@ -159,7 +189,7 @@ from the class are to take the value 1.
 All the categorical values can be replaced with meaningful numeric values
 
 ### Basic LLRs
-- select some observations from our data to create \\(\\mathbf\{H\}\\)
+- Select some observations from our data to create \\(\\mathbf\{H\}\\)
 - We can calculate LLRs for coupons (coupon ID = class)
 - We can calculate LLRs for brands (brand = class)
 
