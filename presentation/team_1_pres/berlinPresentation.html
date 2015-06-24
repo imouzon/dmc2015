@@ -35,31 +35,13 @@ class: center, middle, inverse
 layout: false
 .left-column[
   ## Iowa
-  ### Where is Iowa
-]
-.right-column[
-
-Because we know that this is an international audience, you might not all be familiar with the state of Iowa.
-<iframe width="600" 
-        height="450" 
-        frameborder="0" 
-        style="border:0"
-        src="https://www.google.com/maps/embed/v1/directions?origin=Berlin%2C%20Germany&destination=Iowa%20State%20University%2C%20Ames%2C%20IA%2C%20United%20States&key=...">
-</iframe>
-]
----
-layout: false
-.left-column[
-  ## Iowa
-  ### Where is Iowa
   ### About Iowa
 ]
 .right-column[
 
-## Iowa is in America's Midwest
-
 <center>
-<img src="www/figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
+   <h2> Iowa is in America's Midwest </h2>
+   <img src="www/figs/iowa-skyline.jpg" alt="dmc logo" height="185"> 
 </center>
 
 -  The largest city, Des Moines, only has a population of about 600,000
@@ -72,7 +54,6 @@ layout: false
 layout: false
 .left-column[
   ## Iowa
-  ### Where is Iowa
   ### About Iowa
   ## Iowa State
   ### The Stats Dept
@@ -82,7 +63,6 @@ layout: false
    <h2> Iowa State Univeristy</h2>
 <img src="www/figs/american_football.jpg" alt="dmc logo" height="245"> 
 </center>
-
 -  First statistics course offered in 1915
 -  Department established in 1947 (the first statistics department in the US)
 -  Snedecor Hall built in 1953
@@ -98,10 +78,14 @@ layout: false
   ## Our Team
 ]
 .right-column[
-## Our Team
+<center> <h2> We were able to put together a terrific team </h2> </center>
 <center>
    <img src="www/figs/team1.png" alt="ChenPlot" height=320></img>
 </center>
+- A result can only be as good as the team that makes it
+- We had a lot of diverse talent
+- We met twice weekly to share results
+- Primary tools: GitHub, R
 ]
 ---
 name: inverse
@@ -143,8 +127,8 @@ layout: false
 ]
 .right-column[
 <center>
-   ## Coupons Expire
-   <img src="www/figs/batchID_plot.jpg" alt="ChenPlot" height=320></img>
+   <h2>Coupons Expire</h2>
+   <img src="www/figs/batchID_plot.jpg" alt="ChenPlot" height=400></img>
 </center>
 - Batches of coupons are sent every Monday at 11:59 p.m.
 - They keep the same coupons for one week
@@ -179,17 +163,11 @@ $$
 $$
 ---
 layout: false
-.left-column[
-  ## First Steps
-  ### Examine Error
-]
-.right-column[
-### PROBLEM
+## The Loss Function Is Weird
 The basic piece of the loss function is
 $$
-\\frac\{1\}\{\\bar\{x\}\}   \\sum\_\{i=1\}^\{n\} \\left\(x\_\{i\} - \\widehat\{x\}\_\{i\}\\right\)^\{2\}
+\\sum\_\{i=1\}^\{n\} \\left\(\\frac\{x\_\{i\} - \\widehat\{x\}\_\{i\}\}\{\\bar\{x\}\} \\right\)^\{2\}
 $$
-
 - We get punished for for missing in either direction
 - We get punished for more as the more we miss by
 - we get punished more if the mean response is low
@@ -198,36 +176,30 @@ We have to predict the mean response too!
 
 Consider `basketValue`:
 <center>
-   <img src="www/figs/basketValue.png" alt="orderFast" height=120></img>
-</center>
-
-There are some enormous values in there - how should that impact our prediction?
-]
----
-layout: false
-.left-column[
-  ## First Steps
-  ### Examine Error
-  ### Basket Error
-]
-.right-column[
-## Error and `basketValue`:
-**Basket behavior**
-There are some extreme values, but most seem to be very close to 180:
-<center>
    <img src="www/figs/basketFreq.png" alt="orderFast" height=120></img>
 </center>
 
-**Possible Scenarios:**
+There are some enormous values in there - how should that impact our prediction?
+---
+layout: false
+<center>
+   <h1> Error and <TT>basketValue</TT> </h1>
+</center>
+<center>
+   <img src="www/figs/basketValue.png" alt="orderFast" height=140></img>
+</center>
 
-|                          |  basketValue is huge| basketValue is NOT huge |
+- **Possible Scenarios:** True Value Contributes to **LOSS** and **WEIGHT**
+
+|                          |  True basketValue <br> is huge| True basketValue <br> is NOT huge |
 |--------------------------|:-------------------:|:-----------------------:|
 | **Prediction is huge**  |  Small Error<br> Huge Mean | **Huge Error** <br> **Small Mean**       |
 | **Predict is small** |  Huge Error<br> Huge Mean | Small Error<br> Small Mean       |
 
 - Obviously, we are never better off making incorrect predictions
+
 - *But* we could lose the entire competition just by making one mistake in basketValue
-]
+
 ---
 name: inverse
 layout: true
@@ -249,42 +221,92 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#And Then...
+#We Just Needed Was a Simple Set of Features
 ---
 layout: false
 <center>
    <img src="http://3.bp.blogspot.com/-u6MZBWbGcZI/UT4mft01YTI/AAAAAAAADpU/JubGsyGdL00/s1600/failure.png" alt="ChenPlot" height=220></img>
-#Nothing Else We Did Worked
+   #Nothing Else We Did Worked
 </center>
 <br>
-We had nothing working for us at all
-- attempts to create some kind of base monetary value of coupons failed
-- attempts to fit a statistical model to user behavior failed
-- attempts to use "oddities" in the data failed
-- Too many categorical 
+
+##We had nothing working for us at all
+
+- Attempts to uncover the base value of the coupons:  **failed**
+- Attempts to fit a statistical model to user behavior: **failed**
+- Attempts to exploit data "oddities": **failed**
+
 ##There was just no clever way to unlock the data
 ---
-name: inverse
+name: iastatered
 layout: true
-class: center, middle, inverse
+class: center, middle, iastatered
 ---
-#We just had to work a little harder
+####We just had to work a little harder
+---
+name: iastateyel
+layout: true
+class: center, middle, iastateyel
+---
+# No small set of clever features exists?
+# Make a BIG Set of Features and Reduce!
 ---
 layout: false
-#We needed good general methods
+class: center, middle
+<center>
+   <h1> A Feature Matrix Can Get Too Big </h1>
+   <img src="www/figs/too-big-to-fail_1.jpg" alt="dmc logo" height="400"> 
+   <h1> And The Features Still Need to Be Useful </h1>
+</center>
+---
+layout: false
+<center>
+   <h1> We needed good general methods </h1>
+   <img src="www/figs/knifetool.jpg" alt="dmc logo" height="150"> 
+</center>
 
-Instead of trying to find more and better data specific features, we created good general features
+- Give up trying to find clever features use best tools to chip away
+- Use structure and meaning to find aspects of the data structure
 
-- LLR: likelihood a coupon is used when examined through different categories
-- tf-idf: measure similarity of a trio of coupons 
+- **LLR**: likelihood a coupon is used examined through different filters 
+- **tf-idf**: measure similarity of a trio of coupons 
 
-## New features means new data divisions
+<center>
+   <h2> Lots of Features Means Lots of Rules</h2>
+</center>
 
--  Historical data sets used to provide background data 
--  Now we can create features based on previous outcomes without biasing the predictions
--  The method of dividing the training data into historical, testing, and validation is difficult
+- Historical data sets used to provide background data 
 
-## New features can be generated with ease
+- Train on one set, validate all methods on common set
+
+---
+<center>
+   <img src="www/figs/bal-el.jpg" alt="dmc logo" height="250"> 
+</center>
+## Reduce features by selection 
+Once we had applied these general methods we had another problem: almost 1000 columns in feature matrix.
+
+- Hundreds of features based on LLRs and tf-idf
+
+- Most features are only weakly related to response
+
+- Needed an easy way to select strongest features.
+---
+# Reducing the Features
+
+## Use Methods That Identify Important Features
+Many machine techniques have importance criteria to help identify usefule features.
+Iteratively run on subsets of data, these can help us reduce the size of our feature matrix:
+
+- Random forest found 305 important features
+
+- C5.0 found 83
+
+- adaboost found 105
+
+- Lasso (**l**east **a**bsolute **s**hrinkage and **s**election **o**perator) chose 78
+
+These featues made up our final feature matrix
 ---
 #Log Likelihood Ratio Statistics
 With just historical data, we can calculate the log likelihood ratio that any coupon will be used as:
@@ -304,24 +326,6 @@ The combinations are almost endless:
 - LLRs on reward, user, ...
 - LLRs on rewardXuser, ...
 - LLRs on rewardXuserXbrand, ...
----
-# Data Explosion! 
-# Thousands of features
-## Reduce features by selection
-Once we had applied these general methods we had another problem: almost 1000 columns in feature matrix.
-- Hundreds of features based on LLRs and tf-idf
-- Most features are only weakly related to response
-- Needed an easy way to select strongest features.
----
-# Data Explosion! 
-
-## Feature Selection:
-Many machine techniques have importance criteria to help identify usefule features.
-Iteratively run on subsets of data, these can help us reduce the size of our feature matrix:
-- random forest found 305 important features
-- C5.0 found 83
-- adaboost found 105
-- 38 from lasso
 ---
 name: inverse
 layout: true

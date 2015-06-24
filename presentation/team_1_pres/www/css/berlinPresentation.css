@@ -1,7 +1,8 @@
 body { 
    font-family: 'Droid Serif'; 
 }
-h1, h2, h3 {
+
+h1, h2, h3, h4 {
    font-family: 'Yanone Kaffeesatz';
    font-weight: 400;
    margin-bottom: 0;
@@ -10,22 +11,30 @@ h1, h2, h3 {
 .remark-slide-content h1 { font-size: 3em; }
 .remark-slide-content h2 { font-size: 2em; }
 .remark-slide-content h3 { font-size: 1.6em; }
+.remark-slide-content h4 { font-size: 4em; }
+.remark-slide-content h5 { font-size: 1.3em; }
+
 .footnote {
    position: absolute;
    bottom: 3em;
 }
+
 li p { line-height: 1.25em; }
-   .red { color: #fa0000; }
-   .bgcol { color: #333333; }
-   .large { font-size: 2em; }
-   a, a > code {
+
+.red { color: #fa0000; }
+.bgcol { color: #333333; }
+.large { font-size: 2em; }
+
+a, a > code {
    color: rgb(249, 38, 114);
    text-decoration: none;
 }
+
 /* Styling for Template:Quote */
 blockquote.templatequote {
   margin-top: 0;
 }
+
 blockquote.templatequote div.templatequotecite {
     line-height: 1.5em;
      /* @noflip */
@@ -34,25 +43,27 @@ blockquote.templatequote div.templatequotecite {
      padding-left: 1.6em;
      margin-top: 0;
 }
-/* ISU colors:
-   red = 333333
-   yellow = ffcc66
-*/
+
 table {
-   width: 100%;
+   width: 70%;
    border-collapse: collapse;
    border-color: #333333;
-   padding: 10px;
-   }
+   padding: 0px;
+   margin-left: auto;
+   margin-right: auto;
+}
+
 th {
    background-color: #333333;
    color: #777872;
    font-size: .8em;
 }
+
 td {
    text-align: center;
    font-size: .8em;
 }
+
 table
 code {
    -moz-border-radius: 5px;
@@ -88,10 +99,11 @@ code {
    color: #f3f3f3;
    padding-left: 1.6em;
 }
-.lossfunc h1, .inverse h2 {
+.lossfunc h1, .lossfunc h2 {
    color: #f3f3f3;
    line-height: 0.8em;
 }
+/*inverse slide*/
 .inverse {
    background: #333333;
    color: #777872;
@@ -99,6 +111,40 @@ code {
 }
 .inverse h1, .inverse h2 {
    color: #f3f3f3;
+   line-height: 0.8em;
+}
+/*inverse light*/
+.inverselight {
+   background: #ffffcc;
+   color: #cc0000;
+   text-shadow: 0 0 20px #777872;
+}
+.inverselight h1, .inverselight h2 {
+   color: #f3f3f3;
+   line-height: 0.8em;
+}
+/*iastate slide*/
+/* ISU colors:
+   red = 333333
+   red2 = CC0033
+   yellow = ffcc66
+*/
+.iastatered {
+   background: #CC0033;
+   color: #ffcc66;
+   text-shadow: 0 0 20px #777872;
+}
+.iastatered h1, .iastatered h2 {
+   color: #ffcc66;
+   line-height: 0.8em;
+}
+.iastateyel {
+   background: #ffcc66;
+   color: #CC0033;
+   text-shadow: 0 0 20px #777872;
+}
+.iastateyel h1, .iastateyel h2 {
+   color: #CC0033;
    line-height: 0.8em;
 }
 /* Slide-specific styling */
